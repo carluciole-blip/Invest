@@ -537,6 +537,27 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="stitle">Recommandation automatique</div>
     <div id="recommandation"></div>
   </div>
+
+  <div class="sec" id="secProjection">
+    <div class="stitle">Projection pluriannuelle</div>
+    <div class="box info" style="margin-bottom:12px">
+      Simulez l'évolution du cash-flow sur plusieurs années en tenant compte de l'inflation des loyers et de l'épuisement progressif de l'amortissement LMNP réel (mobilier épuisé après 7 ans, installations/agencements après 15 ans, façade après 25 ans).
+    </div>
+    <div class="g3">
+      <div class="field"><label>Durée de projection <strong id="lDureeProj">10 ans</strong></label>
+        <input type="range" id="dureeProj" min="5" max="20" value="10" step="5" oninput="sp2('dureeProj','lDureeProj',' ans');calcProjection()">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px"><span>5 ans</span><span>10 ans</span><span>15 ans</span><span>20 ans</span></div>
+      </div>
+      <div class="field"><label>Inflation loyers / an <strong id="lInflat">2,0 %</strong></label>
+        <input type="range" id="inflat" min="0" max="5" value="2" step="0.5" oninput="spF('inflat','lInflat','%');calcProjection()">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px"><span>0%</span><span>2,5%</span><span>5%</span></div>
+      </div>
+      <div class="field"><label>Année de début <strong id="lAnDebut">2026</strong></label>
+        <input type="number" id="anDebut" value="2026" step="1" min="2024" max="2040" oninput="document.getElementById('lAnDebut').textContent=this.value;calcProjection()"></div>
+    </div>
+    <div style="overflow-x:auto;margin-top:8px"><table class="ctable" id="projTable"></table></div>
+    <div id="projCumul" style="margin-top:10px"></div>
+  </div>
 </div>
 
 </div><!-- /wrap -->
@@ -828,7 +849,7 @@ function c(){
   ].map(([i,k,v])=>`<div class="row"><span style="display:flex;gap:8px"><span>${i}</span><span style="color:var(--muted)">${k}</span></span><span style="font-size:12px;text-align:right;max-width:55%">${v}</span></div>`).join('');
 
   // Stocker les variables pour l'onglet Conseiller
-  lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,prixAcq:G('prixAcq')};
+  lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,opCost,deductFixed,prixAcq:G('prixAcq')};
   calcConseil();
 }
 
@@ -845,6 +866,7 @@ function calcConseil(){
   const reelTax=lc.reelTax||0;
   const tmi3=lc.tmi3||0.30;
   const PS=0.186;
+
   const loyerLT=G('loyerLT')||1400;
   const vacLT=G('vacLT')/100||0.08;
   const gstLT=G('gstLT')/100||0;
@@ -931,14 +953,14 @@ function calcConseil(){
   const colHeaders=['Critère','RP','Long terme','Airbnb'];
   let tbl=`<tr>${colHeaders.map((h,i)=>{
     const isWin=i>0&&(i-1===winnerIdx);
-    return`<th class="${isWin?'col-hi':''}">${h}${isWin?' ★':''}</th>`;
+    return`<th class="${isWin?'col-hi':'}">${h}${isWin?' ★':''}</th>`;
   }).join('')}</tr>`;
   tableRows.forEach(row=>{
     tbl+=`<tr>`;
     tbl+=`<td style="color:var(--muted)">${row.l}</td>`;
     row.v.forEach((v,i)=>{
       const isWin=row.highlight&&i===winnerIdx;
-      tbl+=`<td class="${isWin?'col-hi':''}">${v}</td>`;
+      tbl+=`<td class="${isWin?'col-hi':''">${v}</td>`;
     });
     tbl+=`</tr>`;
   });
@@ -995,6 +1017,114 @@ function calcConseil(){
   }
 
   $('recommandation').innerHTML=reco;
+  calcProjection();
+}
+
+// ── HELPERS PROJECTION ───────────────────────────────────────────────────────
+function sp2(id,lbl,unit){$(lbl).textContent=G(id)+unit}
+function spF(id,lbl,unit){$(lbl).textContent=G(id).toFixed(1).replace('.',',')+' '+unit}
+
+// ── PROJECTION PLURIANNUELLE ──────────────────────────────────────────────────
+function calcProjection(){
+  const lc=lastCalc;
+  if(!lc||!lc.prixAcq) return;
+
+  const n=G('dureeProj')||10;
+  const inf=G('inflat')/100;
+  const anDebut=+(document.getElementById('anDebut').value)||2026;
+  const prixAcq=lc.prixAcq||300000;
+  const fixed=lc.fixed||0;
+  const loanAn=lc.loanAn||0;
+  const tmi3=lc.tmi3||0.30;
+  const gross0=lc.gross||0;
+  const opCost0=lc.opCost||0;
+  const deductFixed0=lc.deductFixed||0;
+
+  const loyerEvite0=(G('loyerEvite')||1500);
+  const loyerLT0=(G('loyerLT')||1400);
+  const vacLT=G('vacLT')/100||0.08;
+  const gstLT=G('gstLT')/100||0;
+
+  // Composants amortissement pour dépletion annuelle
+  const tTerrain=G('terrain')/100||0.15;
+  const amortBase=prixAcq*(1-tTerrain);
+  const mobAn=amortBase*.05/7;
+  const instAn=amortBase*.10/15;
+  const agenAn=amortBase*.20/15;
+  const facAn=amortBase*.15/25;
+  const goAn=amortBase*.50/50;
+
+  function amortY(y){
+    return goAn+(y<=25?facAn:0)+(y<=15?agenAn+instAn:0)+(y<=7?mobAn:0);
+  }
+
+  const rows=[];
+  let cumRP=0,cumLT=0,cumAir=0;
+
+  for(let y=1;y<=n;y++){
+    const g=Math.pow(1+inf,y-1);
+    const amort=amortY(y);
+
+    // Scénario RP : loyer évité croît avec inflation, charges fixes (crédit constant)
+    const rpCF12=(loyerEvite0*g*12)-fixed;
+    cumRP+=rpCF12;
+
+    // Scénario LT meublé
+    const ltRev=loyerLT0*g*12*(1-vacLT);
+    const ltComm=loyerLT0*g*12*gstLT;
+    let ltImp=0;
+    if(ltRev>77700){
+      const ltBase=Math.max(0,ltRev-ltComm-(fixed-loanAn)-amort);
+      ltImp=ltBase*(tmi3+0.186);
+    } else {
+      ltImp=ltRev*0.50*(tmi3+0.186);
+    }
+    const ltCF12=ltRev-ltComm-ltImp-fixed;
+    cumLT+=ltCF12;
+
+    // Scénario Airbnb LMNP réel
+    const grossY=gross0*g;
+    const opCostY=opCost0*g;
+    const airBase=Math.max(0,grossY-opCostY-(fixed-loanAn)-amort);
+    const airTax=airBase*(tmi3+0.186);
+    const airCF12=grossY-opCostY-airTax-fixed;
+    cumAir+=airCF12;
+
+    rows.push({y,an:anDebut+y-1,rpM:rpCF12/12,ltM:ltCF12/12,airM:airCF12/12,cumRP,cumLT,cumAir,amort});
+  }
+
+  // Table
+  let tbl=`<tr><th>Année</th><th>RP / mois</th><th>Long terme / mois</th><th>Airbnb / mois</th><th>Amort. / an</th></tr>`;
+  rows.forEach(r=>{
+    const best=Math.max(r.rpM,r.ltM,r.airM);
+    const yA=r.y;
+    const amortNote=yA===8?'⚠️ mobilier épuisé':yA===16?'⚠️ agen.+inst. épuisés':yA===26?'⚠️ façade épuisée':'';
+    tbl+=`<tr>
+      <td style="color:var(--muted)">${r.an}${amortNote?`<br><span style="font-size:10px;color:var(--warn-txt)">${amortNote}</span>`:''}</td>
+      <td class="${r.rpM===best?'col-hi':''}" style="color:${r.rpM>=0?'inherit':'var(--red)'}">${fe(r.rpM)}</td>
+      <td class="${r.ltM===best&&r.ltM!==r.rpM?'col-hi':''}" style="color:${r.ltM>=0?'inherit':'var(--red)'}">${fe(r.ltM)}</td>
+      <td class="${r.airM===best&&r.airM!==r.rpM&&r.airM!==r.ltM?'col-hi':''}" style="color:${r.airM>=0?'inherit':'var(--red)'}">${fe(r.airM)}</td>
+      <td style="color:var(--muted);font-size:11.5px">${fe(r.amort)}</td>
+    </tr>`;
+  });
+  $('projTable').innerHTML=tbl;
+
+  // Résumé cumulatif
+  const last=rows[rows.length-1];
+  const cums=[{n:'RP',c:last.cumRP},{n:'Location LT',c:last.cumLT},{n:'Airbnb',c:last.cumAir}];
+  const bestCum=cums.reduce((a,b)=>a.c>b.c?a:b);
+  const worstCum=cums.reduce((a,b)=>a.c<b.c?a:b);
+  $('projCumul').innerHTML=`
+    <div class="box good"><b>Cumul sur ${n} ans :</b>
+      RP → <b>${fe(last.cumRP)}</b> ·
+      Long terme → <b>${fe(last.cumLT)}</b> ·
+      Airbnb → <b>${fe(last.cumAir)}</b><br>
+      <span style="color:var(--good-txt)">Meilleur scénario sur ${n} ans : <b>${bestCum.n}</b> (${fe(bestCum.c)} nets cumulés)</span>
+      ${bestCum.c-worstCum.c>0?` · Écart max avec le moins bon : <b>+${fe(bestCum.c-worstCum.c)}</b>`:''}
+    </div>
+    <div class="box info" style="margin-top:6px">
+      <b>Note :</b> L'amortissement LMNP réel s'épuise par composant (mobilier 7 ans, installations/agencements 15 ans, façade 25 ans, gros œuvre 50 ans). Au fil des années, la base imposable du scénario Airbnb augmente → l'avantage fiscal se réduit. Cette projection est linéaire et n'intègre pas la plus-value ni les revaluations patrimoniales.
+    </div>`;
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -1002,6 +1132,7 @@ const sel=$('arrSel');
 Object.keys(ARR).forEach((k,i)=>{const o=document.createElement('option');o.value=k;o.textContent=k;if(i===10)o.selected=true;sel.appendChild(o);});
 setArr();
 calcAmort();
+// calcProjection() called via calcConseil() which is called from c()
 </script>
 </body>
 </html>
