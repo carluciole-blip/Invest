@@ -6,54 +6,54 @@
 <title>Tableau de bord Entrepreneur · Paris 2026</title>
 <style>
 :root{
-  --bg:#0d1117;--panel:#161b22;--p2:#21262d;--border:#30363d;
-  --text:#e6edf3;--muted:#8b949e;--acc:#58a6ff;--green:#3fb950;
-  --orange:#f0883e;--red:#f85149;--purple:#bc8cff;--gold:#e3b341;
-  --teal:#39d353;--info-bg:#0d1f36;--info-brd:#1d3557;--info-txt:#a8c8ff;
-  --warn-bg:#2a1f10;--warn-brd:#f0883e;--warn-txt:#ffd9a0;
-  --good-bg:#0d2018;--good-brd:#3fb950;--good-txt:#8ff0a4;
-  --bad-bg:#2a1010;--bad-brd:#f85149;--bad-txt:#ffb0b0;
+  --bg:#ffffff;--panel:#f9fafb;--p2:#f3f4f6;--border:#e5e7eb;
+  --text:#111827;--muted:#6b7280;--acc:#2563eb;--green:#10b981;
+  --orange:#6b7280;--red:#dc2626;--purple:#6b7280;--gold:#6b7280;
+  --teal:#10b981;--info-bg:#eff6ff;--info-brd:#bfdbfe;--info-txt:#1d4ed8;
+  --warn-bg:#fffbeb;--warn-brd:#fcd34d;--warn-txt:#92400e;
+  --good-bg:#f0fdf4;--good-brd:#bbf7d0;--good-txt:#166534;
+  --bad-bg:#fef2f2;--bad-brd:#fecaca;--bad-txt:#991b1b;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px 16px 60px}
+body{font-family:'Inter',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px 16px 60px}
 .wrap{max-width:1000px;margin:0 auto}
 h1{font-size:22px;font-weight:700;letter-spacing:-.4px}
 .sub{color:var(--muted);font-size:13px;margin-top:4px;margin-bottom:20px}
 /* TABS */
-.tabs{display:flex;gap:2px;background:var(--p2);padding:4px;border-radius:10px;margin-bottom:20px;overflow-x:auto}
-.tab{flex:1;min-width:fit-content;padding:8px 10px;font-size:12.5px;font-weight:600;border:none;background:none;color:var(--muted);border-radius:7px;cursor:pointer;white-space:nowrap}
-.tab.on{background:var(--panel);color:var(--text);box-shadow:0 1px 4px #0005}
+.tabs{display:flex;gap:2px;background:var(--p2);padding:4px;border-radius:10px;margin-bottom:20px;overflow-x:auto;border:1px solid var(--border)}
+.tab{flex:1;min-width:fit-content;padding:8px 10px;font-size:12.5px;font-weight:500;border:none;background:none;color:var(--muted);border-radius:7px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.tab.on{background:#ffffff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08);font-weight:600}
 .pane{display:none}.pane.on{display:block}
 /* TOP BAR */
 .topbar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-.kpi{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;border-left:3px solid var(--acc)}
-.kpi .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px}
+.kpi{background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.kpi .lbl{font-size:10.5px;letter-spacing:.4px;color:var(--muted);margin-bottom:4px}
 .kpi .num{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums}
 .kpi .sub2{font-size:11.5px;color:var(--muted);margin-top:3px}
-.epbar{background:var(--p2);border-radius:6px;height:10px;overflow:hidden;margin-bottom:20px}
+.epbar{background:#e5e7eb;border-radius:6px;height:8px;overflow:hidden;margin-bottom:20px}
 .epfill{height:100%;border-radius:6px;transition:width .4s}
 /* SECTIONS */
-.sec{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--acc);border-radius:12px;padding:16px;margin-bottom:14px}
-.sec.g{border-left-color:var(--green)}
-.sec.o{border-left-color:var(--orange)}
-.sec.p{border-left-color:var(--purple)}
-.sec.gold{border-left-color:var(--gold)}
-.sec.t{border-left-color:var(--teal)}
-.stitle{font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:12px}
+.sec{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.sec.g{}
+.sec.o{}
+.sec.p{}
+.sec.gold{}
+.sec.t{}
+.stitle{font-size:11px;letter-spacing:.4px;color:var(--muted);margin-bottom:12px;font-weight:600}
 /* FIELDS */
 .field{margin-bottom:13px}
 .field>label{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:5px;color:var(--text)}
 .field>label strong{color:var(--acc);font-weight:700}
 input[type=range]{width:100%;accent-color:var(--acc)}
-input[type=number]{width:100%;padding:8px 10px;background:var(--p2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
-input[type=number]:focus{outline:none;border-color:var(--acc)}
-select{width:100%;padding:9px;background:var(--p2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:13px}
+input[type=number]{width:100%;padding:8px 10px;background:#ffffff;color:var(--text);border:1px solid #d1d5db;border-radius:8px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=number]:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
+select{width:100%;padding:9px;background:#ffffff;color:var(--text);border:1px solid #d1d5db;border-radius:8px;font-size:13px}
 /* SEGMENTS */
 .seg{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
-.seg button{padding:6px 9px;font-size:11.5px;border-radius:7px;border:1px solid var(--border);background:var(--p2);color:var(--muted);cursor:pointer}
+.seg button{padding:6px 9px;font-size:11.5px;border-radius:7px;border:1px solid var(--border);background:#ffffff;color:var(--muted);cursor:pointer;transition:all .15s}
 .seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
-.seg.g button.on{background:var(--green);border-color:var(--green)}
-.seg.o button.on{background:var(--orange);border-color:var(--orange)}
+.seg.g button.on{background:var(--acc);border-color:var(--acc)}
+.seg.o button.on{background:var(--acc);border-color:var(--acc)}
 /* GRID */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -73,21 +73,21 @@ select{width:100%;padding:9px;background:var(--p2);color:var(--text);border:1px 
 .box.bad{background:var(--bad-bg);border:1px solid var(--bad-brd);color:var(--bad-txt)}
 /* INNER KPIS */
 .minikpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
-.mk{background:var(--p2);border-radius:10px;padding:13px}
-.mk .l{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.mk{background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:13px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.mk .l{font-size:10.5px;color:var(--muted);letter-spacing:.3px;margin-bottom:3px;font-weight:500}
 .mk .n{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
 /* STRUCT CARDS */
 .scards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
-.scard{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--panel)}
+.scard{border:1px solid var(--border);border-radius:8px;padding:14px;background:#ffffff;box-shadow:0 1px 3px rgba(0,0,0,.06)}
 .scard.best{border:2px solid var(--acc);background:var(--info-bg)}
 .scard .sn{font-size:12.5px;font-weight:700;margin-bottom:6px}
 .scard .sv{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
 .scard .ss{font-size:11px;color:var(--muted);margin-top:4px}
 .scard.best .sv{color:var(--acc)}
-.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;margin-bottom:5px}
-.badge.ok{background:var(--good-bg);color:var(--good-txt)}
-.badge.ko{background:var(--bad-bg);color:var(--bad-txt)}
-.badge.best{background:var(--info-bg);color:var(--info-txt)}
+.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;margin-bottom:5px}
+.badge.ok{background:var(--good-bg);color:var(--good-txt);border:1px solid var(--good-brd)}
+.badge.ko{background:var(--bad-bg);color:var(--bad-txt);border:1px solid var(--bad-brd)}
+.badge.best{background:var(--info-bg);color:var(--info-txt);border:1px solid var(--info-brd)}
 /* COMPARE TABLE */
 .ctable{width:100%;border-collapse:collapse;font-size:12px}
 .ctable th{padding:7px 8px;text-align:left;background:var(--p2);color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)}
@@ -97,7 +97,7 @@ select{width:100%;padding:9px;background:var(--p2);color:var(--text);border:1px 
 .ctable tr.tot td{font-weight:700;font-size:13px;border-top:2px solid var(--border);border-bottom:none}
 .ctable td.hi{color:var(--acc)}
 /* DETAILS */
-details.info{background:var(--info-bg);border:1px solid var(--info-brd);border-left:3px solid var(--acc);border-radius:9px;margin:10px 0}
+details.info{background:var(--info-bg);border:1px solid var(--info-brd);border-radius:8px;margin:10px 0}
 details.info summary{padding:10px 12px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--info-txt);list-style:none;display:flex;gap:6px;align-items:center}
 details.info summary::before{content:"ⓘ";font-size:14px}
 details.info summary::-webkit-details-marker{display:none}
@@ -105,16 +105,16 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 .dbody{padding:12px;font-size:12px;line-height:1.65;color:var(--text)}
 .dbody ul{margin:6px 0 6px 14px}.dbody li{margin-bottom:4px}
 .dbody b{color:var(--info-txt)}
-.dbody .wbox{background:var(--warn-bg);border-radius:6px;padding:8px 10px;margin-top:8px;color:var(--warn-txt);font-size:11.5px}
-.dbody .gbox{background:var(--good-bg);border-radius:6px;padding:8px 10px;margin-top:8px;color:var(--good-txt);font-size:11.5px}
+.dbody .wbox{background:var(--warn-bg);border:1px solid var(--warn-brd);border-radius:6px;padding:8px 10px;margin-top:8px;color:var(--warn-txt);font-size:11.5px}
+.dbody .gbox{background:var(--good-bg);border:1px solid var(--good-brd);border-radius:6px;padding:8px 10px;margin-top:8px;color:var(--good-txt);font-size:11.5px}
 /* BARS */
 .brow{display:grid;grid-template-columns:38px 1fr 84px;align-items:center;gap:8px;font-size:12.5px;margin-bottom:2px}
 .brow .m{color:var(--muted)}
-.btrk{background:var(--p2);border-radius:5px;height:20px;overflow:hidden}
-.bfll{height:100%;background:linear-gradient(90deg,#00a699,#ff5a5f);border-radius:5px}
+.btrk{background:#e5e7eb;border-radius:5px;height:20px;overflow:hidden}
+.bfll{height:100%;background:linear-gradient(90deg,var(--acc),var(--green));border-radius:5px}
 .brow .rv{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
 /* SRC */
-.src{font-size:11px;color:var(--muted);line-height:1.7;padding:12px;background:var(--p2);border-radius:8px;margin-top:10px}
+.src{font-size:11px;color:var(--muted);line-height:1.7;padding:12px;background:var(--p2);border:1px solid var(--border);border-radius:8px;margin-top:10px}
 </style>
 </head>
 <body>
@@ -133,11 +133,11 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 
 <!-- TABS -->
 <div class="tabs">
-  <button class="tab on" onclick="sw(0)">💰 Revenus</button>
-  <button class="tab" onclick="sw(1)">🏠 Charges</button>
-  <button class="tab" onclick="sw(2)">🏡 Airbnb Paris</button>
-  <button class="tab" onclick="sw(3)">🏛️ Structure fiscale</button>
-  <button class="tab" onclick="sw(4)">🏦 Banque</button>
+  <button class="tab on" onclick="sw(0)">Revenus</button>
+  <button class="tab" onclick="sw(1)">Charges</button>
+  <button class="tab" onclick="sw(2)">Airbnb Paris</button>
+  <button class="tab" onclick="sw(3)">Structure fiscale</button>
+  <button class="tab" onclick="sw(4)">Banque</button>
 </div>
 
 <!-- ══ PANE 0 : REVENUS ══════════════════════════════════════════════════════ -->
@@ -183,11 +183,11 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
       <input type="range" id="tmi" min="0" max="45" value="30" step="1" oninput="sp('tmi','lTMI','%');c()">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px"><span>0%</span><span>11%</span><span>30%</span><span>41%</span><span>45%</span></div>
     </div>
-    <div style="background:var(--p2);border-radius:10px;padding:12px">
+    <div style="background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:12px">
       <div class="row"><span>CA mensuel</span><span id="rMeCA">—</span></div>
-      <div class="row"><span>Cotisations sociales</span><span id="rMeCot" style="color:var(--orange)">—</span></div>
-      <div class="row"><span>Impôt sur le revenu</span><span id="rMeIR" style="color:var(--orange)">—</span></div>
-      <div class="row bold total"><span>Net en poche / mois</span><span id="rMeNet" style="color:var(--orange)">—</span></div>
+      <div class="row"><span>Cotisations sociales</span><span id="rMeCot" style="color:var(--red)">—</span></div>
+      <div class="row"><span>Impôt sur le revenu</span><span id="rMeIR" style="color:var(--red)">—</span></div>
+      <div class="row bold total"><span>Net en poche / mois</span><span id="rMeNet" style="color:var(--acc)">—</span></div>
       <div class="row"><span>Taux de prélèvement global</span><span id="rMeTx">—</span></div>
     </div>
     <details class="info" style="margin-top:10px">
@@ -205,7 +205,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   </div>
 
   <div class="sec p">
-    <div class="stitle">Revenus locatifs & autres</div>
+    <div class="stitle">Revenus locatifs &amp; autres</div>
     <div class="g2">
       <div class="field"><label>Airbnb net / mois <strong id="lAir">1 200 €</strong></label>
         <input type="number" id="airN" value="1200" step="50" oninput="fv('airN','lAir');c()"></div>
@@ -265,7 +265,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 <!-- ══ PANE 2 : AIRBNB ══════════════════════════════════════════════════════ -->
 <div class="pane" id="p2">
   <div class="sec">
-    <div class="stitle">Bien & marché</div>
+    <div class="stitle">Bien &amp; marché</div>
     <div class="field"><label style="margin-bottom:5px">Arrondissement</label>
       <select id="arrSel" onchange="setArr()"></select>
       <div style="font-size:11px;color:var(--muted);margin-top:4px" id="arrI"></div>
@@ -416,7 +416,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   </div>
 
   <div class="g2" style="margin-bottom:14px">
-    <div class="kpi" style="border-left-color:var(--gold)"><div class="lbl">Capacité d'emprunt</div><div class="num" id="bkCap" style="color:var(--gold)">—</div><div class="sub2" id="bkMens"></div></div>
+    <div class="kpi" style="border-left-color:var(--acc)"><div class="lbl">Capacité d'emprunt</div><div class="num" id="bkCap" style="color:var(--acc)">—</div><div class="sub2" id="bkMens"></div></div>
     <div class="kpi"><div class="lbl">Budget acquisition max</div><div class="num" id="bkPrix">—</div><div class="sub2" id="bkSub"></div></div>
   </div>
 
@@ -428,7 +428,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="row bold"><span>Mensualité max disponible</span><span id="bkMM">—</span></div>
     <div class="row dim"><span>Mensualité crédit (hors ass.)</span><span id="bkMC">—</span></div>
     <div class="row dim"><span>Assurance / mois</span><span id="bkAM">—</span></div>
-    <div class="row bold total"><span>Mensualité TOTALE</span><span id="bkMT" style="color:var(--gold)">—</span></div>
+    <div class="row bold total"><span>Mensualité TOTALE</span><span id="bkMT" style="color:var(--acc)">—</span></div>
     <div class="row"><span>Taux d'endettement après projet</span><span id="bkTx">—</span></div>
     <div id="bkAlrt"></div>
   </div>
@@ -527,13 +527,13 @@ function c(){
 
   // TOP KPIs
   $('kRev').textContent=fe(totalRev); $('kRev').style.color='var(--acc)';
-  $('kChg').textContent=fe(totalChg); $('kChg').style.color='var(--orange)';
+  $('kChg').textContent=fe(totalChg); $('kChg').style.color='var(--red)';
   const epc=epargne>=0?'var(--green)':'var(--red)';
   $('kEp').textContent=fe(epargne); $('kEp').style.color=epc;
   $('kEpCard').style.borderLeftColor=epc;
   $('kEpPct').textContent=fp(txEp)+' des revenus';
   const pct=Math.min(100,totalRev>0?totalChg/totalRev*100:100);
-  $('epfill').style.width=pct+'%'; $('epfill').style.background=epargne>=0?'linear-gradient(90deg,var(--acc),var(--green))':'var(--red)';
+  $('epfill').style.width=pct+'%'; $('epfill').style.background=epargne>=0?'var(--acc)':'var(--red)';
 
   // TAB 0
   $('rSal').textContent=fe(salNetM);
