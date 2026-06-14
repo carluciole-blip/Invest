@@ -334,6 +334,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   <div class="sec">
     <div class="stitle">Cascade CA brut → cash-flow net</div>
     <div id="cascade"></div>
+    <div id="cashflowNote" style="margin-top:10px"></div>
   </div>
 </div>
 
@@ -344,10 +345,29 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   </div>
 
   <div class="sec">
+    <div class="stitle">Calculateur d'amortissement par composants</div>
+    <div class="g2">
+      <div class="field"><label>Prix d'acquisition (FAI) <strong id="lPrix">300 000 €</strong></label>
+        <input type="number" id="prixAcq" value="300000" step="5000" oninput="fv('prixAcq','lPrix');calcAmort()"></div>
+      <div class="field"><label>Quote-part terrain (non amortissable) <strong id="lTerrain">15 %</strong></label>
+        <input type="range" id="terrain" min="5" max="30" value="15" step="1" oninput="sp('terrain','lTerrain','%');calcAmort()"></div>
+    </div>
+    <div id="amortDetail" style="background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;font-size:12px">
+      <div class="row dim"><span>Gros oeuvre (50% · 50 ans)</span><span id="aGO">—</span></div>
+      <div class="row dim"><span>Façade (15% · 25 ans)</span><span id="aFac">—</span></div>
+      <div class="row dim"><span>Agencements cuisine/SdB (20% · 15 ans)</span><span id="aAgen">—</span></div>
+      <div class="row dim"><span>Installations techniques (10% · 15 ans)</span><span id="aInst">—</span></div>
+      <div class="row dim"><span>Mobilier & équipements (5% · 7 ans)</span><span id="aMob">—</span></div>
+      <div class="row bold total"><span>Amortissement total / an</span><span id="aTot" style="color:var(--acc)">—</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">Économie fiscale annuelle (TMI + PS) : <span id="aEco" style="color:var(--green);font-weight:600">—</span> — l'amortissement réduit l'impôt sans impact sur le cash.</div>
+    </div>
+    <div class="field"><label>Amortissement annuel retenu <strong id="lAmt">9 000 €</strong></label>
+      <input type="range" id="amort" min="0" max="30000" value="9000" step="500" oninput="sp('amort','lAmt','€');c()"></div>
+  </div>
+
+  <div class="sec">
     <div class="stitle">Paramètres fiscaux</div>
     <div class="g2">
-      <div class="field"><label>Amortissement annuel (réel) <strong id="lAmt">9 000 €</strong></label>
-        <input type="range" id="amort" min="0" max="25000" value="9000" step="500" oninput="sp('amort','lAmt','€');c()"></div>
       <div class="field"><label>TMI <strong id="lTMI2">30 %</strong></label>
         <input type="range" id="tmi2" min="0" max="45" value="30" step="1" oninput="sp('tmi2','lTMI2','%');syncTMI();c()"></div>
     </div>
@@ -490,6 +510,18 @@ function setDuree(d,b){duree=d;document.querySelectorAll('#sDuree button').forEa
 function setCible(cl,b){cible=cl;document.querySelectorAll('#sCible button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setArr(){const d=ARR[$('arrSel').value];$('adr').value=Math.round(d.adr*1.2/5)*5;$('occ').value=d.occ;sp('adr','lADR','€');sp('occ','lOcc','%');$('arrI').textContent='Médiane : '+d.adr+' €/nuit · occ. '+d.occ+'% · +20% pour 70m²/6 couchages';c()}
 function syncTMI(){$('tmi').value=$('tmi2').value;$('lTMI').textContent=$('tmi2').value+' %'}
+function calcAmort(){
+  const prix=G('prixAcq'), tTerrain=G('terrain')/100;
+  const amortBase=prix*(1-tTerrain);
+  const GO=amortBase*.50/50, fac=amortBase*.15/25, agen=amortBase*.20/15, inst=amortBase*.10/15, mob=amortBase*.05/7;
+  const tot=GO+fac+agen+inst+mob;
+  $('aGO').textContent=fe(GO);$('aFac').textContent=fe(fac);$('aAgen').textContent=fe(agen);
+  $('aInst').textContent=fe(inst);$('aMob').textContent=fe(mob);$('aTot').textContent=fe(tot);
+  const tmiVal=G('tmi2')/100, eco=tot*(tmiVal+0.186);
+  $('aEco').textContent=fe(eco)+'/an ('+fe(eco/12)+'/mois)';
+  $('amort').value=Math.round(tot/500)*500;$('lAmt').textContent=fe(Math.round(tot/500)*500);
+  c();
+}
 
 // ── MATH ──────────────────────────────────────────────────────────────────────
 function mens(cap,taux,n){const r=taux/12/100,m=n*12;if(!r)return cap/m;return cap*r*Math.pow(1+r,m)/(Math.pow(1+r,m)-1)}
@@ -628,6 +660,23 @@ function c(){
   $('cascade').innerHTML=cascadeItems.map(r=>`<div class="row ${r[2]}"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('')+
     `<div class="row bold total"><span>= Cash-flow net (LMNP réel)</span><span style="color:${cfn>=0?'var(--green)':'var(--red)'}">${fe(cfn)}</span></div>`;
 
+  // Note explicative cashflow
+  const amortVal=G('amort'), taxSaving=amortVal*(tmi3+0.186);
+  let cfNote='';
+  if(capN===90){
+    const grossSec=Math.min(365*occ,365)*adr+Math.min(365*occ,365)/stay*cln;
+    cfNote=`<div class="box info">
+      Plafond 90 nuits (résidence principale) = CA brut max ${fe(gross)}/an.<br>
+      En résidence secondaire (365 nuits autorisées) : CA brut estimé ~${fe(grossSec)}/an — cash-flow potentiellement 2 à 3× supérieur.
+    </div>`;
+  }
+  if(amortVal>0){
+    cfNote+=`<div class="box good" style="margin-top:6px">
+      L'amortissement (${fe(amortVal)}/an) est une charge <b>non décaissée</b> : il réduit l'impôt de ${fe(taxSaving)}/an (${fe(taxSaving/12)}/mois) sans sortir d'argent.
+    </div>`;
+  }
+  $('cashflowNote').innerHTML=cfNote;
+
   // Struct cards
   $('structCards').innerHTML=structs.map(s=>{
     const ib=s.k===bestK;
@@ -706,6 +755,7 @@ function c(){
 const sel=$('arrSel');
 Object.keys(ARR).forEach((k,i)=>{const o=document.createElement('option');o.value=k;o.textContent=k;if(i===10)o.selected=true;sel.appendChild(o);});
 setArr();
+calcAmort();
 </script>
 </body>
 </html>
