@@ -115,6 +115,9 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 .brow .rv{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
 /* SRC */
 .src{font-size:11px;color:var(--muted);line-height:1.7;padding:12px;background:var(--p2);border:1px solid var(--border);border-radius:8px;margin-top:10px}
+/* WINNER */
+.winner{border:2px solid var(--green)!important;background:var(--good-bg)!important}
+.ctable .col-hi{background:var(--good-bg);font-weight:700;color:var(--good-txt)}
 </style>
 </head>
 <body>
@@ -138,6 +141,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   <button class="tab" onclick="sw(2)">Airbnb Paris</button>
   <button class="tab" onclick="sw(3)">Structure fiscale</button>
   <button class="tab" onclick="sw(4)">Banque</button>
+  <button class="tab" onclick="sw(5)">Conseiller</button>
 </div>
 
 <!-- ══ PANE 0 : REVENUS ══════════════════════════════════════════════════════ -->
@@ -463,6 +467,78 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   </div>
 </div>
 
+<!-- ══ PANE 5 : CONSEILLER ════════════════════════════════════════════════════ -->
+<div class="pane" id="p5">
+  <div class="box info" style="margin-bottom:14px">
+    Compare 3 scénarios d'utilisation de votre bien parisien : résidence principale, location longue durée meublée, et Airbnb. Les charges fixes et données Airbnb sont reprises automatiquement depuis les autres onglets.
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Paramètres du bien</div>
+    <div class="g2">
+      <div class="field"><label>Surface (m²) <strong id="lSurf">45</strong></label>
+        <input type="number" id="surface" value="45" step="1" oninput="fv('surface','lSurf');calcConseil()"></div>
+      <div class="field"><label>Loyer marché meublé estimé/mois (bail 1 an) <strong id="lLoyerLT">1 400 €</strong></label>
+        <input type="number" id="loyerLT" value="1400" step="50" oninput="fv('loyerLT','lLoyerLT');calcConseil()"></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Taux de vacance locative longue durée <strong id="lVacLT">8 %</strong></label>
+        <input type="range" id="vacLT" min="0" max="15" value="8" step="1" oninput="sp('vacLT','lVacLT','%');calcConseil()">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px"><span>0%</span><span>7,5%</span><span>15%</span></div>
+      </div>
+      <div class="field"><label>Frais de gestion locative (optionnel) <strong id="lGstLT">0 %</strong></label>
+        <input type="range" id="gstLT" min="0" max="12" value="0" step="1" oninput="sp('gstLT','lGstLT','%');calcConseil()">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px"><span>0%</span><span>6%</span><span>12%</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Scénario 1 — Résidence principale (vous habitez)</div>
+    <div class="field"><label>Loyer que vous paieriez ailleurs / mois <strong id="lLoyerEvite">1 500 €</strong></label>
+      <input type="number" id="loyerEvite" value="1500" step="50" oninput="fv('loyerEvite','lLoyerEvite');calcConseil()"></div>
+    <div style="background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:12px">
+      <div class="row dim"><span>Loyer évité / mois</span><span id="rpLoyerEvite">—</span></div>
+      <div class="row dim"><span>Charges (crédit + fixes) / mois</span><span id="rpCharges">—</span></div>
+      <div class="row bold total"><span>Cash-flow net / mois</span><span id="rpCF">—</span></div>
+      <div class="row"><span>Rendement implicite / prix d'achat</span><span id="rpRend">—</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Scénario 2 — Location longue durée meublée</div>
+    <div style="background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:12px">
+      <div class="row dim"><span>Revenu annuel (après vacance)</span><span id="ltRevAn">—</span></div>
+      <div class="row dim"><span>Commission gestionnaire</span><span id="ltComm">—</span></div>
+      <div class="row dim"><span>Impôt + PS (micro-BIC 50 %)</span><span id="ltImpot">—</span></div>
+      <div class="row dim"><span>Charges fixes / an</span><span id="ltFixed">—</span></div>
+      <div class="row bold total"><span>Cash-flow net / mois</span><span id="ltCF">—</span></div>
+      <div class="row"><span>Rendement net / prix d'achat</span><span id="ltRend">—</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Scénario 3 — Airbnb / location saisonnière</div>
+    <div style="background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:12px">
+      <div class="row dim"><span>CA brut / an</span><span id="airGross">—</span></div>
+      <div class="row dim"><span>Impôt + PS (LMNP réel)</span><span id="airImpot">—</span></div>
+      <div class="row dim"><span>Charges fixes / an</span><span id="airFixed">—</span></div>
+      <div class="row bold total"><span>Cash-flow net / mois</span><span id="airCF">—</span></div>
+      <div class="row"><span>Rendement net / prix d'achat</span><span id="airRend">—</span></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Tableau comparatif</div>
+    <div style="overflow-x:auto"><table class="ctable" id="conseilTable"></table></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Recommandation automatique</div>
+    <div id="recommandation"></div>
+  </div>
+</div>
+
 </div><!-- /wrap -->
 
 <script>
@@ -488,6 +564,7 @@ const SEA={Jan:.78,Fév:.80,Mar:.92,Avr:1.05,Mai:1.18,Juin:1.25,Juil:1.20,Aoû:1
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let salMode='net', meType='svc', meIR='bar', freq='m', capN=90, classt='nc', duree=20, cible='rp';
+let lastCalc={};
 const $=id=>document.getElementById(id);
 const G=id=>+($(id).value||0);
 const fe=n=>Math.round(n).toLocaleString('fr-FR')+' €';
@@ -749,6 +826,175 @@ function c(){
     ['💰','Reste à vivre',fe(totalRev-mensT-(totalChg-G('loyer')-G('crEx')))+'/mois'],
     ['🏦','Apport / notaire',fe(G('appt'))+' — frais notaire estimés : '+fe(prixMax*.08)],
   ].map(([i,k,v])=>`<div class="row"><span style="display:flex;gap:8px"><span>${i}</span><span style="color:var(--muted)">${k}</span></span><span style="font-size:12px;text-align:right;max-width:55%">${v}</span></div>`).join('');
+
+  // Stocker les variables pour l'onglet Conseiller
+  lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,prixAcq:G('prixAcq')};
+  calcConseil();
+}
+
+// ── CONSEILLER ────────────────────────────────────────────────────────────────
+function calcConseil(){
+  const lc=lastCalc;
+  if(!lc||!lc.prixAcq) return;
+
+  const prixAcq=lc.prixAcq||300000;
+  const gross=lc.gross||0;
+  const reelNet=lc.reelNet||0;
+  const fixed=lc.fixed||0;
+  const loanAn=lc.loanAn||0;
+  const reelTax=lc.reelTax||0;
+  const tmi3=lc.tmi3||0.30;
+  const PS=0.186;
+  const loyerLT=G('loyerLT')||1400;
+  const vacLT=G('vacLT')/100||0.08;
+  const gstLT=G('gstLT')/100||0;
+  const loyerEvite=G('loyerEvite')||1500;
+
+  // ── Scénario 1 : Résidence principale ──
+  const rpLoyerEvite=loyerEvite;
+  // Charges = crédit + tout le fixed (hors crédit déjà dedans)
+  const rpChargesAn=fixed; // fixed inclut déjà loanAn
+  const rpCFAn=(rpLoyerEvite*12)-rpChargesAn;
+  const rpCFM=rpCFAn/12;
+  const rpRend=prixAcq>0?(rpLoyerEvite*12)/prixAcq*100:0;
+
+  $('rpLoyerEvite').textContent=fe(rpLoyerEvite);
+  $('rpCharges').textContent='− '+fe(rpChargesAn/12);
+  $('rpCF').textContent=fe(rpCFM);
+  $('rpCF').style.color=rpCFM>=0?'var(--green)':'var(--red)';
+  $('rpRend').textContent=fp(rpRend,2);
+
+  // ── Scénario 2 : Location longue durée meublée ──
+  const ltRevAn=loyerLT*12*(1-vacLT);
+  const ltCommAn=loyerLT*12*(gstLT);
+  // Micro-BIC meublé classique 50% abattement ou LMNP réel si > 77700
+  let ltImpotAn=0;
+  if(ltRevAn>77700){
+    // LMNP réel simplifié : base = revenu - charges déductibles - amortissement
+    const ltBase=Math.max(0,ltRevAn-ltCommAn-(fixed-loanAn)-(lc.amort||0));
+    ltImpotAn=ltBase*(tmi3+PS);
+  } else {
+    // micro-BIC 50%
+    ltImpotAn=ltRevAn*0.50*(tmi3+PS);
+  }
+  const ltCFAn=ltRevAn-ltCommAn-ltImpotAn-fixed;
+  const ltCFM=ltCFAn/12;
+  const ltRend=prixAcq>0?ltCFAn/prixAcq*100:0;
+
+  $('ltRevAn').textContent=fe(ltRevAn);
+  $('ltComm').textContent=ltCommAn>0?'− '+fe(ltCommAn):'0 €';
+  $('ltImpot').textContent='− '+fe(ltImpotAn);
+  $('ltFixed').textContent='− '+fe(fixed);
+  $('ltCF').textContent=fe(ltCFM);
+  $('ltCF').style.color=ltCFM>=0?'var(--green)':'var(--red)';
+  $('ltRend').textContent=fp(ltRend,2);
+
+  // ── Scénario 3 : Airbnb ──
+  const airCFM=reelNet/12;
+  const airRend=prixAcq>0?reelNet/prixAcq*100:0;
+
+  $('airGross').textContent=fe(gross);
+  $('airImpot').textContent='− '+fe(reelTax);
+  $('airFixed').textContent='− '+fe(fixed);
+  $('airCF').textContent=fe(airCFM);
+  $('airCF').style.color=airCFM>=0?'var(--green)':'var(--red)';
+  $('airRend').textContent=fp(airRend,2);
+
+  // ── Tableau comparatif ──
+  const cfs=[rpCFM,ltCFM,airCFM];
+  const maxCF=Math.max(...cfs);
+  const winnerIdx=cfs.indexOf(maxCF);
+
+  const rpRevBrut=loyerEvite;
+  const ltRevBrut=ltRevAn/12;
+  const airRevBrut=gross/12;
+
+  const rpChgM=rpChargesAn/12;
+  const ltChgM=fixed/12;
+  const airChgM=fixed/12;
+
+  const rpImpotM=0;
+  const ltImpotM=ltImpotAn/12;
+  const airImpotM=reelTax/12;
+
+  const tableRows=[
+    {l:'Revenus bruts / mois',v:[fe(rpRevBrut),fe(ltRevBrut),fe(airRevBrut)]},
+    {l:'Charges (crédit + fixes) / mois',v:['− '+fe(rpChgM),'− '+fe(ltChgM),'− '+fe(airChgM)]},
+    {l:'Impôt / mois',v:['— ','− '+fe(ltImpotM),'− '+fe(airImpotM)]},
+    {l:'Cash-flow net / mois',v:[fe(rpCFM),fe(ltCFM),fe(airCFM)],highlight:true},
+    {l:'Rendement net / prix achat',v:[fp(rpRend,2),fp(ltRend,2),fp(airRend,2)]},
+    {l:'Vacance / risque',v:['Nul','Faible','Modéré']},
+    {l:'Effort de gestion',v:['Nul','Faible','Élevé']},
+    {l:'Stabilité revenus',v:['Très stable','Stable','Variable']},
+  ];
+
+  const colHeaders=['Critère','RP','Long terme','Airbnb'];
+  let tbl=`<tr>${colHeaders.map((h,i)=>{
+    const isWin=i>0&&(i-1===winnerIdx);
+    return`<th class="${isWin?'col-hi':''}">${h}${isWin?' ★':''}</th>`;
+  }).join('')}</tr>`;
+  tableRows.forEach(row=>{
+    tbl+=`<tr>`;
+    tbl+=`<td style="color:var(--muted)">${row.l}</td>`;
+    row.v.forEach((v,i)=>{
+      const isWin=row.highlight&&i===winnerIdx;
+      tbl+=`<td class="${isWin?'col-hi':''}">${v}</td>`;
+    });
+    tbl+=`</tr>`;
+  });
+  $('conseilTable').innerHTML=tbl;
+
+  // ── Recommandation ──
+  const scenarios=[
+    {name:'Résidence principale',cf:rpCFM,rend:rpRend,effort:'Nul',stable:'Très stable'},
+    {name:'Location longue durée',cf:ltCFM,rend:ltRend,effort:'Faible',stable:'Stable'},
+    {name:'Airbnb / saisonnier',cf:airCFM,rend:airRend,effort:'Élevé',stable:'Variable'},
+  ];
+  const bestCF=scenarios.reduce((a,b)=>a.cf>b.cf?a:b);
+  const bestEquil=scenarios.reduce((a,b)=>{
+    // score = cf / 2 + rend * 500 - (effort === 'Élevé' ? 200 : effort === 'Faible' ? 50 : 0)
+    const effortPenalty=e=>e==='Élevé'?200:e==='Faible'?50:0;
+    const scoreA=a.cf/2+a.rend*500-effortPenalty(a.effort);
+    const scoreB=b.cf/2+b.rend*500-effortPenalty(b.effort);
+    return scoreA>scoreB?a:b;
+  });
+
+  const colors=['var(--green)','var(--orange)','var(--red)'];
+  const sortedByCF=[...scenarios].sort((a,b)=>b.cf-a.cf);
+  const rankColor=s=>{
+    const rank=sortedByCF.findIndex(x=>x.name===s.name);
+    return colors[rank]||'var(--muted)';
+  };
+
+  // Vigilance
+  const vigilance=[];
+  if(airCFM>ltCFM*1.5) vigilance.push('⚠️ L\'Airbnb génère un cash-flow nettement supérieur, mais la réglementation des 90 nuits/an (loi Le Meur) peut contraindre fortement votre rentabilité en résidence principale.');
+  if(ltCFM<0) vigilance.push('⚠️ La location longue durée génère un cash-flow négatif avec ces paramètres : le loyer ne couvre pas les charges. Vérifiez le loyer de marché ou renégociez le crédit.');
+  if(rpCFM<0) vigilance.push('⚠️ En résidence principale, le coût de possession dépasse le loyer évité : l\'acquisition n\'est pas neutre financièrement à court terme.');
+  if(prixAcq>0 && Math.max(rpRend,ltRend,airRend)<2) vigilance.push('⚠️ Tous les rendements nets sont inférieurs à 2 % : le prix d\'acquisition est élevé par rapport aux revenus potentiels du bien.');
+  if(reelNet>0 && (G('amort')||0)===0) vigilance.push('💡 Activez l\'amortissement dans l\'onglet Structure fiscale pour optimiser l\'impôt du scénario Airbnb (LMNP réel).');
+
+  let reco=`
+  <div class="g2" style="margin-bottom:12px">
+    <div class="kpi ${bestCF.name===scenarios[0].name?'winner':''}" style="border-left:4px solid ${rankColor(bestCF)}">
+      <div class="lbl">Meilleur cash-flow pur</div>
+      <div class="num" style="color:${rankColor(bestCF)}">${bestCF.name}</div>
+      <div class="sub2">${fe(bestCF.cf)}/mois · rendement ${fp(bestCF.rend,2)}</div>
+    </div>
+    <div class="kpi ${bestEquil.name===scenarios[0].name?'winner':''}" style="border-left:4px solid ${rankColor(bestEquil)}">
+      <div class="lbl">Meilleur équilibre rentabilité/effort</div>
+      <div class="num" style="color:${rankColor(bestEquil)}">${bestEquil.name}</div>
+      <div class="sub2">${fe(bestEquil.cf)}/mois · effort : ${bestEquil.effort}</div>
+    </div>
+  </div>`;
+
+  if(vigilance.length>0){
+    reco+=`<div class="box warn"><b>Points de vigilance :</b><ul style="margin:6px 0 0 14px">${vigilance.map(v=>`<li style="margin-bottom:4px">${v}</li>`).join('')}</ul></div>`;
+  } else {
+    reco+=`<div class="box good">✅ Votre situation ne présente pas de point de vigilance majeur. Comparez les cash-flows ci-dessus pour choisir la stratégie la plus adaptée à votre mode de vie.</div>`;
+  }
+
+  $('recommandation').innerHTML=reco;
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
