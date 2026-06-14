@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tableau de bord Entrepreneur · Paris 2026</title>
+<style>
+:root{
+  --bg:#0d1117;--panel:#161b22;--p2:#21262d;--border:#30363d;
+  --text:#e6edf3;--muted:#8b949e;--acc:#58a6ff;--green:#3fb950;
+  --orange:#f0883e;--red:#f85149;--purple:#bc8cff;--gold:#e3b341;
+  --teal:#39d353;--info-bg:#0d1f36;--info-brd:#1d3557;--info-txt:#a8c8ff;
+  --warn-bg:#2a1f10;--warn-brd:#f0883e;--warn-txt:#ffd9a0;
+  --good-bg:#0d2018;--good-brd:#3fb950;--good-txt:#8ff0a4;
+  --bad-bg:#2a1010;--bad-brd:#f85149;--bad-txt:#ffb0b0;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:20px 16px 60px}
+.wrap{max-width:1000px;margin:0 auto}
+h1{font-size:22px;font-weight:700;letter-spacing:-.4px}
+.sub{color:var(--muted);font-size:13px;margin-top:4px;margin-bottom:20px}
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--p2);padding:4px;border-radius:10px;margin-bottom:20px;overflow-x:auto}
+.tab{flex:1;min-width:fit-content;padding:8px 10px;font-size:12.5px;font-weight:600;border:none;background:none;color:var(--muted);border-radius:7px;cursor:pointer;white-space:nowrap}
+.tab.on{background:var(--panel);color:var(--text);box-shadow:0 1px 4px #0005}
+.pane{display:none}.pane.on{display:block}
+/* TOP BAR */
+.topbar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;border-left:3px solid var(--acc)}
+.kpi .lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px}
+.kpi .num{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .sub2{font-size:11.5px;color:var(--muted);margin-top:3px}
+.epbar{background:var(--p2);border-radius:6px;height:10px;overflow:hidden;margin-bottom:20px}
+.epfill{height:100%;border-radius:6px;transition:width .4s}
+/* SECTIONS */
+.sec{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--acc);border-radius:12px;padding:16px;margin-bottom:14px}
+.sec.g{border-left-color:var(--green)}
+.sec.o{border-left-color:var(--orange)}
+.sec.p{border-left-color:var(--purple)}
+.sec.gold{border-left-color:var(--gold)}
+.sec.t{border-left-color:var(--teal)}
+.stitle{font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:12px}
+/* FIELDS */
+.field{margin-bottom:13px}
+.field>label{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:5px;color:var(--text)}
+.field>label strong{color:var(--acc);font-weight:700}
+input[type=range]{width:100%;accent-color:var(--acc)}
+input[type=number]{width:100%;padding:8px 10px;background:var(--p2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:13px;text-align:right;font-variant-numeric:tabular-nums}
+input[type=number]:focus{outline:none;border-color:var(--acc)}
+select{width:100%;padding:9px;background:var(--p2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:13px}
+/* SEGMENTS */
+.seg{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.seg button{padding:6px 9px;font-size:11.5px;border-radius:7px;border:1px solid var(--border);background:var(--p2);color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.seg.g button.on{background:var(--green);border-color:var(--green)}
+.seg.o button.on{background:var(--orange);border-color:var(--orange)}
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media(max-width:600px){.g2,.g3,.g4,.topbar{grid-template-columns:1fr}}
+/* ROWS */
+.row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;font-variant-numeric:tabular-nums}
+.row:last-child{border-bottom:none}
+.row.bold{font-weight:700;font-size:14px}
+.row.total{border-top:2px solid var(--border);padding-top:9px;font-weight:700;font-size:15px;border-bottom:none;margin-top:4px}
+.row.dim{color:var(--muted)}
+/* BOXES */
+.box{border-radius:8px;padding:10px 12px;font-size:12px;line-height:1.6;margin-top:10px}
+.box.info{background:var(--info-bg);border:1px solid var(--info-brd);color:var(--info-txt)}
+.box.warn{background:var(--warn-bg);border:1px solid var(--warn-brd);color:var(--warn-txt)}
+.box.good{background:var(--good-bg);border:1px solid var(--good-brd);color:var(--good-txt)}
+.box.bad{background:var(--bad-bg);border:1px solid var(--bad-brd);color:var(--bad-txt)}
+/* INNER KPIS */
+.minikpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.mk{background:var(--p2);border-radius:10px;padding:13px}
+.mk .l{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.mk .n{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+/* STRUCT CARDS */
+.scards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.scard{border:1px solid var(--border);border-radius:12px;padding:14px;background:var(--panel)}
+.scard.best{border:2px solid var(--acc);background:var(--info-bg)}
+.scard .sn{font-size:12.5px;font-weight:700;margin-bottom:6px}
+.scard .sv{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums}
+.scard .ss{font-size:11px;color:var(--muted);margin-top:4px}
+.scard.best .sv{color:var(--acc)}
+.badge{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:700;margin-bottom:5px}
+.badge.ok{background:var(--good-bg);color:var(--good-txt)}
+.badge.ko{background:var(--bad-bg);color:var(--bad-txt)}
+.badge.best{background:var(--info-bg);color:var(--info-txt)}
+/* COMPARE TABLE */
+.ctable{width:100%;border-collapse:collapse;font-size:12px}
+.ctable th{padding:7px 8px;text-align:left;background:var(--p2);color:var(--muted);font-weight:600;border-bottom:1px solid var(--border)}
+.ctable th:not(:first-child){text-align:right}
+.ctable td{padding:6px 8px;border-bottom:1px solid var(--border)}
+.ctable td:not(:first-child){text-align:right;font-variant-numeric:tabular-nums}
+.ctable tr.tot td{font-weight:700;font-size:13px;border-top:2px solid var(--border);border-bottom:none}
+.ctable td.hi{color:var(--acc)}
+/* DETAILS */
+details.info{background:var(--info-bg);border:1px solid var(--info-brd);border-left:3px solid var(--acc);border-radius:9px;margin:10px 0}
+details.info summary{padding:10px 12px;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--info-txt);list-style:none;display:flex;gap:6px;align-items:center}
+details.info summary::before{content:"ⓘ";font-size:14px}
+details.info summary::-webkit-details-marker{display:none}
+details.info[open] summary{border-bottom:1px solid var(--info-brd)}
+.dbody{padding:12px;font-size:12px;line-height:1.65;color:var(--text)}
+.dbody ul{margin:6px 0 6px 14px}.dbody li{margin-bottom:4px}
+.dbody b{color:var(--info-txt)}
+.dbody .wbox{background:var(--warn-bg);border-radius:6px;padding:8px 10px;margin-top:8px;color:var(--warn-txt);font-size:11.5px}
+.dbody .gbox{background:var(--good-bg);border-radius:6px;padding:8px 10px;margin-top:8px;color:var(--good-txt);font-size:11.5px}
+/* BARS */
+.brow{display:grid;grid-template-columns:38px 1fr 84px;align-items:center;gap:8px;font-size:12.5px;margin-bottom:2px}
+.brow .m{color:var(--muted)}
+.btrk{background:var(--p2);border-radius:5px;height:20px;overflow:hidden}
+.bfll{height:100%;background:linear-gradient(90deg,#00a699,#ff5a5f);border-radius:5px}
+.brow .rv{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+/* SRC */
+.src{font-size:11px;color:var(--muted);line-height:1.7;padding:12px;background:var(--p2);border-radius:8px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>Tableau de bord financier · Entrepreneur</h1>
+<p class="sub">Consolidez tous vos revenus · épargne réelle · Airbnb Paris · structures fiscales · capacité bancaire · 2025-2026</p>
+
+<!-- TOP KPIs permanents -->
+<div class="topbar">
+  <div class="kpi" style="border-left-color:var(--acc)"><div class="lbl">Revenus nets / mois</div><div class="num" id="kRev">—</div></div>
+  <div class="kpi" style="border-left-color:var(--orange)"><div class="lbl">Charges / mois</div><div class="num" id="kChg">—</div></div>
+  <div class="kpi" id="kEpCard"><div class="lbl">Épargne nette / mois</div><div class="num" id="kEp">—</div><div class="sub2" id="kEpPct"></div></div>
+</div>
+<div class="epbar"><div class="epfill" id="epfill"></div></div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" onclick="sw(0)">💰 Revenus</button>
+  <button class="tab" onclick="sw(1)">🏠 Charges</button>
+  <button class="tab" onclick="sw(2)">🏡 Airbnb Paris</button>
+  <button class="tab" onclick="sw(3)">🏛️ Structure fiscale</button>
+  <button class="tab" onclick="sw(4)">🏦 Banque</button>
+</div>
+
+<!-- ══ PANE 0 : REVENUS ══════════════════════════════════════════════════════ -->
+<div class="pane on" id="p0">
+
+  <div class="sec g">
+    <div class="stitle">Salaire / activité salariée</div>
+    <div class="seg g" id="sModeS">
+      <button class="on" onclick="setMode('net',this)">Saisir le net</button>
+      <button onclick="setMode('brut',this)">Saisir le brut</button>
+    </div>
+    <div id="netF" class="field">
+      <label>Salaire net mensuel (après PAS) <strong id="lSN">3 500 €</strong></label>
+      <input type="number" id="salN" value="3500" step="50" oninput="fv('salN','lSN');c()">
+    </div>
+    <div id="brutF" class="field" style="display:none">
+      <label>Salaire brut mensuel <strong id="lSB">4 500 €</strong></label>
+      <input type="number" id="salB" value="4500" step="50" oninput="fv('salB','lSB');c()">
+      <div class="box info" style="margin-top:6px">Net ≈ <span id="netEst">—</span> (coefficient 78 %)</div>
+    </div>
+    <div class="row bold"><span>Net retenu</span><span id="rSal" style="color:var(--green)">—</span></div>
+  </div>
+
+  <div class="sec o">
+    <div class="stitle">Micro-entreprise (auto-entrepreneur)</div>
+    <div class="field"><label>CA mensuel <strong id="lCA">5 000 €</strong></label>
+      <input type="number" id="meCA" value="5000" step="100" oninput="fv('meCA','lCA');c()"></div>
+    <div class="field" style="margin-bottom:6px"><label style="margin-bottom:6px">Type d'activité</label>
+      <div class="seg o" id="sMeType">
+        <button class="on" onclick="setMeType('svc',this)">Prestations BIC</button>
+        <button onclick="setMeType('vte',this)">Vente BIC</button>
+        <button onclick="setMeType('bnc',this)">Libéral BNC</button>
+        <button onclick="setMeType('cpv',this)">Libéral Cipav</button>
+      </div>
+    </div>
+    <div class="field" style="margin-bottom:6px"><label style="margin-bottom:6px">Imposition IR</label>
+      <div class="seg o" id="sMeIR">
+        <button class="on" onclick="setMeIR('bar',this)">Barème progressif</button>
+        <button onclick="setMeIR('lib',this)">Versement libératoire</button>
+      </div>
+    </div>
+    <div id="tmiF" class="field"><label>TMI (taux marginal) <strong id="lTMI">30 %</strong></label>
+      <input type="range" id="tmi" min="0" max="45" value="30" step="1" oninput="sp('tmi','lTMI','%');c()">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px"><span>0%</span><span>11%</span><span>30%</span><span>41%</span><span>45%</span></div>
+    </div>
+    <div style="background:var(--p2);border-radius:10px;padding:12px">
+      <div class="row"><span>CA mensuel</span><span id="rMeCA">—</span></div>
+      <div class="row"><span>Cotisations sociales</span><span id="rMeCot" style="color:var(--orange)">—</span></div>
+      <div class="row"><span>Impôt sur le revenu</span><span id="rMeIR" style="color:var(--orange)">—</span></div>
+      <div class="row bold total"><span>Net en poche / mois</span><span id="rMeNet" style="color:var(--orange)">—</span></div>
+      <div class="row"><span>Taux de prélèvement global</span><span id="rMeTx">—</span></div>
+    </div>
+    <details class="info" style="margin-top:10px">
+      <summary>Taux applicables 2026 (sources URSSAF)</summary>
+      <div class="dbody">
+        <ul>
+          <li><b>Prestations BIC :</b> cotisations 21,2 % · abattement IR 50 % · libératoire 1,7 %</li>
+          <li><b>Vente BIC :</b> cotisations 12,3 % · abattement IR 71 % · libératoire 1 %</li>
+          <li><b>Libéral BNC hors Cipav :</b> cotisations 25,6 % (décret n°2025-943) · abattement 34 % · libératoire 2,2 %</li>
+          <li><b>Libéral Cipav :</b> cotisations 23,2 % · abattement 34 % · libératoire 2,2 %</li>
+          <li>Versement libératoire accessible si RFR N-2 &lt; 27 794 € (personne seule) — IR soldé à la source.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <div class="sec p">
+    <div class="stitle">Revenus locatifs & autres</div>
+    <div class="g2">
+      <div class="field"><label>Airbnb net / mois <strong id="lAir">1 200 €</strong></label>
+        <input type="number" id="airN" value="1200" step="50" oninput="fv('airN','lAir');c()"></div>
+      <div class="field"><label>Dividendes nets / mois <strong id="lDiv">0 €</strong></label>
+        <input type="number" id="divN" value="0" step="50" oninput="fv('divN','lDiv');c()"></div>
+      <div class="field"><label>Autres revenus nets / mois <strong id="lAut">0 €</strong></label>
+        <input type="number" id="autR" value="0" step="50" oninput="fv('autR','lAut');c()"></div>
+    </div>
+    <div class="box info">Le net Airbnb est automatiquement mis à jour depuis l'onglet Airbnb Paris → Structure fiscale.</div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Récapitulatif revenus nets</div>
+    <div class="row"><span>Salaire net</span><span id="rR0">—</span></div>
+    <div class="row"><span>Micro-entreprise net</span><span id="rR1">—</span></div>
+    <div class="row"><span>Airbnb net</span><span id="rR2">—</span></div>
+    <div class="row"><span>Dividendes + autres</span><span id="rR3">—</span></div>
+    <div class="row bold total"><span>TOTAL NETS / MOIS</span><span id="rRTot" style="color:var(--acc)">—</span></div>
+    <div class="row dim"><span>Soit annuellement</span><span id="rRAn">—</span></div>
+  </div>
+</div>
+
+<!-- ══ PANE 1 : CHARGES ══════════════════════════════════════════════════════ -->
+<div class="pane" id="p1">
+  <div class="sec o">
+    <div class="stitle">Logement</div>
+    <div class="g2">
+      <div class="field"><label>Loyer ou crédit RP <strong id="lLoy">1 200 €</strong></label>
+        <input type="number" id="loyer" value="1200" step="50" oninput="fv('loyer','lLoy');c()"></div>
+      <div class="field"><label>Crédits existants (hors RP) <strong id="lCrEx">0 €</strong></label>
+        <input type="number" id="crEx" value="0" step="50" oninput="fv('crEx','lCrEx');c()"></div>
+    </div>
+  </div>
+  <div class="sec g">
+    <div class="stitle">Vie courante</div>
+    <div class="g2">
+      <div class="field"><label>Transport <strong id="lTrp">150 €</strong></label><input type="number" id="trp" value="150" step="10" oninput="fv('trp','lTrp');c()"></div>
+      <div class="field"><label>Alimentation <strong id="lAlim">500 €</strong></label><input type="number" id="alim" value="500" step="25" oninput="fv('alim','lAlim');c()"></div>
+      <div class="field"><label>Santé / mutuelle <strong id="lSnte">80 €</strong></label><input type="number" id="snte" value="80" step="10" oninput="fv('snte','lSnte');c()"></div>
+      <div class="field"><label>Abonnements <strong id="lAbo">100 €</strong></label><input type="number" id="abo" value="100" step="10" oninput="fv('abo','lAbo');c()"></div>
+      <div class="field"><label>Loisirs <strong id="lLois">200 €</strong></label><input type="number" id="lois" value="200" step="25" oninput="fv('lois','lLois');c()"></div>
+      <div class="field"><label>Épargne forcée (PEL, PER…) <strong id="lEpF">200 €</strong></label><input type="number" id="epF" value="200" step="50" oninput="fv('epF','lEpF');c()"></div>
+    </div>
+    <div class="field"><label>Autres charges <strong id="lAutC">100 €</strong></label><input type="number" id="autC" value="100" step="25" oninput="fv('autC','lAutC');c()"></div>
+  </div>
+  <div class="sec" id="bilanSec">
+    <div class="stitle">Bilan mensuel</div>
+    <div class="row"><span>Revenus nets</span><span id="bRev" style="color:var(--acc)">—</span></div>
+    <div class="row dim"><span>Logement</span><span id="bLog">—</span></div>
+    <div class="row dim"><span>Vie courante</span><span id="bVie">—</span></div>
+    <div class="row bold total"><span>ÉPARGNE NETTE</span><span id="bEp">—</span></div>
+    <div class="row"><span>Taux d'épargne</span><span id="bTx">—</span></div>
+    <div id="epAlrt"></div>
+  </div>
+</div>
+
+<!-- ══ PANE 2 : AIRBNB ══════════════════════════════════════════════════════ -->
+<div class="pane" id="p2">
+  <div class="sec">
+    <div class="stitle">Bien & marché</div>
+    <div class="field"><label style="margin-bottom:5px">Arrondissement</label>
+      <select id="arrSel" onchange="setArr()"></select>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px" id="arrI"></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>ADR / nuit <strong id="lADR">210 €</strong></label>
+        <input type="range" id="adr" min="120" max="450" value="210" step="5" oninput="sp('adr','lADR','€');c()"></div>
+      <div class="field"><label>Taux d'occupation <strong id="lOcc">72 %</strong></label>
+        <input type="range" id="occ" min="40" max="90" value="72" step="1" oninput="sp('occ','lOcc','%');c()"></div>
+    </div>
+    <div class="field"><label style="margin-bottom:6px">Plafond légal / an</label>
+      <div class="seg" id="sCapN">
+        <button class="on" onclick="setCap(90,this)">90 nuits (résid. principale — Loi Le Meur)</button>
+        <button onclick="setCap(365,this)">365 nuits (résid. secondaire)</button>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Durée séjour <strong id="lStay">3.2 nuits</strong></label>
+        <input type="range" id="stay" min="1" max="7" value="3.2" step="0.1" oninput="sp('stay','lStay',' nuits');c()"></div>
+      <div class="field"><label>Ménage / séjour <strong id="lCln">80 €</strong></label>
+        <input type="range" id="cln" min="0" max="150" value="80" step="5" oninput="sp('cln','lCln','€');c()"></div>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Conciergerie <strong id="lComm">0 %</strong></label>
+        <input type="range" id="comm" min="0" max="25" value="0" step="1" oninput="sp('comm','lComm','%');c()"></div>
+      <div class="field"><label>Frais plateforme <strong id="lPlat">3 %</strong></label>
+        <input type="range" id="plat" min="0" max="6" value="3" step="0.5" oninput="sp('plat','lPlat','%');c()"></div>
+    </div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Charges fixes du bien</div>
+    <div class="seg" id="sFreq">
+      <button class="on" onclick="setFreq('m',this)">Saisie mensuelle</button>
+      <button onclick="setFreq('a',this)">Saisie annuelle</button>
+    </div>
+    <div class="g2">
+      <div class="field"><label>Crédit (mensualité totale) <strong id="lLoan">0 €</strong></label><input type="number" id="loan" value="0" step="50" oninput="fv('loan','lLoan');c()"></div>
+      <div class="field"><label>Dont intérêts (déductibles réel) <strong id="lIntr">0 €</strong></label><input type="number" id="intr" value="0" step="20" oninput="fv('intr','lIntr');c()"></div>
+      <div class="field"><label>Copropriété <strong id="lCop">200 €</strong></label><input type="number" id="cop" value="200" step="10" oninput="fv('cop','lCop');c()"></div>
+      <div class="field"><label>Électricité <strong id="lElec">80 €</strong></label><input type="number" id="elec" value="80" step="5" oninput="fv('elec','lElec');c()"></div>
+      <div class="field"><label>Eau <strong id="lEau">30 €</strong></label><input type="number" id="eau" value="30" step="5" oninput="fv('eau','lEau');c()"></div>
+      <div class="field"><label>Internet <strong id="lNet">35 €</strong></label><input type="number" id="net2" value="35" step="5" oninput="fv('net2','lNet');c()"></div>
+      <div class="field"><label>Assurance PNO <strong id="lAss">30 €</strong></label><input type="number" id="ass" value="30" step="5" oninput="fv('ass','lAss');c()"></div>
+      <div class="field"><label>Frais bancaires <strong id="lBnk">15 €</strong></label><input type="number" id="bnk" value="15" step="5" oninput="fv('bnk','lBnk');c()"></div>
+      <div class="field"><label>Taxe foncière <strong id="lTF">100 €</strong></label><input type="number" id="tf" value="100" step="10" oninput="fv('tf','lTF');c()"></div>
+      <div class="field"><label>CFE <strong id="lCFE">20 €</strong></label><input type="number" id="cfe" value="20" step="5" oninput="fv('cfe','lCFE');c()"></div>
+      <div class="field"><label>Expert-comptable <strong id="lCpta">50 €</strong></label><input type="number" id="cpta" value="50" step="10" oninput="fv('cpta','lCpta');c()"></div>
+      <div class="field"><label>Maintenance / aléas <strong id="lMnt">50 €</strong></label><input type="number" id="mnt" value="50" step="10" oninput="fv('mnt','lMnt');c()"></div>
+    </div>
+  </div>
+
+  <div class="minikpis">
+    <div class="mk"><div class="l">CA brut / an</div><div class="n" id="aGross">—</div></div>
+    <div class="mk"><div class="l">Marge exploitation</div><div class="n" id="aEBITDA">—</div></div>
+    <div class="mk"><div class="l">Charges fixes / an</div><div class="n" id="aFixed">—</div></div>
+    <div class="mk"><div class="l">Nuits · séjours</div><div class="n" id="aNights">—</div></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Saisonnalité — CA brut estimé par mois</div>
+    <div id="seasBars"></div>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:10px">Coefficients saisonniers parisiens. Pointes : juin (+25 %), sept. (+22 %), mai (+18 %). Creux : jan-fév (−20 %).</div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Cascade CA brut → cash-flow net</div>
+    <div id="cascade"></div>
+  </div>
+</div>
+
+<!-- ══ PANE 3 : STRUCTURE FISCALE ═══════════════════════════════════════════ -->
+<div class="pane" id="p3">
+  <div class="box info" style="margin-bottom:14px">
+    Paramètres communs repris automatiquement depuis les autres onglets (CA Airbnb, charges fixes, TMI). Ajustez l'amortissement et le classement ici.
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Paramètres fiscaux</div>
+    <div class="g2">
+      <div class="field"><label>Amortissement annuel (réel) <strong id="lAmt">9 000 €</strong></label>
+        <input type="range" id="amort" min="0" max="25000" value="9000" step="500" oninput="sp('amort','lAmt','€');c()"></div>
+      <div class="field"><label>TMI <strong id="lTMI2">30 %</strong></label>
+        <input type="range" id="tmi2" min="0" max="45" value="30" step="1" oninput="sp('tmi2','lTMI2','%');syncTMI();c()"></div>
+    </div>
+    <div class="field"><label style="margin-bottom:6px">Classement du meublé</label>
+      <div class="seg" id="sClass">
+        <button class="on" onclick="setClass('nc',this)">Non classé (défaut Airbnb)</button>
+        <button onclick="setClass('cl',this)">Classé meublé de tourisme</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="scards" id="structCards"></div>
+
+  <div class="sec">
+    <div class="stitle">Comparaison détaillée</div>
+    <div style="overflow-x:auto"><table class="ctable" id="cmpTbl"></table></div>
+  </div>
+
+  <details class="info">
+    <summary>Comprendre chaque structure — règles fiscales 2026</summary>
+    <div class="dbody">
+      <p style="margin-bottom:8px"><b>LMNP micro-BIC :</b> abattement forfaitaire 30 % (non classé) ou 50 % (classé) sur le CA. Base imposable taxée à TMI + 18,6 % PS (LFSS 2026). Plafond : 15 000 € (non classé) / 77 700 € (classé). Déclaration ultra-simple.</p>
+      <p style="margin-bottom:8px"><b>LMNP réel simplifié :</b> déduction de toutes les charges réelles + amortissement (80 % du bien sur 25-30 ans, terrain non amortissable). Bénéfice souvent ≈ 0. Déficit reportable 10 ans sur BIC meublés (pas sur salaire). Depuis fév. 2025 (LF 2025, art. 84) : amortissements réintégrés dans la plus-value à la revente.</p>
+      <p style="margin-bottom:8px"><b>SCI à l'IS :</b> la location meublée (Airbnb) bascule automatiquement une SCI à l'IS si recettes meublées &gt; 10 % des recettes totales. IS 15 % jusqu'à 42 500 €, puis 25 %. Distribution : flat tax 31,4 % (LFSS 2026). Double imposition IS + flat tax.</p>
+      <p style="margin-bottom:8px"><b>SASU / SAS à l'IS :</b> même IS + flat tax 31,4 %. Intéressante si bénéfices réinvestis sans distribution. Inconvénient majeur : plus-value professionnelle à la revente (valeur nette comptable, pas d'abattement durée de détention particuliers).</p>
+      <div class="wbox">⚠️ Flat tax (PFU) : 31,4 % depuis le 1ᵉʳ janvier 2026 (LFSS 2026, loi n°2025-1403) — la hausse de CSG (9,2 % → 10,6 %) s'applique aux dividendes et revenus du capital mobilier. Les plus-values immobilières restent à 19 % + 17,2 % PS.</div>
+      <div class="gbox">✅ Dans la majorité des cas avec un crédit immobilier, le LMNP réel simplifié ressort comme la structure la plus avantageuse grâce à l'amortissement qui neutralise l'impôt sans décaisser de trésorerie.</div>
+    </div>
+  </details>
+
+  <div class="src">
+    <b>Sources fiscales :</b> Art. 219 CGI (IS 15 %/42 500 € · 25 % au-delà) · LFSS 2026 n°2025-1403 art. 12 (PFU 31,4 %) · Art. 50-0 CGI (micro-BIC abattements 30/50 %) · Loi Le Meur n°2024-1039 (90 nuits/an résid. principale) · LF 2025 art. 84 (réintégration amortissements dans plus-value LMNP) · Service-Public.fr F32744 · URSSAF / Compta-Online (cotisations micro-entreprise 2026).
+  </div>
+</div>
+
+<!-- ══ PANE 4 : BANQUE ═══════════════════════════════════════════════════════ -->
+<div class="pane" id="p4">
+  <div class="box info" style="margin-bottom:14px">
+    <b>Règle HCSF :</b> taux d'endettement max <b>35 %</b> des revenus nets retenus. Revenus non-salariaux décotés de <b>30 %</b> (moyenne 3 ans). Dividendes décotés <b>50 %</b>. Taux marché <b>juin 2026</b> (CAFPI / Pretto) : 3,20 % sur 15 ans · 3,37 % sur 20 ans · 3,53 % sur 25 ans.
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Profil de l'emprunt</div>
+    <div class="g2">
+      <div class="field"><label>Apport personnel <strong id="lAppt">50 000 €</strong></label>
+        <input type="number" id="appt" value="50000" step="5000" oninput="fv('appt','lAppt');c()"></div>
+      <div class="field">
+        <label style="margin-bottom:6px">Durée du prêt</label>
+        <div class="seg" id="sDuree">
+          <button onclick="setDuree(15,this)">15 ans</button>
+          <button class="on" onclick="setDuree(20,this)">20 ans</button>
+          <button onclick="setDuree(25,this)">25 ans</button>
+        </div>
+      </div>
+    </div>
+    <div class="field"><label>Taux mannel (0 = marché) <strong id="lTauxM">0 %</strong></label>
+      <input type="range" id="tauxM" min="0" max="6" value="0" step="0.05" oninput="sp('tauxM','lTauxM','%');c()"></div>
+    <div class="field"><label>Assurance emprunteur <strong id="lAssE">0,25 %/an</strong></label>
+      <input type="range" id="assE" min="0" max="0.6" value="0.25" step="0.05" oninput="sp('assE','lAssE','%/an');c()"></div>
+    <div class="field"><label style="margin-bottom:6px">Projet financé</label>
+      <div class="seg" id="sCible">
+        <button class="on" onclick="setCible('rp',this)">Résidence principale</button>
+        <button onclick="setCible('loc',this)">Investissement locatif</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="kpi" style="border-left-color:var(--gold)"><div class="lbl">Capacité d'emprunt</div><div class="num" id="bkCap" style="color:var(--gold)">—</div><div class="sub2" id="bkMens"></div></div>
+    <div class="kpi"><div class="lbl">Budget acquisition max</div><div class="num" id="bkPrix">—</div><div class="sub2" id="bkSub"></div></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Détail du calcul bancaire</div>
+    <div class="row"><span>Revenus retenus par la banque</span><span id="bkRevB">—</span></div>
+    <div class="row dim"><span>35 % max (règle HCSF)</span><span id="bk35">—</span></div>
+    <div class="row dim"><span>Crédits existants à déduire</span><span id="bkExC">—</span></div>
+    <div class="row bold"><span>Mensualité max disponible</span><span id="bkMM">—</span></div>
+    <div class="row dim"><span>Mensualité crédit (hors ass.)</span><span id="bkMC">—</span></div>
+    <div class="row dim"><span>Assurance / mois</span><span id="bkAM">—</span></div>
+    <div class="row bold total"><span>Mensualité TOTALE</span><span id="bkMT" style="color:var(--gold)">—</span></div>
+    <div class="row"><span>Taux d'endettement après projet</span><span id="bkTx">—</span></div>
+    <div id="bkAlrt"></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Ce que le banquier va regarder</div>
+    <div id="bkLook"></div>
+  </div>
+
+  <div class="src">
+    <b>Sources :</b> Taux immobiliers juin 2026 : CAFPI (3,20/3,37/3,48 %) · Pretto · Meilleurtaux · Capifrance. Règle HCSF : taux endettement max 35 %, déc. 2021, maintenu 2026. Décote revenus indépendants : pratique bancaire standard. <i>Ce simulateur est indicatif — consultez un courtier pour une analyse personnalisée.</i>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const ARR={
+  "1er — Louvre / Palais-Royal":{adr:300,occ:75},"2e — Bourse / Sentier":{adr:235,occ:74},
+  "3e — Haut-Marais":{adr:240,occ:75},"4e — Marais / Île St-Louis":{adr:250,occ:76},
+  "5e — Quartier Latin":{adr:225,occ:75},"6e — Saint-Germain":{adr:270,occ:75},
+  "7e — Tour Eiffel / Invalides":{adr:265,occ:74},"8e — Champs-Élysées":{adr:280,occ:72},
+  "9e — Opéra / Pigalle":{adr:200,occ:74},"10e — Canal St-Martin":{adr:180,occ:73},
+  "11e — Bastille / Oberkampf":{adr:171,occ:70},"12e — Bercy / Nation":{adr:160,occ:69},
+  "13e — Butte-aux-Cailles":{adr:150,occ:68},"14e — Montparnasse":{adr:165,occ:70},
+  "15e — Vaugirard":{adr:160,occ:70},"16e — Trocadéro / Passy":{adr:215,occ:69},
+  "17e — Batignolles":{adr:180,occ:71},"18e — Montmartre":{adr:160,occ:71},
+  "19e — Buttes-Chaumont":{adr:135,occ:67},"20e — Belleville":{adr:135,occ:67}
+};
+const COTIS={
+  svc:{s:.212,a:.50,l:.017},vte:{s:.123,a:.71,l:.010},
+  bnc:{s:.256,a:.34,l:.022},cpv:{s:.232,a:.34,l:.022}
+};
+const TAUX={15:3.20,20:3.37,25:3.53};
+const SEA={Jan:.78,Fév:.80,Mar:.92,Avr:1.05,Mai:1.18,Juin:1.25,Juil:1.20,Aoû:1.05,Sep:1.22,Oct:1.10,Nov:.82,Déc:.90};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let salMode='net', meType='svc', meIR='bar', freq='m', capN=90, classt='nc', duree=20, cible='rp';
+const $=id=>document.getElementById(id);
+const G=id=>+($(id).value||0);
+const fe=n=>Math.round(n).toLocaleString('fr-FR')+' €';
+const fp=(n,d=1)=>n.toFixed(d)+' %';
+
+// ── UI HELPERS ────────────────────────────────────────────────────────────────
+function sw(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  document.querySelectorAll('.pane').forEach((p,j)=>p.classList.toggle('on',i===j));
+}
+function fv(id,lbl){$(lbl).textContent=fe(G(id))}
+function sp(id,lbl,u=''){$(lbl).textContent=$(id).value+u}
+function setMode(m,b){salMode=m;document.querySelectorAll('#sModeS button').forEach(x=>x.classList.toggle('on',x===b));$('netF').style.display=m==='net'?'':'none';$('brutF').style.display=m==='brut'?'':'none';c()}
+function setMeType(t,b){meType=t;document.querySelectorAll('#sMeType button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setMeIR(t,b){meIR=t;document.querySelectorAll('#sMeIR button').forEach(x=>x.classList.toggle('on',x===b));$('tmiF').style.display=t==='bar'?'block':'none';c()}
+function setFreq(f,b){freq=f;document.querySelectorAll('#sFreq button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setCap(n,b){capN=n;document.querySelectorAll('#sCapN button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setClass(cl,b){classt=cl;document.querySelectorAll('#sClass button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setDuree(d,b){duree=d;document.querySelectorAll('#sDuree button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setCible(cl,b){cible=cl;document.querySelectorAll('#sCible button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setArr(){const d=ARR[$('arrSel').value];$('adr').value=Math.round(d.adr*1.2/5)*5;$('occ').value=d.occ;sp('adr','lADR','€');sp('occ','lOcc','%');$('arrI').textContent='Médiane : '+d.adr+' €/nuit · occ. '+d.occ+'% · +20% pour 70m²/6 couchages';c()}
+function syncTMI(){$('tmi').value=$('tmi2').value;$('lTMI').textContent=$('tmi2').value+' %'}
+
+// ── MATH ──────────────────────────────────────────────────────────────────────
+function mens(cap,taux,n){const r=taux/12/100,m=n*12;if(!r)return cap/m;return cap*r*Math.pow(1+r,m)/(Math.pow(1+r,m)-1)}
+function capB(mm,taux,n){const r=taux/12/100,m=n*12;if(!r)return mm*m;return mm*(Math.pow(1+r,m)-1)/(r*Math.pow(1+r,m))}
+
+// ── MAIN CALC ─────────────────────────────────────────────────────────────────
+function c(){
+  const PS=0.186, tmi=G('tmi')/100;
+
+  // SALAIRE
+  const salNetM = salMode==='net' ? G('salN') : G('salB')*0.78;
+  if(salMode==='brut') $('netEst').textContent=fe(G('salB')*.78);
+
+  // MICRO-ENTREPRISE
+  const ct=COTIS[meType], caM=G('meCA'), cotM=caM*ct.s;
+  const irM = meIR==='lib' ? caM*ct.l : caM*(1-ct.a)*tmi;
+  const meNet=caM-cotM-irM;
+
+  $('rMeCA').textContent=fe(caM);
+  $('rMeCot').textContent='− '+fe(cotM);
+  $('rMeIR').textContent='− '+fe(irM);
+  $('rMeNet').textContent=fe(meNet);
+  $('rMeTx').textContent=fp(caM>0?(cotM+irM)/caM*100:0);
+
+  // AUTRES REVENUS
+  const airNet=G('airN'), divNet=G('divN'), autRev=G('autR');
+  const totalRev=salNetM+meNet+airNet+divNet+autRev;
+
+  // CHARGES PERSO
+  const logC=G('loyer')+G('crEx');
+  const vieC=G('trp')+G('alim')+G('snte')+G('abo')+G('lois')+G('epF')+G('autC');
+  const totalChg=logC+vieC;
+  const epargne=totalRev-totalChg;
+  const txEp=totalRev>0?epargne/totalRev*100:0;
+
+  // TOP KPIs
+  $('kRev').textContent=fe(totalRev); $('kRev').style.color='var(--acc)';
+  $('kChg').textContent=fe(totalChg); $('kChg').style.color='var(--orange)';
+  const epc=epargne>=0?'var(--green)':'var(--red)';
+  $('kEp').textContent=fe(epargne); $('kEp').style.color=epc;
+  $('kEpCard').style.borderLeftColor=epc;
+  $('kEpPct').textContent=fp(txEp)+' des revenus';
+  const pct=Math.min(100,totalRev>0?totalChg/totalRev*100:100);
+  $('epfill').style.width=pct+'%'; $('epfill').style.background=epargne>=0?'linear-gradient(90deg,var(--acc),var(--green))':'var(--red)';
+
+  // TAB 0
+  $('rSal').textContent=fe(salNetM);
+  $('rR0').textContent=fe(salNetM); $('rR1').textContent=fe(meNet);
+  $('rR2').textContent=fe(airNet); $('rR3').textContent=fe(divNet+autRev);
+  $('rRTot').textContent=fe(totalRev); $('rRAn').textContent=fe(totalRev*12);
+
+  // TAB 1
+  $('bRev').textContent=fe(totalRev); $('bLog').textContent='− '+fe(logC);
+  $('bVie').textContent='− '+fe(vieC); $('bEp').textContent=fe(epargne);
+  $('bEp').style.color=epc; $('bTx').textContent=fp(txEp); $('bTx').style.color=epc;
+  let epAl='';
+  if(epargne<0) epAl=`<div class="box bad">⚠️ Flux négatif : charges > revenus de ${fe(-epargne)}/mois. Un banquier refusera tout nouveau crédit dans cette configuration.</div>`;
+  else if(txEp<10) epAl='<div class="box warn">Taux d\'épargne &lt; 10 % — profil tendu. Visez 15 % minimum pour rassurer un prêteur.</div>';
+  else if(txEp>=15) epAl=`<div class="box good">✅ Taux d'épargne solide (${fp(txEp)}) — profil rassurant pour un banquier.</div>`;
+  $('epAlrt').innerHTML=epAl;
+
+  // TAB 2 — Airbnb
+  const M=freq==='m'?12:1;
+  const adr=G('adr'), occ=G('occ')/100, stay=G('stay')||1, cln=G('cln');
+  const comm=G('comm')/100, plat=G('plat')/100;
+  const nights=Math.min(365*occ,capN), bookings=nights/stay;
+  const lodging=nights*adr, cleanRev=bookings*cln, gross=lodging+cleanRev;
+  const cleanCost=bookings*cln, commCost=lodging*comm, platCost=gross*plat, opCost=cleanCost+commCost+platCost;
+  const ebitda=gross-opCost;
+  const fixIds=['loan','cop','elec','eau','net2','ass','bnk','tf','cfe','cpta','mnt'];
+  const fixed=fixIds.reduce((s,id)=>s+(G(id)*M),0);
+  const loanAn=G('loan')*M, intrAn=G('intr')*M;
+
+  $('aGross').textContent=fe(gross); $('aEBITDA').textContent=fe(ebitda);
+  $('aFixed').textContent=fe(fixed); $('aNights').textContent=Math.round(nights)+' · '+Math.round(bookings);
+
+  // Saisonnalité
+  const mo=Object.keys(SEA), wS=mo.reduce((s,m)=>s+SEA[m],0);
+  $('seasBars').innerHTML=mo.map(m=>{const r=gross*(SEA[m]/wS),w=SEA[m]/1.25*100;
+    return`<div class="brow"><span class="m">${m}</span><div class="btrk"><div class="bfll" style="width:${w}%"></div></div><span class="rv">${fe(r)}</span></div>`;}).join('');
+
+  // TAB 3 — Structures fiscales
+  const tmi3=G('tmi2')/100, amort=G('amort');
+  const microCap=classt==='nc'?15000:77700, abatt=classt==='nc'?0.30:0.50;
+  const eligible=gross<=microCap;
+
+  // LMNP micro-BIC
+  const micBase=Math.max(0,gross*(1-abatt));
+  const micTax=micBase*(tmi3+PS);
+  const micNet=ebitda-fixed-micTax;
+
+  // LMNP réel
+  const deductFixed=fixIds.reduce((s,id)=>s+(G(id)*M),0)-loanAn+intrAn;
+  const reelBase=Math.max(0,gross-opCost-deductFixed-amort);
+  const reelTax=reelBase*(tmi3+PS);
+  const reelNet=ebitda-fixed-reelTax;
+
+  // SCI IS
+  const sciBase=Math.max(0,gross-opCost-fixed+loanAn-intrAn-amort);
+  const sciIS=Math.min(sciBase,42500)*.15+Math.max(0,sciBase-42500)*.25;
+  const sciFT=(sciBase-sciIS)*.314;
+  const sciNet=ebitda-fixed-sciIS-sciFT;
+
+  // SASU IS
+  const sasuBase=sciBase;
+  const sasuIS=Math.min(sasuBase,42500)*.15+Math.max(0,sasuBase-42500)*.25;
+  const sasuFT=(sasuBase-sasuIS)*.314;
+  const sasuNet=ebitda-fixed-sasuIS-sasuFT;
+
+  const structs=[
+    {k:'mic',name:'LMNP micro-BIC',net:micNet,tax:micTax,note:eligible?'':'⚠️ CA > plafond '+fe(microCap)+' → Réel obligatoire'},
+    {k:'ree',name:'LMNP réel simplifié',net:reelNet,tax:reelTax,note:'Amort. '+fe(amort)+'/an · charges déduites'},
+    {k:'sci',name:'SCI à l\'IS',net:sciNet,tax:sciIS+sciFT,note:'IS 15/25% + flat tax 31,4% (double imp.)'},
+    {k:'sas',name:'SASU / SAS IS',net:sasuNet,tax:sasuIS+sasuFT,note:'Plus-value pro à la revente (sans abattement)'},
+  ];
+  const bestK=structs.reduce((a,b)=>a.net>b.net?a:b).k;
+
+  // Update airbnbNet from best structure
+  const bestNet=structs.find(s=>s.k===bestK).net;
+  if(bestNet>0){$('airN').value=Math.round(bestNet/12);$('lAir').textContent=fe(bestNet/12)}
+
+  // Cascade pour TAB 2
+  const lmnpReelTax=reelTax;
+  const cascadeItems=[
+    ['CA brut / an',fe(gross),''],
+    ['− Ménage + comm. + plateforme','− '+fe(opCost),'dim'],
+    ['= Marge d\'exploitation',fe(ebitda),'bold'],
+    ['− Impôt + PS (LMNP réel estimé)','− '+fe(lmnpReelTax),'dim'],
+    ['− Crédit immobilier','− '+fe(loanAn),'dim'],
+    ['− Copropriété + TF + CFE','− '+fe((G('cop')+G('tf')+G('cfe'))*M),'dim'],
+    ['− Énergie + internet','− '+fe((G('elec')+G('eau')+G('net2'))*M),'dim'],
+    ['− Assurance + banque + comptable','− '+fe((G('ass')+G('bnk')+G('cpta'))*M),'dim'],
+    ['− Maintenance','− '+fe(G('mnt')*M),'dim'],
+  ];
+  const cfn=reelNet;
+  $('cascade').innerHTML=cascadeItems.map(r=>`<div class="row ${r[2]}"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('')+
+    `<div class="row bold total"><span>= Cash-flow net (LMNP réel)</span><span style="color:${cfn>=0?'var(--green)':'var(--red)'}">${fe(cfn)}</span></div>`;
+
+  // Struct cards
+  $('structCards').innerHTML=structs.map(s=>{
+    const ib=s.k===bestK;
+    return`<div class="scard ${ib?'best':''}">
+      ${ib?'<div class="badge best">Meilleur net</div>':''}
+      <div class="sn">${s.name}</div>
+      <div class="sv">${fe(s.net/12)}<span style="font-size:12px;font-weight:400">/mois</span></div>
+      <div class="ss">Impôt : ${fe(s.tax/12)}/mois · ${gross>0?fp(s.tax/gross*100,0):'0 %'} du CA</div>
+      ${s.note?`<div style="font-size:10.5px;color:var(--warn-txt);margin-top:4px">${s.note}</div>`:''}
+    </div>`;}).join('');
+
+  // Compare table
+  const cols=['LMNP micro-BIC','LMNP réel','SCI IS','SASU IS'];
+  const netRow=[micNet,reelNet,sciNet,sasuNet];
+  const taxRow=[micTax,reelTax,sciIS+sciFT,sasuIS+sasuFT];
+  const rows=[
+    {l:'Structure',v:['Nom propre (SIRET)','Nom propre (SIRET)','Société civile','Soc. commerciale']},
+    {l:'Impôt de base',v:['TMI + 18,6 % PS','TMI + 18,6 % PS','IS 15 %/25 %','IS 15 %/25 %']},
+    {l:'Déduction charges',v:[abatt*100+'% abattement','Réelles + amort.','Réelles + amort.','Réelles + amort.']},
+    {l:'Amortissement',v:['Non','Oui ('+fe(amort)+'/an)','Oui','Oui']},
+    {l:'Distribution bénéf.',v:['Revenus directs','Revenus directs','Flat tax 31,4 %','Flat tax 31,4 %']},
+    {l:'Plus-value revente',v:['Particulier + réintég.','Particulier + réintég.','Particulier (SCI IR) / IS','IS — très défavorable']},
+    {l:'Plafond micro',v:[fe(microCap),'—','—','—']},
+    {l:'Impôt total / an',v:taxRow.map(t=>fe(t))},
+    {l:'Net dans la poche / an',v:netRow.map(n=>fe(n)),bold:true},
+    {l:'Net / mois',v:netRow.map(n=>fe(n/12)),bold:true},
+  ];
+  let tbl=`<tr>${['Critère',...cols].map((h,i)=>`<th>${h}${i>0&&structs[i-1].k===bestK?' ★':''}</th>`).join('')}</tr>`;
+  rows.forEach(row=>{
+    const best=row.bold?netRow.indexOf(Math.max(...netRow)):false;
+    tbl+=`<tr ${row.bold?'class="tot"':''}><td style="color:var(--muted)">${row.l}</td>`;
+    row.v.forEach((v,i)=>{
+      const isBest=row.bold&&i===best;
+      tbl+=`<td${isBest?' class="hi"':''}>${v}</td>`;
+    });
+    tbl+='</tr>';
+  });
+  $('cmpTbl').innerHTML=tbl;
+
+  // TAB 4 — Banque
+  const tauxM=G('tauxM'), taux=tauxM>0?tauxM:(TAUX[duree]||3.37);
+  const revB=cible==='loc'?salNetM+meNet*.7+airNet*.7+divNet*.5+autRev*.5:salNetM+meNet*.7+airNet*.7+divNet+autRev;
+  const existC=G('crEx');
+  const mensMax=Math.max(0,revB*.35-existC);
+  const capEmp=capB(mensMax,taux,duree);
+  const prixMax=capEmp+G('appt');
+  const mensC=mens(capEmp,taux,duree);
+  const assM=capEmp*G('assE')/100/12;
+  const mensT=mensC+assM;
+  const txEnd=revB>0?(existC+mensT)/revB*100:0;
+
+  $('bkCap').textContent=fe(capEmp); $('bkMens').textContent='Mensualité hors ass. : '+fe(mensC);
+  $('bkPrix').textContent=fe(prixMax); $('bkSub').textContent='Apport '+fe(G('appt'))+' + emprunt '+fe(capEmp);
+  $('bkRevB').textContent=fe(revB); $('bk35').textContent=fe(revB*.35);
+  $('bkExC').textContent='− '+fe(existC); $('bkMM').textContent=fe(mensMax);
+  $('bkMC').textContent=fe(mensC); $('bkAM').textContent=fe(assM);
+  $('bkMT').textContent=fe(mensT);
+  $('bkTx').textContent=fp(txEnd); $('bkTx').style.color=txEnd<=35?'var(--green)':'var(--red)';
+
+  let bkAl='';
+  if(txEnd>35) bkAl=`<div class="box bad">⚠️ Endettement ${fp(txEnd)} > 35 % — dépassement HCSF. Augmentez l'apport, réduisez la durée ou améliorez les revenus.</div>`;
+  else if(txEnd>0) bkAl=`<div class="box good">✅ Taux d'endettement ${fp(txEnd)} — dans la limite des 35 %. Profil finançable.</div>`;
+  $('bkAlrt').innerHTML=bkAl;
+
+  $('bkLook').innerHTML=[
+    [salNetM>0?'✅':'⚠️','Salaire',salNetM>0?'Atout majeur — revenu stable et justifiable':'Aucun salaire — indépendants scrutinés sur 3 ans'],
+    [meNet>0?'⚠️':'—','Micro-entreprise (décote 30 %)',meNet>0?`Retenu : ${fe(meNet*.7)}/mois · 3 bilans exigés`:'Non renseigné'],
+    [airNet>0?'⚠️':'—','Airbnb (décote 30 %)',airNet>0?`Retenu : ${fe(airNet*.7)}/mois`:'Non renseigné'],
+    [txEnd<=33?'✅':txEnd<=35?'⚠️':'🚫','Endettement',fp(txEnd)+(txEnd<=33?' — Excellent':txEnd<=35?' — Acceptable':' — Trop élevé')],
+    ['💰','Reste à vivre',fe(totalRev-mensT-(totalChg-G('loyer')-G('crEx')))+'/mois'],
+    ['🏦','Apport / notaire',fe(G('appt'))+' — frais notaire estimés : '+fe(prixMax*.08)],
+  ].map(([i,k,v])=>`<div class="row"><span style="display:flex;gap:8px"><span>${i}</span><span style="color:var(--muted)">${k}</span></span><span style="font-size:12px;text-align:right;max-width:55%">${v}</span></div>`).join('');
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+const sel=$('arrSel');
+Object.keys(ARR).forEach((k,i)=>{const o=document.createElement('option');o.value=k;o.textContent=k;if(i===10)o.selected=true;sel.appendChild(o);});
+setArr();
+</script>
+</body>
+</html>
