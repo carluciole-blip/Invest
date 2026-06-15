@@ -675,7 +675,7 @@ function c(){
   $('bRev').textContent=fe(totalRev); $('bLog').textContent='− '+fe(logC);
   $('bVie').textContent='− '+fe(vieC); $('bEp').textContent=fe(epargne);
   $('bEp').style.color=epc; $('bTx').textContent=fp(txEp); $('bTx').style.color=epc;
-  let epAl='';
+  var epAl='';
   if(epargne<0) epAl='<div class="box bad">⚠️ Flux négatif : charges > revenus de '+fe(-epargne)+'/mois. Un banquier refusera tout nouveau crédit dans cette configuration.</div>';
   else if(txEp<10) epAl='<div class="box warn">Taux d\'épargne &lt; 10 % — profil tendu. Visez 15 % minimum pour rassurer un prêteur.</div>';
   else if(txEp>=15) epAl='<div class="box good">✅ Taux d\'épargne solide ('+fp(txEp)+') — profil rassurant pour un banquier.</div>';
@@ -698,7 +698,7 @@ function c(){
 
   // Saisonnalité
   const mo=Object.keys(SEA), wS=mo.reduce((s,m)=>s+SEA[m],0);
-  $('seasBars').innerHTML=mo.map(m=>{const r=gross*(SEA[m]/wS),w=SEA[m]/1.25*100;
+  $('seasBars').innerHTML=mo.map(function(m){var r=gross*(SEA[m]/wS),w=SEA[m]/1.25*100;
     return'<div class="brow"><span class="m">'+m+'</span><div class="btrk"><div class="bfll" style="width:'+w+'%"></div></div><span class="rv">'+fe(r)+'</span></div>';}).join('');
 
   // TAB 3 — Structures fiscales
@@ -755,12 +755,12 @@ function c(){
     ['− Maintenance','− '+fe(G('mnt')*M),'dim'],
   ];
   const cfn=reelNet;
-  $('cascade').innerHTML=cascadeItems.map(r=>'<div class="row '+r[2]+'"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>').join('')+
-    '<div class="row bold total"><span>= Cash-flow net (LMNP réel)</span><span style="color:'+(cfn>=0?'var(--green)':'var(--red)')+'">'+ fe(cfn)+'</span></div>';
+  $('cascade').innerHTML=cascadeItems.map(function(r){return'<div class="row '+r[2]+'"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';}).join('')+
+    '<div class="row bold total"><span>= Cash-flow net (LMNP réel)</span><span style="color:'+(cfn>=0?'var(--green)':'var(--red)')+'">'+fe(cfn)+'</span></div>';
 
   // Note explicative cashflow
   const amortVal=G('amort'), taxSaving=amortVal*(tmi3+0.186);
-  let cfNote='';
+  var cfNote='';
   if(capN===90){
     const grossSec=Math.min(365*occ,365)*adr+Math.min(365*occ,365)/stay*cln;
     cfNote='<div class="box info">Plafond 90 nuits (résidence principale) = CA brut max '+fe(gross)+'/an.<br>En résidence secondaire (365 nuits autorisées) : CA brut estimé ~'+fe(grossSec)+'/an — cash-flow potentiellement 2 à 3× supérieur.</div>';
@@ -771,8 +771,8 @@ function c(){
   $('cashflowNote').innerHTML=cfNote;
 
   // Struct cards
-  $('structCards').innerHTML=structs.map(s=>{
-    const ib=s.k===bestK;
+  $('structCards').innerHTML=structs.map(function(s){
+    var ib=s.k===bestK;
     return'<div class="scard '+(ib?'best':'')+'">'
       +(ib?'<div class="badge best">Meilleur net</div>':'')
       +'<div class="sn">'+s.name+'</div>'
@@ -793,15 +793,15 @@ function c(){
     {l:'Distribution bénéf.',v:['Revenus directs','Revenus directs','Flat tax 31,4 %','Flat tax 31,4 %']},
     {l:'Plus-value revente',v:['Particulier + réintég.','Particulier + réintég.','Particulier (SCI IR) / IS','IS — très défavorable']},
     {l:'Plafond micro',v:[fe(microCap),'—','—','—']},
-    {l:'Impôt total / an',v:taxRow.map(t=>fe(t))},
-    {l:'Net dans la poche / an',v:netRow.map(n=>fe(n)),bold:true},
-    {l:'Net / mois',v:netRow.map(n=>fe(n/12)),bold:true},
+    {l:'Impôt total / an',v:taxRow.map(function(t){return fe(t);})},
+    {l:'Net dans la poche / an',v:netRow.map(function(n){return fe(n);}),bold:true},
+    {l:'Net / mois',v:netRow.map(function(n){return fe(n/12);}),bold:true},
   ];
-  let tbl='<tr>'+['Critère',...cols].map((h,i)=>'<th>'+h+(i>0&&structs[i-1].k===bestK?' ★':'')+'</th>').join('')+'</tr>';
-  rows.forEach(row=>{
+  var tbl='<tr>'+['Critère',...cols].map(function(h,i){return'<th>'+h+(i>0&&structs[i-1].k===bestK?' ★':'')+'</th>';}).join('')+'</tr>';
+  rows.forEach(function(row){
     const best=row.bold?netRow.indexOf(Math.max(...netRow)):false;
-    tbl+='<tr '+(row.bold?'class="tot"':'')+'>'+"<td style=\"color:var(--muted)\">"+ row.l+'</td>';
-    row.v.forEach((v,i)=>{
+    tbl+='<tr '+(row.bold?'class="tot"':'')+'>  <td style="color:var(--muted)">'+row.l+'</td>';
+    row.v.forEach(function(v,i){
       const isBest=row.bold&&i===best;
       tbl+='<td'+(isBest?' class="hi"':'')+'>'+v+'</td>';
     });
@@ -829,7 +829,7 @@ function c(){
   $('bkMT').textContent=fe(mensT);
   $('bkTx').textContent=fp(txEnd); $('bkTx').style.color=txEnd<=35?'var(--green)':'var(--red)';
 
-  let bkAl='';
+  var bkAl='';
   if(txEnd>35) bkAl='<div class="box bad">⚠️ Endettement '+fp(txEnd)+' > 35 % — dépassement HCSF. Augmentez l\'apport, réduisez la durée ou améliorez les revenus.</div>';
   else if(txEnd>0) bkAl='<div class="box good">✅ Taux d\'endettement '+fp(txEnd)+' — dans la limite des 35 %. Profil finançable.</div>';
   $('bkAlrt').innerHTML=bkAl;
@@ -841,7 +841,7 @@ function c(){
     [txEnd<=33?'✅':txEnd<=35?'⚠️':'🚫','Endettement',fp(txEnd)+(txEnd<=33?' — Excellent':txEnd<=35?' — Acceptable':' — Trop élevé')],
     ['💰','Reste à vivre',fe(totalRev-mensT-(totalChg-G('loyer')-G('crEx')))+'/mois'],
     ['🏦','Apport / notaire',fe(G('appt'))+' — frais notaire estimés : '+fe(prixMax*.08)],
-  ].map(([i,k,v])=>'<div class="row"><span style="display:flex;gap:8px"><span>'+i+'</span><span style="color:var(--muted)">'+k+'</span></span><span style="font-size:12px;text-align:right;max-width:55%">'+v+'</span></div>').join('');
+  ].map(function(item){return'<div class="row"><span style="display:flex;gap:8px"><span>'+item[0]+'</span><span style="color:var(--muted)">'+item[1]+'</span></span><span style="font-size:12px;text-align:right;max-width:55%">'+item[2]+'</span></div>';}).join('');
 
   // Stocker les variables pour l'onglet Conseiller
   lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,opCost,deductFixed,prixAcq:G('prixAcq')};
@@ -885,7 +885,7 @@ function calcConseil(){
   const ltRevAn=loyerLT*12*(1-vacLT);
   const ltCommAn=loyerLT*12*(gstLT);
   // Micro-BIC meublé classique 50% abattement ou LMNP réel si > 77700
-  let ltImpotAn=0;
+  var ltImpotAn=0;
   if(ltRevAn>77700){
     // LMNP réel simplifié : base = revenu - charges déductibles - amortissement
     const ltBase=Math.max(0,ltRevAn-ltCommAn-(fixed-loanAn)-(lc.amort||0));
@@ -946,15 +946,15 @@ function calcConseil(){
   ];
 
   const colHeaders=['Critère','RP','Long terme','Airbnb'];
-  let tbl='<tr>'+colHeaders.map(function(h,i){
-    const isWin=i>0&&(i-1===winnerIdx);
+  var tbl='<tr>'+colHeaders.map(function(h,i){
+    var isWin=i>0&&(i-1===winnerIdx);
     return'<th class="'+(isWin?'col-hi':'')+'">'+h+(isWin?' ★':'')+'</th>';
   }).join('')+'</tr>';
-  tableRows.forEach(row=>{
+  tableRows.forEach(function(row){
     tbl+='<tr>';
     tbl+='<td style="color:var(--muted)">'+row.l+'</td>';
-    row.v.forEach((v,i)=>{
-      const isWin=row.highlight&&i===winnerIdx;
+    row.v.forEach(function(v,i){
+      var isWin=row.highlight&&i===winnerIdx;
       tbl+='<td class="'+(isWin?'col-hi':'')+'">'+v+'</td>';
     });
     tbl+='</tr>';
@@ -991,7 +991,7 @@ function calcConseil(){
   if(prixAcq>0 && Math.max(rpRend,ltRend,airRend)<2) vigilance.push('⚠️ Tous les rendements nets sont inférieurs à 2 % : le prix d\'acquisition est élevé par rapport aux revenus potentiels du bien.');
   if(reelNet>0 && (G('amort')||0)===0) vigilance.push('💡 Activez l\'amortissement dans l\'onglet Structure fiscale pour optimiser l\'impôt du scénario Airbnb (LMNP réel).');
 
-  let reco='<div class="g2" style="margin-bottom:12px">'
+  var reco='<div class="g2" style="margin-bottom:12px">'
     +'<div class="kpi '+(bestCF.name===scenarios[0].name?'winner':'')+'" style="border-left:4px solid '+rankColor(bestCF)+'">'
     +'<div class="lbl">Meilleur cash-flow pur</div>'
     +'<div class="num" style="color:'+rankColor(bestCF)+'">'+bestCF.name+'</div>'
@@ -1050,9 +1050,9 @@ function calcProjection(){
   }
 
   const rows=[];
-  let cumRP=0,cumLT=0,cumAir=0;
+  var cumRP=0,cumLT=0,cumAir=0;
 
-  for(let y=1;y<=n;y++){
+  for(var y=1;y<=n;y++){
     const g=Math.pow(1+inf,y-1);
     const amort=amortY(y);
 
@@ -1063,7 +1063,7 @@ function calcProjection(){
     // Scénario LT meublé
     const ltRev=loyerLT0*g*12*(1-vacLT);
     const ltComm=loyerLT0*g*12*gstLT;
-    let ltImp=0;
+    var ltImp=0;
     if(ltRev>77700){
       const ltBase=Math.max(0,ltRev-ltComm-(fixed-loanAn)-amort);
       ltImp=ltBase*(tmi3+0.186);
@@ -1081,14 +1081,14 @@ function calcProjection(){
     const airCF12=grossY-opCostY-airTax-fixed;
     cumAir+=airCF12;
 
-    rows.push({y,an:anDebut+y-1,rpM:rpCF12/12,ltM:ltCF12/12,airM:airCF12/12,cumRP,cumLT,cumAir,amort});
+    rows.push({y:y,an:anDebut+y-1,rpM:rpCF12/12,ltM:ltCF12/12,airM:airCF12/12,cumRP:cumRP,cumLT:cumLT,cumAir:cumAir,amort:amort});
   }
 
   // Table
-  let tbl='<tr><th>Année</th><th>RP / mois</th><th>Long terme / mois</th><th>Airbnb / mois</th><th>Amort. / an</th></tr>';
+  var tbl='<tr><th>Année</th><th>RP / mois</th><th>Long terme / mois</th><th>Airbnb / mois</th><th>Amort. / an</th></tr>';
   rows.forEach(function(r){
     const best=Math.max(r.rpM,r.ltM,r.airM);
-    let amortNote='';
+    var amortNote='';
     if(r.y===8) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">mobilier épuisé</span>';
     else if(r.y===16) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">agen.+inst. épuisés</span>';
     else if(r.y===26) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">façade épuisée</span>';
