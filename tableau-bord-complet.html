@@ -675,10 +675,10 @@ function c(){
   $('bRev').textContent=fe(totalRev); $('bLog').textContent='− '+fe(logC);
   $('bVie').textContent='− '+fe(vieC); $('bEp').textContent=fe(epargne);
   $('bEp').style.color=epc; $('bTx').textContent=fp(txEp); $('bTx').style.color=epc;
-  let epAl='';
-  if(epargne<0) epAl=`<div class="box bad">⚠️ Flux négatif : charges > revenus de ${fe(-epargne)}/mois. Un banquier refusera tout nouveau crédit dans cette configuration.</div>`;
+  var epAl='';
+  if(epargne<0) epAl='<div class="box bad">⚠️ Flux négatif : charges > revenus de '+fe(-epargne)+'/mois. Un banquier refusera tout nouveau crédit dans cette configuration.</div>';
   else if(txEp<10) epAl='<div class="box warn">Taux d\'épargne &lt; 10 % — profil tendu. Visez 15 % minimum pour rassurer un prêteur.</div>';
-  else if(txEp>=15) epAl=`<div class="box good">✅ Taux d'épargne solide (${fp(txEp)}) — profil rassurant pour un banquier.</div>`;
+  else if(txEp>=15) epAl='<div class="box good">✅ Taux d\'épargne solide ('+fp(txEp)+') — profil rassurant pour un banquier.</div>';
   $('epAlrt').innerHTML=epAl;
 
   // TAB 2 — Airbnb
@@ -698,8 +698,8 @@ function c(){
 
   // Saisonnalité
   const mo=Object.keys(SEA), wS=mo.reduce((s,m)=>s+SEA[m],0);
-  $('seasBars').innerHTML=mo.map(m=>{const r=gross*(SEA[m]/wS),w=SEA[m]/1.25*100;
-    return`<div class="brow"><span class="m">${m}</span><div class="btrk"><div class="bfll" style="width:${w}%"></div></div><span class="rv">${fe(r)}</span></div>`;}).join('');
+  $('seasBars').innerHTML=mo.map(function(m){var r=gross*(SEA[m]/wS),w=SEA[m]/1.25*100;
+    return '<div class="brow"><span class="m">'+m+'</span><div class="btrk"><div class="bfll" style="width:'+w+'%"></div></div><span class="rv">'+fe(r)+'</span></div>';}).join('');
 
   // TAB 3 — Structures fiscales
   const tmi3=G('tmi2')/100, amort=G('amort');
@@ -755,36 +755,32 @@ function c(){
     ['− Maintenance','− '+fe(G('mnt')*M),'dim'],
   ];
   const cfn=reelNet;
-  $('cascade').innerHTML=cascadeItems.map(r=>`<div class="row ${r[2]}"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('')+
-    `<div class="row bold total"><span>= Cash-flow net (LMNP réel)</span><span style="color:${cfn>=0?'var(--green)':'var(--red)'}">${fe(cfn)}</span></div>`;
+  $('cascade').innerHTML=cascadeItems.map(function(r){return '<div class="row '+r[2]+'"><span>'+r[0]+'</span><span>'+r[1]+'</span></div>';}).join('')+
+    '<div class="row bold total"><span>= Cash-flow net (LMNP réel)</span><span style="color:'+(cfn>=0?'var(--green)':'var(--red)')+'">'+fe(cfn)+'</span></div>';
 
   // Note explicative cashflow
   const amortVal=G('amort'), taxSaving=amortVal*(tmi3+0.186);
-  let cfNote='';
+  var cfNote='';
   if(capN===90){
     const grossSec=Math.min(365*occ,365)*adr+Math.min(365*occ,365)/stay*cln;
-    cfNote=`<div class="box info">
-      Plafond 90 nuits (résidence principale) = CA brut max ${fe(gross)}/an.<br>
-      En résidence secondaire (365 nuits autorisées) : CA brut estimé ~${fe(grossSec)}/an — cash-flow potentiellement 2 à 3× supérieur.
-    </div>`;
+    cfNote='<div class="box info">Plafond 90 nuits (résidence principale) = CA brut max '+fe(gross)+'/an.<br>En résidence secondaire (365 nuits autorisées) : CA brut estimé ~'+fe(grossSec)+'/an — cash-flow potentiellement 2 à 3× supérieur.</div>';
   }
   if(amortVal>0){
-    cfNote+=`<div class="box good" style="margin-top:6px">
-      L'amortissement (${fe(amortVal)}/an) est une charge <b>non décaissée</b> : il réduit l'impôt de ${fe(taxSaving)}/an (${fe(taxSaving/12)}/mois) sans sortir d'argent.
-    </div>`;
+    cfNote+='<div class="box good" style="margin-top:6px">L\'amortissement ('+fe(amortVal)+'/an) est une charge <b>non décaissée</b> : il réduit l\'impôt de '+fe(taxSaving)+'/an ('+fe(taxSaving/12)+'/mois) sans sortir d\'argent.</div>';
   }
   $('cashflowNote').innerHTML=cfNote;
 
   // Struct cards
-  $('structCards').innerHTML=structs.map(s=>{
+  $('structCards').innerHTML=structs.map(function(s){
     const ib=s.k===bestK;
-    return`<div class="scard ${ib?'best':''}">
-      ${ib?'<div class="badge best">Meilleur net</div>':''}
-      <div class="sn">${s.name}</div>
-      <div class="sv">${fe(s.net/12)}<span style="font-size:12px;font-weight:400">/mois</span></div>
-      <div class="ss">Impôt : ${fe(s.tax/12)}/mois · ${gross>0?fp(s.tax/gross*100,0):'0 %'} du CA</div>
-      ${s.note?`<div style="font-size:10.5px;color:var(--warn-txt);margin-top:4px">${s.note}</div>`:''}
-    </div>`;}).join('');
+    var html='<div class="scard '+(ib?'best':'')+'">'
+      +(ib?'<div class="badge best">Meilleur net</div>':'')
+      +'<div class="sn">'+s.name+'</div>'
+      +'<div class="sv">'+fe(s.net/12)+'<span style="font-size:12px;font-weight:400">/mois</span></div>'
+      +'<div class="ss">Impôt : '+fe(s.tax/12)+'/mois · '+(gross>0?fp(s.tax/gross*100,0):'0 %')+' du CA</div>'
+      +(s.note?'<div style="font-size:10.5px;color:var(--warn-txt);margin-top:4px">'+s.note+'</div>':'')
+      +'</div>';
+    return html;}).join('');
 
   // Compare table
   const cols=['LMNP micro-BIC','LMNP réel','SCI IS','SASU IS'];
@@ -798,17 +794,17 @@ function c(){
     {l:'Distribution bénéf.',v:['Revenus directs','Revenus directs','Flat tax 31,4 %','Flat tax 31,4 %']},
     {l:'Plus-value revente',v:['Particulier + réintég.','Particulier + réintég.','Particulier (SCI IR) / IS','IS — très défavorable']},
     {l:'Plafond micro',v:[fe(microCap),'—','—','—']},
-    {l:'Impôt total / an',v:taxRow.map(t=>fe(t))},
-    {l:'Net dans la poche / an',v:netRow.map(n=>fe(n)),bold:true},
-    {l:'Net / mois',v:netRow.map(n=>fe(n/12)),bold:true},
+    {l:'Impôt total / an',v:taxRow.map(function(t){return fe(t);})},
+    {l:'Net dans la poche / an',v:netRow.map(function(n){return fe(n);}),bold:true},
+    {l:'Net / mois',v:netRow.map(function(n){return fe(n/12);}),bold:true},
   ];
-  let tbl=`<tr>${['Critère',...cols].map((h,i)=>`<th>${h}${i>0&&structs[i-1].k===bestK?' ★':''}</th>`).join('')}</tr>`;
-  rows.forEach(row=>{
+  var tbl='<tr>'+['Critère',...cols].map(function(h,i){return '<th>'+h+(i>0&&structs[i-1].k===bestK?' ★':'')+'</th>';}).join('')+'</tr>';
+  rows.forEach(function(row){
     const best=row.bold?netRow.indexOf(Math.max(...netRow)):false;
-    tbl+=`<tr ${row.bold?'class="tot"':''}><td style="color:var(--muted)">${row.l}</td>`;
-    row.v.forEach((v,i)=>{
+    tbl+='<tr '+(row.bold?'class="tot"':'')+'>\n<td style="color:var(--muted)">'+row.l+'</td>';
+    row.v.forEach(function(v,i){
       const isBest=row.bold&&i===best;
-      tbl+=`<td${isBest?' class="hi"':''}>${v}</td>`;
+      tbl+='<td'+(isBest?' class="hi"':'')+'>'+v+'</td>';
     });
     tbl+='</tr>';
   });
@@ -834,19 +830,19 @@ function c(){
   $('bkMT').textContent=fe(mensT);
   $('bkTx').textContent=fp(txEnd); $('bkTx').style.color=txEnd<=35?'var(--green)':'var(--red)';
 
-  let bkAl='';
-  if(txEnd>35) bkAl=`<div class="box bad">⚠️ Endettement ${fp(txEnd)} > 35 % — dépassement HCSF. Augmentez l'apport, réduisez la durée ou améliorez les revenus.</div>`;
-  else if(txEnd>0) bkAl=`<div class="box good">✅ Taux d'endettement ${fp(txEnd)} — dans la limite des 35 %. Profil finançable.</div>`;
+  var bkAl='';
+  if(txEnd>35) bkAl='<div class="box bad">⚠️ Endettement '+fp(txEnd)+' > 35 % — dépassement HCSF. Augmentez l\'apport, réduisez la durée ou améliorez les revenus.</div>';
+  else if(txEnd>0) bkAl='<div class="box good">✅ Taux d\'endettement '+fp(txEnd)+' — dans la limite des 35 %. Profil finançable.</div>';
   $('bkAlrt').innerHTML=bkAl;
 
   $('bkLook').innerHTML=[
     [salNetM>0?'✅':'⚠️','Salaire',salNetM>0?'Atout majeur — revenu stable et justifiable':'Aucun salaire — indépendants scrutinés sur 3 ans'],
-    [meNet>0?'⚠️':'—','Micro-entreprise (décote 30 %)',meNet>0?`Retenu : ${fe(meNet*.7)}/mois · 3 bilans exigés`:'Non renseigné'],
-    [airNet>0?'⚠️':'—','Airbnb (décote 30 %)',airNet>0?`Retenu : ${fe(airNet*.7)}/mois`:'Non renseigné'],
+    [meNet>0?'⚠️':'—','Micro-entreprise (décote 30 %)',meNet>0?'Retenu : '+fe(meNet*.7)+'/mois · 3 bilans exigés':'Non renseigné'],
+    [airNet>0?'⚠️':'—','Airbnb (décote 30 %)',airNet>0?'Retenu : '+fe(airNet*.7)+'/mois':'Non renseigné'],
     [txEnd<=33?'✅':txEnd<=35?'⚠️':'🚫','Endettement',fp(txEnd)+(txEnd<=33?' — Excellent':txEnd<=35?' — Acceptable':' — Trop élevé')],
     ['💰','Reste à vivre',fe(totalRev-mensT-(totalChg-G('loyer')-G('crEx')))+'/mois'],
     ['🏦','Apport / notaire',fe(G('appt'))+' — frais notaire estimés : '+fe(prixMax*.08)],
-  ].map(([i,k,v])=>`<div class="row"><span style="display:flex;gap:8px"><span>${i}</span><span style="color:var(--muted)">${k}</span></span><span style="font-size:12px;text-align:right;max-width:55%">${v}</span></div>`).join('');
+  ].map(function(row){return '<div class="row"><span style="display:flex;gap:8px"><span>'+row[0]+'</span><span style="color:var(--muted)">'+row[1]+'</span></span><span style="font-size:12px;text-align:right;max-width:55%">'+row[2]+'</span></div>';}).join('');
 
   // Stocker les variables pour l'onglet Conseiller
   lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,opCost,deductFixed,prixAcq:G('prixAcq')};
@@ -890,7 +886,7 @@ function calcConseil(){
   const ltRevAn=loyerLT*12*(1-vacLT);
   const ltCommAn=loyerLT*12*(gstLT);
   // Micro-BIC meublé classique 50% abattement ou LMNP réel si > 77700
-  let ltImpotAn=0;
+  var ltImpotAn=0;
   if(ltRevAn>77700){
     // LMNP réel simplifié : base = revenu - charges déductibles - amortissement
     const ltBase=Math.max(0,ltRevAn-ltCommAn-(fixed-loanAn)-(lc.amort||0));
@@ -951,18 +947,18 @@ function calcConseil(){
   ];
 
   const colHeaders=['Critère','RP','Long terme','Airbnb'];
-  let tbl=`<tr>${colHeaders.map((h,i)=>{
+  var tbl='<tr>'+colHeaders.map(function(h,i){
     const isWin=i>0&&(i-1===winnerIdx);
-    return`<th class="${isWin?'col-hi':'}">${h}${isWin?' ★':''}</th>`;
-  }).join('')}</tr>`;
-  tableRows.forEach(row=>{
-    tbl+=`<tr>`;
-    tbl+=`<td style="color:var(--muted)">${row.l}</td>`;
-    row.v.forEach((v,i)=>{
+    return '<th class="'+(isWin?'col-hi':'')+'">'+h+(isWin?' ★':'')+'</th>';
+  }).join('')+'</tr>';
+  tableRows.forEach(function(row){
+    tbl+='<tr>';
+    tbl+='<td style="color:var(--muted)">'+row.l+'</td>';
+    row.v.forEach(function(v,i){
       const isWin=row.highlight&&i===winnerIdx;
-      tbl+=`<td class="${isWin?'col-hi':''">${v}</td>`;
+      tbl+='<td class="'+(isWin?'col-hi':'')+'">'+v+'</td>';
     });
-    tbl+=`</tr>`;
+    tbl+='</tr>';
   });
   $('conseilTable').innerHTML=tbl;
 
@@ -973,9 +969,9 @@ function calcConseil(){
     {name:'Airbnb / saisonnier',cf:airCFM,rend:airRend,effort:'Élevé',stable:'Variable'},
   ];
   const bestCF=scenarios.reduce((a,b)=>a.cf>b.cf?a:b);
-  const bestEquil=scenarios.reduce((a,b)=>{
+  const bestEquil=scenarios.reduce(function(a,b){
     // score = cf / 2 + rend * 500 - (effort === 'Élevé' ? 200 : effort === 'Faible' ? 50 : 0)
-    const effortPenalty=e=>e==='Élevé'?200:e==='Faible'?50:0;
+    const effortPenalty=function(e){return e==='Élevé'?200:e==='Faible'?50:0;};
     const scoreA=a.cf/2+a.rend*500-effortPenalty(a.effort);
     const scoreB=b.cf/2+b.rend*500-effortPenalty(b.effort);
     return scoreA>scoreB?a:b;
@@ -983,7 +979,7 @@ function calcConseil(){
 
   const colors=['var(--green)','var(--orange)','var(--red)'];
   const sortedByCF=[...scenarios].sort((a,b)=>b.cf-a.cf);
-  const rankColor=s=>{
+  const rankColor=function(s){
     const rank=sortedByCF.findIndex(x=>x.name===s.name);
     return colors[rank]||'var(--muted)';
   };
@@ -996,24 +992,20 @@ function calcConseil(){
   if(prixAcq>0 && Math.max(rpRend,ltRend,airRend)<2) vigilance.push('⚠️ Tous les rendements nets sont inférieurs à 2 % : le prix d\'acquisition est élevé par rapport aux revenus potentiels du bien.');
   if(reelNet>0 && (G('amort')||0)===0) vigilance.push('💡 Activez l\'amortissement dans l\'onglet Structure fiscale pour optimiser l\'impôt du scénario Airbnb (LMNP réel).');
 
-  let reco=`
-  <div class="g2" style="margin-bottom:12px">
-    <div class="kpi ${bestCF.name===scenarios[0].name?'winner':''}" style="border-left:4px solid ${rankColor(bestCF)}">
-      <div class="lbl">Meilleur cash-flow pur</div>
-      <div class="num" style="color:${rankColor(bestCF)}">${bestCF.name}</div>
-      <div class="sub2">${fe(bestCF.cf)}/mois · rendement ${fp(bestCF.rend,2)}</div>
-    </div>
-    <div class="kpi ${bestEquil.name===scenarios[0].name?'winner':''}" style="border-left:4px solid ${rankColor(bestEquil)}">
-      <div class="lbl">Meilleur équilibre rentabilité/effort</div>
-      <div class="num" style="color:${rankColor(bestEquil)}">${bestEquil.name}</div>
-      <div class="sub2">${fe(bestEquil.cf)}/mois · effort : ${bestEquil.effort}</div>
-    </div>
-  </div>`;
+  var reco='<div class="g2" style="margin-bottom:12px">'
+    +'<div class="kpi '+(bestCF.name===scenarios[0].name?'winner':'')+'" style="border-left:4px solid '+rankColor(bestCF)+'">'
+    +'<div class="lbl">Meilleur cash-flow pur</div>'
+    +'<div class="num" style="color:'+rankColor(bestCF)+'">'+bestCF.name+'</div>'
+    +'<div class="sub2">'+fe(bestCF.cf)+'/mois · rendement '+fp(bestCF.rend,2)+'</div></div>'
+    +'<div class="kpi '+(bestEquil.name===scenarios[0].name?'winner':'')+'" style="border-left:4px solid '+rankColor(bestEquil)+'">'
+    +'<div class="lbl">Meilleur équilibre rentabilité/effort</div>'
+    +'<div class="num" style="color:'+rankColor(bestEquil)+'">'+bestEquil.name+'</div>'
+    +'<div class="sub2">'+fe(bestEquil.cf)+'/mois · effort : '+bestEquil.effort+'</div></div></div>';
 
   if(vigilance.length>0){
-    reco+=`<div class="box warn"><b>Points de vigilance :</b><ul style="margin:6px 0 0 14px">${vigilance.map(v=>`<li style="margin-bottom:4px">${v}</li>`).join('')}</ul></div>`;
+    reco+='<div class="box warn"><b>Points de vigilance :</b><ul style="margin:6px 0 0 14px">'+vigilance.map(function(v){return'<li style="margin-bottom:4px">'+v+'</li>';}).join('')+'</ul></div>';
   } else {
-    reco+=`<div class="box good">✅ Votre situation ne présente pas de point de vigilance majeur. Comparez les cash-flows ci-dessus pour choisir la stratégie la plus adaptée à votre mode de vie.</div>`;
+    reco+='<div class="box good">✅ Votre situation ne présente pas de point de vigilance majeur. Comparez les cash-flows ci-dessus pour choisir la stratégie la plus adaptée à votre mode de vie.</div>';
   }
 
   $('recommandation').innerHTML=reco;
@@ -1059,9 +1051,9 @@ function calcProjection(){
   }
 
   const rows=[];
-  let cumRP=0,cumLT=0,cumAir=0;
+  var cumRP=0,cumLT=0,cumAir=0;
 
-  for(let y=1;y<=n;y++){
+  for(var y=1;y<=n;y++){
     const g=Math.pow(1+inf,y-1);
     const amort=amortY(y);
 
@@ -1072,7 +1064,7 @@ function calcProjection(){
     // Scénario LT meublé
     const ltRev=loyerLT0*g*12*(1-vacLT);
     const ltComm=loyerLT0*g*12*gstLT;
-    let ltImp=0;
+    var ltImp=0;
     if(ltRev>77700){
       const ltBase=Math.max(0,ltRev-ltComm-(fixed-loanAn)-amort);
       ltImp=ltBase*(tmi3+0.186);
@@ -1090,22 +1082,24 @@ function calcProjection(){
     const airCF12=grossY-opCostY-airTax-fixed;
     cumAir+=airCF12;
 
-    rows.push({y,an:anDebut+y-1,rpM:rpCF12/12,ltM:ltCF12/12,airM:airCF12/12,cumRP,cumLT,cumAir,amort});
+    rows.push({y:y,an:anDebut+y-1,rpM:rpCF12/12,ltM:ltCF12/12,airM:airCF12/12,cumRP:cumRP,cumLT:cumLT,cumAir:cumAir,amort:amort});
   }
 
   // Table
-  let tbl=`<tr><th>Année</th><th>RP / mois</th><th>Long terme / mois</th><th>Airbnb / mois</th><th>Amort. / an</th></tr>`;
-  rows.forEach(r=>{
+  var tbl='<tr><th>Année</th><th>RP / mois</th><th>Long terme / mois</th><th>Airbnb / mois</th><th>Amort. / an</th></tr>';
+  rows.forEach(function(r){
     const best=Math.max(r.rpM,r.ltM,r.airM);
-    const yA=r.y;
-    const amortNote=yA===8?'⚠️ mobilier épuisé':yA===16?'⚠️ agen.+inst. épuisés':yA===26?'⚠️ façade épuisée':'';
-    tbl+=`<tr>
-      <td style="color:var(--muted)">${r.an}${amortNote?`<br><span style="font-size:10px;color:var(--warn-txt)">${amortNote}</span>`:''}</td>
-      <td class="${r.rpM===best?'col-hi':''}" style="color:${r.rpM>=0?'inherit':'var(--red)'}">${fe(r.rpM)}</td>
-      <td class="${r.ltM===best&&r.ltM!==r.rpM?'col-hi':''}" style="color:${r.ltM>=0?'inherit':'var(--red)'}">${fe(r.ltM)}</td>
-      <td class="${r.airM===best&&r.airM!==r.rpM&&r.airM!==r.ltM?'col-hi':''}" style="color:${r.airM>=0?'inherit':'var(--red)'}">${fe(r.airM)}</td>
-      <td style="color:var(--muted);font-size:11.5px">${fe(r.amort)}</td>
-    </tr>`;
+    var amortNote='';
+    if(r.y===8) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">mobilier épuisé</span>';
+    else if(r.y===16) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">agen.+inst. épuisés</span>';
+    else if(r.y===26) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">façade épuisée</span>';
+    tbl+='<tr>';
+    tbl+='<td style="color:var(--muted)">'+r.an+amortNote+'</td>';
+    tbl+='<td class="'+(r.rpM===best?'col-hi':'')+'" style="color:'+(r.rpM>=0?'inherit':'var(--red)')+'">'+fe(r.rpM)+'</td>';
+    tbl+='<td class="'+(r.ltM===best&&r.ltM!==r.rpM?'col-hi':'')+'" style="color:'+(r.ltM>=0?'inherit':'var(--red)')+'">'+fe(r.ltM)+'</td>';
+    tbl+='<td class="'+(r.airM===best&&r.airM!==r.rpM&&r.airM!==r.ltM?'col-hi':'')+'" style="color:'+(r.airM>=0?'inherit':'var(--red)')+'">'+fe(r.airM)+'</td>';
+    tbl+='<td style="color:var(--muted);font-size:11.5px">'+fe(r.amort)+'</td>';
+    tbl+='</tr>';
   });
   $('projTable').innerHTML=tbl;
 
@@ -1114,17 +1108,11 @@ function calcProjection(){
   const cums=[{n:'RP',c:last.cumRP},{n:'Location LT',c:last.cumLT},{n:'Airbnb',c:last.cumAir}];
   const bestCum=cums.reduce((a,b)=>a.c>b.c?a:b);
   const worstCum=cums.reduce((a,b)=>a.c<b.c?a:b);
-  $('projCumul').innerHTML=`
-    <div class="box good"><b>Cumul sur ${n} ans :</b>
-      RP → <b>${fe(last.cumRP)}</b> ·
-      Long terme → <b>${fe(last.cumLT)}</b> ·
-      Airbnb → <b>${fe(last.cumAir)}</b><br>
-      <span style="color:var(--good-txt)">Meilleur scénario sur ${n} ans : <b>${bestCum.n}</b> (${fe(bestCum.c)} nets cumulés)</span>
-      ${bestCum.c-worstCum.c>0?` · Écart max avec le moins bon : <b>+${fe(bestCum.c-worstCum.c)}</b>`:''}
-    </div>
-    <div class="box info" style="margin-top:6px">
-      <b>Note :</b> L'amortissement LMNP réel s'épuise par composant (mobilier 7 ans, installations/agencements 15 ans, façade 25 ans, gros œuvre 50 ans). Au fil des années, la base imposable du scénario Airbnb augmente → l'avantage fiscal se réduit. Cette projection est linéaire et n'intègre pas la plus-value ni les revaluations patrimoniales.
-    </div>`;
+  const ecart=bestCum.c-worstCum.c>0?' · Écart max : <b>+'+fe(bestCum.c-worstCum.c)+'</b>':'';
+  $('projCumul').innerHTML=
+    '<div class="box good"><b>Cumul sur '+n+' ans :</b> RP → <b>'+fe(last.cumRP)+'</b> · Long terme → <b>'+fe(last.cumLT)+'</b> · Airbnb → <b>'+fe(last.cumAir)+'</b><br>'
+    +'<span style="color:var(--good-txt)">Meilleur scénario sur '+n+' ans : <b>'+bestCum.n+'</b> ('+fe(bestCum.c)+' nets cumulés)</span>'+ecart+'</div>'
+    +'<div class="box info" style="margin-top:6px"><b>Note :</b> L\'amortissement LMNP réel s\'épuise par composant (mobilier 7 ans, installations/agencements 15 ans, façade 25 ans, gros oeuvre 50 ans). Au fil des années, la base imposable du scénario Airbnb augmente → l\'avantage fiscal se réduit.</div>';
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
