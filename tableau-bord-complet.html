@@ -1044,7 +1044,15 @@ function calcConseil(){
 
   var vigilance=[];
   vigilance.push("Loi Le Meur (oct. 2024) : Airbnb en résidence principale limité à 90 nuits/an. En résidence secondaire : 120 nuits (meublé classé).");
-  vigilance.push("Art.84 LF 2025 (15/02/2025) : amortissements LMNP réel réintégrés dans le calcul de la plus-value à la revente.");
+  vigilance.push("Art.84 LF 2025 (15/02/2025) : amortissements LMNP réel réintégrés dans le calcul de la plus-value à la revente — PS sur PV immobilière maintenu à 17,2% (non impacté par LFSS 2026), IR 19% + abattements durée détention. Exceptions : résidences étudiantes, seniors, EHPAD.");
+  // Estimation PV taxable si vente (indicative)
+  if(prixAcq>0&&amort>0){
+    var prixRevEstim=prixAcq; // hypothèse prix stable pour illustration
+    var amortTotalEstim=amort*10; // 10 ans d'amort par défaut
+    var pvBrute=Math.max(0,prixRevEstim-prixAcq+amortTotalEstim); // réintégration amort
+    var pvIR=pvBrute*0.19, pvPS=pvBrute*0.172; // PS 17,2% sur PV immo
+    if(pvBrute>0) vigilance.push("PV revente estimée (scénario 10 ans, prix stable) : réintégration amort "+fe(amortTotalEstim)+" → base imposable ~"+fe(pvBrute)+" → IR 19% = "+fe(pvIR)+" + PS 17,2% = "+fe(pvPS)+" = total "+fe(pvIR+pvPS)+". Utiliser un simulateur ou notaire pour affiner.");
+  }
   if(rfr/parts<=29315) vigilance.push("Versement libératoire accessible (RFR N-2 "+fe(rfr)+" <= 29 315 EUR/part) : intéressant en micro-BIC si TMI >= 11%.");
   else vigilance.push("Versement libératoire non accessible (RFR N-2 "+fe(rfr)+" > 29 315 EUR/part).");
   if(amort>0&&ltCFan<0) vigilance.push("Déficit LMNP réel (LT) reportable sur BIC meublés des 10 années suivantes — avantage fiscal différé.");
@@ -1121,11 +1129,13 @@ function calcProjection(){
     const rpCF12=(loyerEvite0*g*12)-fixed;
     cumRP+=rpCF12;
 
-    // Scénario LT meublé
+    // Scénario LT meublé — D4: seuil micro réévalué chaque année (inflation)
     const ltRev=loyerLT0*g*12*(1-vacLT);
     const ltComm=loyerLT0*g*12*gstLT;
+    // Seuil micro indexé sur inflation (LF2026: 83600€, revu chaque 3 ans mais on approx. avec inflation)
+    const ltSeuilMicro=83600*Math.pow(1+inf,y-1);
     let ltImp=0;
-    if(ltRev>83600){
+    if(ltRev>ltSeuilMicro){
       const ltBase=Math.max(0,ltRev-ltComm-(fixed-loanAn)-amort);
       ltImp=ltBase*(tmi3+0.186);
     } else {
@@ -1142,11 +1152,11 @@ function calcProjection(){
     const airCF12=grossY-opCostY-airTax-fixed;
     cumAir+=airCF12;
 
-    rows.push({y,an:anDebut+y-1,rpM:rpCF12/12,ltM:ltCF12/12,airM:airCF12/12,cumRP,cumLT,cumAir,amort});
+    rows.push({y,an:anDebut+y-1,rpM:rpCF12/12,ltM:ltCF12/12,airM:airCF12/12,cumRP,cumLT,cumAir,amort,ltRegP:ltRev>ltSeuilMicro?'LMNP réel':'micro-BIC'});
   }
 
   // Table
-  let tbl='<tr><th>Année</th><th>RP / mois</th><th>Long terme / mois</th><th>Airbnb / mois</th><th>Amort. / an</th></tr>';
+  let tbl='<tr><th>Année</th><th>RP / mois</th><th>Long terme / mois</th><th>Régime LT</th><th>Airbnb / mois</th><th>Amort. / an</th></tr>';
   rows.forEach(function(r){
     const best=Math.max(r.rpM,r.ltM,r.airM);
     let amortNote='';
@@ -1155,9 +1165,10 @@ function calcProjection(){
     else if(r.y===26) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">façade épuisée</span>';
     tbl+='<tr>';
     tbl+='<td style="color:var(--muted)">'+r.an+amortNote+'</td>';
-    tbl+='<td class="'+(r.rpM===best?'col-hi':''+'" style="color:'+(r.rpM>=0?'inherit':'var(--red)')+'">'+fe(r.rpM)+'</td>');
-    tbl+='<td class="'+(r.ltM===best&&r.ltM!==r.rpM?'col-hi':''+'" style="color:'+(r.ltM>=0?'inherit':'var(--red)')+'">'+fe(r.ltM)+'</td>');
-    tbl+='<td class="'+(r.airM===best&&r.airM!==r.rpM&&r.airM!==r.ltM?'col-hi':''+'" style="color:'+(r.airM>=0?'inherit':'var(--red)')+'">'+fe(r.airM)+'</td>');
+    tbl+='<td class="'+(r.rpM===best?'col-hi':'')+'" style="color:'+(r.rpM>=0?'inherit':'var(--red)')+'">'+fe(r.rpM)+'</td>';
+    tbl+='<td class="'+(r.ltM===best&&r.ltM!==r.rpM?'col-hi':'')+'" style="color:'+(r.ltM>=0?'inherit':'var(--red)')+'">'+fe(r.ltM)+'</td>';
+    tbl+='<td style="font-size:10.5px;color:var(--muted)">'+r.ltRegP+'</td>';
+    tbl+='<td class="'+(r.airM===best&&r.airM!==r.rpM&&r.airM!==r.ltM?'col-hi':'')+'" style="color:'+(r.airM>=0?'inherit':'var(--red)')+'">'+fe(r.airM)+'</td>';
     tbl+='<td style="color:var(--muted);font-size:11.5px">'+fe(r.amort)+'</td>';
     tbl+='</tr>';
   });
