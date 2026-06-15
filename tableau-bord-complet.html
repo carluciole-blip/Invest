@@ -696,7 +696,7 @@ function c(){
 
   // TAB 3 — Structures fiscales
   const tmi3=G('tmi2')/100, amort=G('amort');
-  const microCap=classt==='nc'?15000:77700, abatt=classt==='nc'?0.30:0.50;
+  const microCap=classt==='nc'?15000:83600, abatt=classt==='nc'?0.30:0.50; // LF2026: seuil classé 83600€
   const eligible=gross<=microCap;
 
   // LMNP micro-BIC
@@ -707,7 +707,11 @@ function c(){
   // LMNP réel
   const deductFixed=fixIds.reduce((s,id)=>s+(G(id)*M),0)-loanAn+intrAn;
   const reelBase=Math.max(0,gross-opCost-deductFixed-amort);
-  const reelTax=reelBase*(tmi3+PS);
+  // C1 : au-delà de 23 000 € CA Airbnb, basculement vers cotisations sociales TNS (URSSAF)
+  // Taux TNS BIC services ≈ 37 % sur bénéfice net (vs PS 18,6 % en dessous du seuil)
+  const TNS_RATE=0.37;
+  const isTNS=gross>23000;
+  const reelTax=reelBase*(isTNS?TNS_RATE:tmi3+PS);
   const reelNet=ebitda-fixed-reelTax;
 
   // SCI IS
@@ -752,8 +756,16 @@ function c(){
     `<div class="row bold total"><span>= Cash-flow net (LMNP réel)</span><span style="color:${cfn>=0?'var(--green)':'var(--red)'}">${fe(cfn)}</span></div>`;
 
   // Note explicative cashflow
-  const amortVal=G('amort'), taxSaving=amortVal*(tmi3+0.186);
+  const amortVal=G('amort'), taxSaving=amortVal*(tmi3+(isTNS?TNS_RATE:0.186));
   let cfNote='';
+  if(isTNS){
+    cfNote='<div class="box warn">'+
+      '<b>Seuil TNS franchi (CA &gt; 23 000 EUR)</b> : les prelevements sociaux 18,6% ne s\'appliquent plus. '+
+      'Au-dela de 23 000 EUR de recettes Airbnb, basculement vers les <b>cotisations sociales TNS/URSSAF (~37% du benefice net)</b> '+
+      '(art. L.611-1 et L.613-7 CSS). L\'impot affiche integre ce taux plus eleve. '+
+      'Un expert-comptable peut optimiser via une structure (SCI IS ou SASU).'+
+    '</div>';
+  }
   if(capN===90){
     const grossSec=Math.min(365*occ,365)*adr+Math.min(365*occ,365)/stay*cln;
     cfNote=`<div class="box info">
@@ -894,7 +906,7 @@ function calcConseil(){
   var ltRevAn=loyerLT*12*(1-vacLT);
   var ltComm=loyerLT*12*gstLT;
   var ltImpot=0; var ltRegime='micro-BIC 50%';
-  if(ltRevAn>77700){
+  if(ltRevAn>83600){
     var ltBase=Math.max(0,ltRevAn-ltComm-(fixed-loanAn)-amort);
     ltImpot=ltBase*(tmi+PS); ltRegime='LMNP reel';
   } else {
@@ -1113,7 +1125,7 @@ function calcProjection(){
     const ltRev=loyerLT0*g*12*(1-vacLT);
     const ltComm=loyerLT0*g*12*gstLT;
     let ltImp=0;
-    if(ltRev>77700){
+    if(ltRev>83600){
       const ltBase=Math.max(0,ltRev-ltComm-(fixed-loanAn)-amort);
       ltImp=ltBase*(tmi3+0.186);
     } else {
@@ -1143,9 +1155,9 @@ function calcProjection(){
     else if(r.y===26) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">façade épuisée</span>';
     tbl+='<tr>';
     tbl+='<td style="color:var(--muted)">'+r.an+amortNote+'</td>';
-    tbl+='<td class="'+(r.rpM===best?'col-hi':'')+'" style="color:'+(r.rpM>=0?'inherit':'var(--red)')+'">'+fe(r.rpM)+'</td>';
-    tbl+='<td class="'+(r.ltM===best&&r.ltM!==r.rpM?'col-hi':'')+'" style="color:'+(r.ltM>=0?'inherit':'var(--red)')+'">'+fe(r.ltM)+'</td>';
-    tbl+='<td class="'+(r.airM===best&&r.airM!==r.rpM&&r.airM!==r.ltM?'col-hi':'')+'" style="color:'+(r.airM>=0?'inherit':'var(--red)')+'">'+fe(r.airM)+'</td>';
+    tbl+='<td class="'+(r.rpM===best?'col-hi':''+'" style="color:'+(r.rpM>=0?'inherit':'var(--red)')+'">'+fe(r.rpM)+'</td>');
+    tbl+='<td class="'+(r.ltM===best&&r.ltM!==r.rpM?'col-hi':''+'" style="color:'+(r.ltM>=0?'inherit':'var(--red)')+'">'+fe(r.ltM)+'</td>');
+    tbl+='<td class="'+(r.airM===best&&r.airM!==r.rpM&&r.airM!==r.ltM?'col-hi':''+'" style="color:'+(r.airM>=0?'inherit':'var(--red)')+'">'+fe(r.airM)+'</td>');
     tbl+='<td style="color:var(--muted);font-size:11.5px">'+fe(r.amort)+'</td>';
     tbl+='</tr>';
   });
