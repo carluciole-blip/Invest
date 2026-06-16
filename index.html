@@ -1346,7 +1346,7 @@ function calcDeclaration(){
   if(grossAir>0||airN>0){
     const recettes=grossAir>0?grossAir:Math.round(airN*12), cl=classt==='cl';
     B.push(fiche('🏠','Airbnb / meublé — option simple (micro-BIC)','Formulaire 2042-C-PRO',
-      [caseRow(cl?'5NG':'5ND','Recettes de location meublée '+(cl?'— meublé de tourisme CLASSÉ (abattement 50 %)':'— NON classé (abattement 30 %)'),recettes,'Total des sommes encaissées sur l\'année (loyers + ménage refacturé), avant abattement. Pour votre conjoint(e) : case '+(cl?'5OG':'5OD')+'.')],
+      [caseRow(cl?'5NG':'5NH','Recettes de location meublée '+(cl?'— meublé de tourisme CLASSÉ (abattement 50 %)':'— meublé de tourisme NON classé, type Airbnb (abattement 30 %)'),recettes,'Total des sommes encaissées sur l\'année (loyers + ménage refacturé), avant abattement. Pour votre conjoint(e) : case '+(cl?'5OG':'5OH')+'. (Réforme « loi Le Meur » : l\'ancienne case 5ND du non classé est remplacée par 5NH à compter des revenus 2025.)')],
       ['Avant la 1ʳᵉ location : enregistrez le logement en mairie (n° obligatoire à Paris) et créez votre activité sur le guichet unique INPI (formulaire P0i) pour obtenir un n° SIRET.']));
     const reelNetAn=Math.round(lastCalc.reelNet||0), pos=reelNetAn>=0;
     B.push(fiche('🏠','... ou option RÉEL (souvent plus avantageuse avec un crédit)','Formulaires 2031 → 2042-C-PRO',
@@ -1355,7 +1355,7 @@ function calcDeclaration(){
   }
   // 4 · DIVIDENDES
   if(G('divN')>0) B.push(fiche('📈','Dividendes (SCI à l\'IS, SASU…)','Formulaire 2042 / 2042-C',[
-    caseRow('2DC','Montant BRUT des dividendes perçus',null,'Inscrivez le dividende brut (avant prélèvements). Taxé par défaut à la « flat tax » de 31,4 %.'),
+    caseRow('2DC','Montant BRUT des dividendes perçus',null,'Inscrivez le dividende brut (avant prélèvements). Taxé par défaut à la « flat tax » : 30 % sur les dividendes 2025, 31,4 % à partir des versements de 2026.'),
     caseRow('2CG','Prélèvements sociaux déjà retenus',null,'En général pré-rempli par votre banque ou votre société.'),
     caseRow('2OP','Case à COCHER pour choisir le barème progressif',null,'À cocher seulement si votre TMI est faible (0 ou 11 %) : le barème devient alors plus intéressant que la flat tax, avec une partie de la CSG déductible.')]));
   el.innerHTML=B.length?B.join(''):'<div class="box info">Renseignez d\'abord vos revenus dans les onglets <b>Revenus</b> et <b>Airbnb Paris</b> — les cases à remplir s\'afficheront ici automatiquement.</div>';

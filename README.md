@@ -24,7 +24,7 @@
 
 ### Pensé pour les débutants
 
-- **Onglet « 📋 Déclaration »** : indique automatiquement les **cases exactes** (1AJ, 5KP, 5KO, 5HQ, 5TA/5TB/5TE, 5ND/5NG, 5NA/5NY, 2DC/2CG/2OP…) et le formulaire (2042, 2042-C-PRO, 2031, 2044) à remplir selon les options choisies, avec le montant à inscrire.
+- **Onglet « 📋 Déclaration »** : indique automatiquement les **cases exactes** (1AJ, 5KP, 5KO, 5HQ, 5TA/5TB/5TE, 5NH/5NG, 5NA/5NY, 2DC/2CG/2OP…) et le formulaire (2042, 2042-C-PRO, 2031, 2044) à remplir selon les options choisies, avec le montant à inscrire.
 - **Glossaire au survol** : chaque terme technique (TMI, BIC, BNC, amortissement, versement libératoire…) est expliqué en langage simple.
 - **Guide de démarrage** intégré + avertissements de vigilance contextuels.
 - **Sauvegarde locale** (localStorage) : vos saisies sont conservées d'une visite à l'autre, **sans rien envoyer sur Internet**.

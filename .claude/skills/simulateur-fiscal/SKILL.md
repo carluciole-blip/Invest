@@ -72,9 +72,10 @@ changent. Toujours afficher l'avertissement millésime dans l'UI.
 | Micro-BIC vente de marchandises | 2042-C-PRO | 5KO |
 | Micro-BNC | 2042-C-PRO | 5HQ |
 | Versement libératoire — vente / services / BNC | 2042-C-PRO | 5TA / 5TB / 5TE |
-| Meublé non classé, micro-BIC | 2042-C-PRO | 5ND (5OD/5PD) |
-| Meublé de tourisme classé, micro-BIC | 2042-C-PRO | 5NG (5OG/5PG) |
-| LMNP au réel | 2031 → 2042-C-PRO | 5NA (bénéfice) / 5NY (déficit) |
+| Meublé de tourisme NON classé (Airbnb), micro-BIC 30 % | 2042-C-PRO | **5NH** (5OH/5PH) — ⚠️ remplace l'ancienne 5ND depuis revenus 2025 (loi Le Meur) |
+| Meublé de tourisme CLASSÉ + chambres d'hôtes, micro-BIC 50 % | 2042-C-PRO | 5NG (5OG/5PG) — inchangé |
+| Meublé longue durée « classique », micro-BIC 50 % | 2042-C-PRO | **5NI** (5OI/5PI) — nouvelle case revenus 2025 |
+| LMNP au réel | 2031 → 2042-C-PRO | 5NA/5OA/5PA (bénéfice) · 5NY/5OY/5PY (déficit) |
 | Location nue, micro-foncier (< 15 000 €) | 2042 | 4BE |
 | Location nue au réel | 2044 → 2042 | 4BA |
 | Dividendes | 2042 / 2042-C | 2DC (brut), 2CG (PS), 2OP (option barème) |
