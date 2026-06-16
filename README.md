@@ -1,15 +1,16 @@
 # Tableau de bord financier · Entrepreneur & Airbnb Paris
 
 > Simulateur financier complet pour entrepreneurs, investisseurs immobiliers et hôtes Airbnb à Paris.  
-> Un seul fichier HTML — aucune dépendance, aucune installation.
+> Un seul fichier HTML — aucune dépendance, aucune installation.  
+> **Conçu pour être accessible même sans aucune connaissance en finance ou en fiscalité.**
 
 ## Démo
 
-👉 [Ouvrir le simulateur](./tableau-bord-complet.html)
+👉 [Ouvrir le simulateur](./index.html) (ou `tableau-bord-complet.html`, identique)
 
 ## Ce que ça fait
 
-### 5 onglets interconnectés
+### 7 onglets interconnectés
 
 | Onglet | Contenu |
 |--------|---------|
@@ -18,6 +19,16 @@
 | 🏡 **Airbnb Paris** | Simulateur par arrondissement · ADR · occupation · charges fixes · cascade CA → cash-flow |
 | 🏛️ **Structure fiscale** | Comparaison LMNP micro-BIC vs LMNP réel vs SCI IS vs SASU IS |
 | 🏦 **Banque** | Capacité d'emprunt (règle HCSF 35 %) · taux juin 2026 · analyse dossier banquier |
+| 🧭 **Conseiller** | Notation de 4 stratégies sur 5 critères · projection pluriannuelle |
+| 📋 **Déclaration** | **Aide-mémoire personnalisé : quelles cases remplir** sur la déclaration d'impôts selon vos revenus |
+
+### Pensé pour les débutants
+
+- **Onglet « 📋 Déclaration »** : indique automatiquement les **cases exactes** (1AJ, 5KP, 5KO, 5HQ, 5TA/5TB/5TE, 5ND/5NG, 5NA/5NY, 2DC/2CG/2OP…) et le formulaire (2042, 2042-C-PRO, 2031, 2044) à remplir selon les options choisies, avec le montant à inscrire.
+- **Glossaire au survol** : chaque terme technique (TMI, BIC, BNC, amortissement, versement libératoire…) est expliqué en langage simple.
+- **Guide de démarrage** intégré + avertissements de vigilance contextuels.
+- **Sauvegarde locale** (localStorage) : vos saisies sont conservées d'une visite à l'autre, **sans rien envoyer sur Internet**.
+- **Export PDF / impression** en un clic, et bouton de réinitialisation.
 
 ### Fonctionnalités clés
 
