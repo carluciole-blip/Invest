@@ -119,6 +119,51 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 /* WINNER */
 .winner{border:2px solid var(--green)!important;background:var(--good-bg)!important}
 .ctable .col-hi{background:var(--good-bg);font-weight:700;color:var(--good-txt)}
+/* TOOLBAR */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.toolbar button{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;font-size:12.5px;font-weight:600;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--text);cursor:pointer;transition:all .15s}
+.toolbar button:hover{border-color:var(--acc);color:var(--acc)}
+.toolbar button.primary{background:var(--acc);color:#fff;border-color:var(--acc)}
+.toolbar button.primary:hover{filter:brightness(1.05);color:#fff}
+/* GLOSSARY TOOLTIP — termes financiers expliqués */
+.gl{border-bottom:1px dotted var(--acc);color:var(--acc);cursor:help;position:relative;font-weight:600;outline:none}
+.gl:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.gl .tip{visibility:hidden;opacity:0;position:absolute;left:0;bottom:130%;z-index:50;width:250px;max-width:78vw;background:#111827;color:#fff;font-weight:400;font-size:12px;line-height:1.5;padding:9px 11px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .15s;text-align:left}
+.gl .tip::after{content:"";position:absolute;top:100%;left:14px;border:6px solid transparent;border-top-color:#111827}
+.gl:hover .tip,.gl:focus .tip,.gl:focus-within .tip{visibility:visible;opacity:1}
+/* DECLARATION TAB */
+.decl-help{background:var(--good-bg);border:1px solid var(--good-brd);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:13px;line-height:1.6;color:var(--good-txt)}
+.fiche{background:#fff;border:1px solid var(--border);border-radius:10px;padding:0;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.fiche-h{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--p2);border-bottom:1px solid var(--border)}
+.fiche-h .ico{font-size:20px;line-height:1}
+.fiche-h .t{font-size:14px;font-weight:700}
+.fiche-h .f{margin-left:auto;font-size:11px;color:var(--muted);background:#fff;border:1px solid var(--border);border-radius:20px;padding:3px 9px;white-space:nowrap}
+.fiche-b{padding:12px 14px}
+.caseline{display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid var(--border)}
+.caseline:last-child{border-bottom:none}
+.casebox{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;min-width:52px;height:34px;padding:0 8px;background:var(--info-bg);border:1.5px solid var(--acc);border-radius:7px;font-weight:800;font-size:14px;color:var(--acc);font-variant-numeric:tabular-nums}
+.casetxt{flex:1;font-size:12.5px;line-height:1.5}
+.casetxt .what{font-weight:600;color:var(--text)}
+.casetxt .amt{color:var(--green);font-weight:700;font-variant-numeric:tabular-nums}
+.casetxt .why{color:var(--muted);font-size:11.5px;display:block;margin-top:2px}
+.steps{counter-reset:step;margin:6px 0 0;padding:0;list-style:none}
+.steps li{counter-increment:step;position:relative;padding:5px 0 5px 30px;font-size:12.5px;line-height:1.5}
+.steps li::before{content:counter(step);position:absolute;left:0;top:4px;width:21px;height:21px;background:var(--acc);color:#fff;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+/* MOBILE TABLE SCROLL HINT */
+@media(max-width:600px){
+  .ctable{font-size:11px}
+  .casebox{min-width:46px;font-size:13px}
+  .fiche-h .f{display:none}
+}
+/* PRINT / PDF */
+@media print{
+  body{padding:0}
+  .tabs,.toolbar,.epbar,.topbar,input[type=range]{display:none!important}
+  .pane{display:block!important;page-break-inside:avoid;border-top:2px solid #ddd;padding-top:14px;margin-top:14px}
+  .gl{border:none;color:inherit}.gl .tip{display:none}
+  details{display:none}
+  .sec,.fiche{box-shadow:none;break-inside:avoid}
+}
 </style>
 </head>
 <body>
@@ -126,6 +171,26 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 
 <h1>Tableau de bord financier · Entrepreneur</h1>
 <p class="sub">Consolidez tous vos revenus · épargne réelle · Airbnb Paris · structures fiscales · capacité bancaire · 2025-2026</p>
+
+<div class="toolbar">
+  <button class="primary" onclick="sw(6)">📋 Que dois-je déclarer aux impôts&nbsp;?</button>
+  <button onclick="window.print()">🖨️ Imprimer / PDF</button>
+  <button onclick="resetAll()">↺ Tout réinitialiser</button>
+</div>
+
+<details class="info" style="margin-bottom:14px">
+  <summary>Première fois ici&nbsp;? Comment ça marche en 30 secondes</summary>
+  <div class="dbody">
+    <ul>
+      <li><b>Vous n'avez pas besoin de tout remplir.</b> Renseignez seulement ce qui vous concerne — laissez le reste à 0.</li>
+      <li>Les chiffres en haut (Revenus / Charges / Épargne) se mettent à jour <b>en direct</b> à chaque saisie.</li>
+      <li>Les mots techniques sont <span class="gl" tabindex="0">soulignés en bleu<span class="tip">Passez la souris ou touchez le mot : une explication simple apparaît. Essayez&nbsp;!</span></span> — survolez-les pour une explication simple.</li>
+      <li>Quand vous avez saisi vos revenus, l'onglet <b>📋 Déclaration</b> vous dit <b>exactement quelles cases remplir</b> sur votre feuille d'impôts.</li>
+      <li>Vos saisies sont <b>enregistrées dans votre navigateur</b> — vous les retrouverez à votre prochaine visite. Rien n'est envoyé sur Internet.</li>
+    </ul>
+    <div class="wbox">⚠️ Outil indicatif, ce n'est pas un conseil fiscal personnalisé. Pour une décision d'investissement, consultez un expert-comptable.</div>
+  </div>
+</details>
 
 <!-- TOP KPIs permanents -->
 <div class="topbar">
@@ -136,17 +201,18 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 <div class="epbar"><div class="epfill" id="epfill"></div></div>
 
 <!-- TABS -->
-<div class="tabs">
-  <button class="tab on" onclick="sw(0)">Revenus</button>
-  <button class="tab" onclick="sw(1)">Charges</button>
-  <button class="tab" onclick="sw(2)">Airbnb Paris</button>
-  <button class="tab" onclick="sw(3)">Structure fiscale</button>
-  <button class="tab" onclick="sw(4)">Banque</button>
-  <button class="tab" onclick="sw(5)">Conseiller</button>
+<div class="tabs" role="tablist">
+  <button class="tab on" role="tab" aria-selected="true"  id="tab0" aria-controls="p0" onclick="sw(0)">Revenus</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab1" aria-controls="p1" onclick="sw(1)">Charges</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab2" aria-controls="p2" onclick="sw(2)">Airbnb Paris</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab3" aria-controls="p3" onclick="sw(3)">Structure fiscale</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab4" aria-controls="p4" onclick="sw(4)">Banque</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab5" aria-controls="p5" onclick="sw(5)">Conseiller</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab6" aria-controls="p6" onclick="sw(6)">📋 Déclaration</button>
 </div>
 
 <!-- ══ PANE 0 : REVENUS ══════════════════════════════════════════════════════ -->
-<div class="pane on" id="p0">
+<div class="pane on" id="p0" role="tabpanel" aria-labelledby="tab0">
 
   <div class="sec g">
     <div class="stitle">Salaire / activité salariée</div>
@@ -161,7 +227,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div id="brutF" class="field" style="display:none">
       <label>Salaire brut mensuel <strong id="lSB">4 500 €</strong></label>
       <input type="number" id="salB" value="4500" step="50" oninput="fv('salB','lSB');c()">
-      <div class="box info" style="margin-top:6px">Net ≈ <span id="netEst">—</span> (coeff. 78 % — approximation : cadre ~75-77 %, non-cadre ~79-82 % selon mutuelle, options PEE, taux PAS marginal)</div>
+      <div class="box info" style="margin-top:6px">Net ≈ <span id="netEst">—</span> (coefficient 78 %)</div>
     </div>
     <div class="row bold"><span>Net retenu</span><span id="rSal" style="color:var(--green)">—</span></div>
   </div>
@@ -185,7 +251,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
       </div>
     </div>
     <div id="tmiF" class="field"><label>TMI (taux marginal) <strong id="lTMI">30 %</strong></label>
-      <input type="range" id="tmi" min="0" max="45" value="30" step="1" oninput="sp('tmi','lTMI','%');c()">
+      <input type="range" id="tmi" min="0" max="45" value="30" step="1" oninput="sp('tmi','lTMI','%');syncTMIReverse();c()">
       <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:3px"><span>0%</span><span>11%</span><span>30%</span><span>41%</span><span>45%</span></div>
     </div>
     <div style="background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:12px">
@@ -234,7 +300,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 </div>
 
 <!-- ══ PANE 1 : CHARGES ══════════════════════════════════════════════════════ -->
-<div class="pane" id="p1">
+<div class="pane" id="p1" role="tabpanel" aria-labelledby="tab1">
   <div class="sec o">
     <div class="stitle">Logement</div>
     <div class="g2">
@@ -268,7 +334,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 </div>
 
 <!-- ══ PANE 2 : AIRBNB ══════════════════════════════════════════════════════ -->
-<div class="pane" id="p2">
+<div class="pane" id="p2" role="tabpanel" aria-labelledby="tab2">
   <div class="sec">
     <div class="stitle">Bien & marché</div>
     <div class="field"><label style="margin-bottom:5px">Arrondissement</label>
@@ -344,7 +410,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 </div>
 
 <!-- ══ PANE 3 : STRUCTURE FISCALE ═══════════════════════════════════════════ -->
-<div class="pane" id="p3">
+<div class="pane" id="p3" role="tabpanel" aria-labelledby="tab3">
   <div class="box info" style="margin-bottom:14px">
     Paramètres communs repris automatiquement depuis les autres onglets (CA Airbnb, charges fixes, TMI). Ajustez l'amortissement et le classement ici.
   </div>
@@ -394,7 +460,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   <details class="info">
     <summary>Comprendre chaque structure — règles fiscales 2026</summary>
     <div class="dbody">
-      <p style="margin-bottom:8px"><b>LMNP micro-BIC :</b> abattement forfaitaire 30 % (non classé) ou 50 % (classé) sur le CA. Base imposable taxée à TMI + 18,6 % PS (LFSS 2026). Plafond : 15 000 € (non classé) / 77 700 € (classé). Déclaration ultra-simple.</p>
+      <p style="margin-bottom:8px"><b>LMNP micro-BIC :</b> abattement forfaitaire 30 % (non classé) ou 50 % (classé) sur le CA. Base imposable taxée à TMI + 18,6 % PS (LFSS 2026). Plafond : 15 000 € (non classé) / 77 700 € (classé — à confirmer LF 2026). Déclaration ultra-simple.</p>
       <p style="margin-bottom:8px"><b>LMNP réel simplifié :</b> déduction de toutes les charges réelles + amortissement (80 % du bien sur 25-30 ans, terrain non amortissable). Bénéfice souvent ≈ 0. Déficit reportable 10 ans sur BIC meublés (pas sur salaire). À compter du 15 février 2025 (LF 2025, art. 84) : amortissements déduits réintégrés dans le prix d'acquisition pour le calcul de la plus-value (exception : résidences étudiantes, seniors, Ehpad).</p>
       <p style="margin-bottom:8px"><b>SCI à l'IS :</b> la location meublée (Airbnb) bascule automatiquement une SCI à l'IS si recettes meublées &gt; 10 % des recettes totales. IS 15 % jusqu'à 100 000 € (LF 2026), puis 25 %. Distribution : flat tax 31,4 % (LFSS 2026). Double imposition IS + flat tax.</p>
       <p style="margin-bottom:8px"><b>SASU / SAS à l'IS :</b> même IS 15 %/100 000 € + flat tax 31,4 %. Intéressante si bénéfices réinvestis sans distribution. Inconvénient majeur : plus-value professionnelle à la revente (valeur nette comptable, pas d'abattement durée de détention particuliers).</p>
@@ -409,7 +475,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 </div>
 
 <!-- ══ PANE 4 : BANQUE ═══════════════════════════════════════════════════════ -->
-<div class="pane" id="p4">
+<div class="pane" id="p4" role="tabpanel" aria-labelledby="tab4">
   <div class="box info" style="margin-bottom:14px">
     <b>Règle HCSF :</b> taux d'endettement max <b>35 %</b> des revenus nets retenus. Revenus non-salariaux décotés de <b>30 %</b> (moyenne 3 ans). Dividendes décotés <b>50 %</b>. Taux marché <b>juin 2026</b> (CAFPI) : 3,20 % sur 15 ans · 3,37 % sur 20 ans · 3,48 % sur 25 ans.
   </div>
@@ -469,7 +535,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 </div>
 
 <!-- ══ PANE 5 : CONSEILLER ════════════════════════════════════════════════════ -->
-<div class="pane" id="p5">
+<div class="pane" id="p5" role="tabpanel" aria-labelledby="tab5">
   <div class="sec">
     <div class="stitle">Mon profil fiscal <span style="font-size:12px;font-weight:400;color:var(--muted)">(avis d'imposition N-1)</span></div>
     <div class="g2">
@@ -498,18 +564,19 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
       </label>
     </div>
     <div class="box info" style="margin-top:8px;font-size:12px">Ces données servent à calibrer les recommandations. Non envoyées à un serveur.</div>
+    <div class="box warn" style="margin-top:6px;font-size:11px">⚠️ Barème IR affiché : seuils 2025 (revenus 2024) — à vérifier lors de la parution du barème 2026. Barèmes sociaux mis à jour : juin 2026 (LFSS 2026).</div>
   </div>
 
   <div class="sec">
     <div class="stitle">Paramètres du bien à optimiser</div>
     <div class="g2">
-      <label class="field">Loyer marché meublé LT /mois (€)<input type="number" id="loyerLT" value="1400" oninput="sp('lLoyerLT',this.value,'€');calcConseil()"></label>
-      <label class="field">Loyer évité si RP /mois (€)<input type="number" id="loyerEvite" value="1500" oninput="sp('lLoyerEvite',this.value,'€');calcConseil()"></label>
+      <label class="field">Loyer marché meublé LT /mois (€)<input type="number" id="loyerLT" value="1400" oninput="calcConseil()"></label>
+      <label class="field">Loyer évité si RP /mois (€)<input type="number" id="loyerEvite" value="1500" oninput="calcConseil()"></label>
       <label class="field">Vacance locative LT (%)
-        <div class="row"><input type="range" id="vacLT" min="0" max="20" value="8" step="1" oninput="sp('lVacLT',this.value,'%');calcConseil()"><span id="lVacLT" class="dim">8%</span></div>
+        <div class="row"><input type="range" id="vacLT" min="0" max="20" value="8" step="1" oninput="sp('vacLT','lVacLT','%');calcConseil()"><span id="lVacLT" class="dim">8%</span></div>
       </label>
       <label class="field">Frais de gestion (%)
-        <div class="row"><input type="range" id="gstLT" min="0" max="15" value="0" step="1" oninput="sp('lGstLT',this.value,'%');calcConseil()"><span id="lGstLT" class="dim">0%</span></div>
+        <div class="row"><input type="range" id="gstLT" min="0" max="15" value="0" step="1" oninput="sp('gstLT','lGstLT','%');calcConseil()"><span id="lGstLT" class="dim">0%</span></div>
       </label>
     </div>
   </div>
@@ -553,6 +620,43 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   </div>
 </div>
 
+<!-- ══ PANE 6 : DÉCLARATION D'IMPÔTS ═════════════════════════════════════════ -->
+<div class="pane" id="p6" role="tabpanel" aria-labelledby="tab6">
+  <div class="decl-help">
+    <b>📋 Votre aide-mémoire personnalisé pour la déclaration de revenus.</b><br>
+    En fonction de ce que vous avez saisi dans les autres onglets, voici <b>les cases exactes à remplir</b> sur votre déclaration, et ce qu'il faut y inscrire. Chaque bloc correspond à un type de revenu. Si un revenu vaut 0, son bloc n'apparaît pas.
+  </div>
+
+  <div class="sec" style="background:var(--info-bg);border-color:var(--info-brd)">
+    <div class="stitle" style="color:var(--info-txt)">Comment lire ce guide</div>
+    <div class="caseline" style="border:none;padding-bottom:0">
+      <span class="casebox">5KP</span>
+      <div class="casetxt"><span class="what">= le numéro de case</span> à recopier sur votre déclaration. <span class="why">Le montant en vert est ce que vous y inscrivez, calculé à partir de vos saisies. Le formulaire est indiqué en haut à droite de chaque bloc.</span></div>
+    </div>
+  </div>
+
+  <div id="declContent"></div>
+
+  <div class="box warn">
+    <b>⚠️ Avertissement millésime.</b> Les numéros de cases correspondent à la déclaration des revenus <b>2025 (déclarée en 2026)</b>. L'administration peut les modifier chaque année. <b>Vérifiez-les sur</b> <span class="gl" tabindex="0">impots.gouv.fr<span class="tip">Rubrique « Déclarer mes revenus » → la notice n°2041 détaille chaque case. En cas de doute, le service des impôts répond gratuitement.</span></span> ou auprès d'un expert-comptable. Ce guide ne remplace pas un conseil fiscal.
+  </div>
+
+  <details class="info">
+    <summary>Les formulaires en clair — lequel pour quoi&nbsp;?</summary>
+    <div class="dbody">
+      <ul>
+        <li><b>2042</b> : la déclaration principale, que tout le monde remplit (salaires, dividendes…).</li>
+        <li><b>2042-C-PRO</b> : l'annexe « professions non salariées » — pour la micro-entreprise et la location meublée (Airbnb).</li>
+        <li><b>2042-C</b> : annexe « complémentaire » — pour les dividendes et revenus de placements.</li>
+        <li><b>2044</b> : pour la location <b>vide</b> (non meublée) au régime réel.</li>
+        <li><b>2031</b> : la déclaration de résultat d'une location meublée au <b>régime réel</b> (remplie par votre comptable), dont le résultat se reporte ensuite sur la 2042-C-PRO.</li>
+        <li><b>2048-IMM</b> : la plus-value en cas de revente d'un bien — remplie par le notaire le jour de la vente.</li>
+      </ul>
+      <div class="gbox">💡 La plupart de ces cases sont accessibles en ligne en cochant les bonnes rubriques au début de la déclaration (« Revenus des professions non salariées », « Revenus de capitaux mobiliers », etc.).</div>
+    </div>
+  </details>
+</div>
+
 </div><!-- /wrap -->
 
 <script>
@@ -574,6 +678,20 @@ const COTIS={
   bnc:{s:.256,a:.34,l:.022},cpv:{s:.232,a:.34,l:.022}
 };
 const TAUX={15:3.20,20:3.37,25:3.48};
+
+// ── BARÈMES FISCAUX 2026 — Mis à jour : juin 2026 ────────────────────────────
+// Sources : LFSS 2026 n°2025-1403 · LF 2026 art.219 CGI · art.L611-1 CSS
+const PS_BIC    = 0.186;   // PS BIC meublé (LFSS 2026)
+const PS_PV     = 0.172;   // PS plus-value immobilière (inchangé)
+const PFU       = 0.314;   // Flat tax dividendes/capital (LFSS 2026 : IR 12,8% + PS 18,6%)
+const IS_RED    = 0.15;    // IS taux réduit
+const IS_NRM    = 0.25;    // IS taux normal
+const IS_SEUIL  = 100000;  // Seuil IS réduit (LF 2026)
+const TNS_RATE  = 0.37;    // Cotisations TNS URSSAF location meublée (>23 000 € CA) — approximation
+const TNS_SEUIL = 23000;   // Seuil bascule TNS (art. L611-1 CSS)
+const MIC_NC_CAP = 15000;  // Plafond micro-BIC non classé (loi Le Meur n°2024-1039)
+const MIC_CL_CAP = 77700;  // Plafond micro-BIC classé (art. 50-0 CGI) — à confirmer LF 2026
+const PV_IR     = 0.19;    // IR sur plus-value immobilière
 const SEA={Jan:.78,Fév:.80,Mar:.92,Avr:1.05,Mai:1.18,Juin:1.25,Juil:1.20,Aoû:1.05,Sep:1.22,Oct:1.10,Nov:.82,Déc:.90};
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
@@ -586,7 +704,7 @@ const fp=(n,d=1)=>n.toFixed(d)+' %';
 
 // ── UI HELPERS ────────────────────────────────────────────────────────────────
 function sw(i){
-  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  document.querySelectorAll('.tab').forEach((t,j)=>{t.classList.toggle('on',i===j);t.setAttribute('aria-selected',i===j);});
   document.querySelectorAll('.pane').forEach((p,j)=>p.classList.toggle('on',i===j));
 }
 function fv(id,lbl){$(lbl).textContent=fe(G(id))}
@@ -601,6 +719,7 @@ function setDuree(d,b){duree=d;document.querySelectorAll('#sDuree button').forEa
 function setCible(cl,b){cible=cl;document.querySelectorAll('#sCible button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setArr(){const d=ARR[$('arrSel').value];$('adr').value=Math.round(d.adr*1.2/5)*5;$('occ').value=d.occ;sp('adr','lADR','€');sp('occ','lOcc','%');$('arrI').textContent='Médiane : '+d.adr+' €/nuit · occ. '+d.occ+'% · +20% pour 70m²/6 couchages';c()}
 function syncTMI(){$('tmi').value=$('tmi2').value;$('lTMI').textContent=$('tmi2').value+' %'}
+function syncTMIReverse(){$('tmi2').value=$('tmi').value;$('lTMI2').textContent=$('tmi').value+' %'}
 function calcAmort(){
   const prix=G('prixAcq'), tTerrain=G('terrain')/100;
   const amortBase=prix*(1-tTerrain);
@@ -608,12 +727,9 @@ function calcAmort(){
   const tot=GO+fac+agen+inst+mob;
   $('aGO').textContent=fe(GO);$('aFac').textContent=fe(fac);$('aAgen').textContent=fe(agen);
   $('aInst').textContent=fe(inst);$('aMob').textContent=fe(mob);$('aTot').textContent=fe(tot);
-  const tmiVal=G('tmi2')/100, eco=tot*(tmiVal+0.186);
+  const tmiVal=G('tmi2')/100, eco=tot*(tmiVal+PS_BIC);
   $('aEco').textContent=fe(eco)+'/an ('+fe(eco/12)+'/mois)';
-  const calcTot=Math.round(tot/500)*500;
-  $('amort').value=calcTot;$('lAmt').textContent=fe(calcTot);
-  // D3: stocker valeur calculée pour détection d'écart si l'utilisateur modifie le slider
-  $('amort').dataset.calcVal=calcTot;
+  $('amort').value=Math.round(tot/500)*500;$('lAmt').textContent=fe(Math.round(tot/500)*500);
   c();
 }
 
@@ -623,7 +739,7 @@ function capB(mm,taux,n){const r=taux/12/100,m=n*12;if(!r)return mm*m;return mm*
 
 // ── MAIN CALC ─────────────────────────────────────────────────────────────────
 function c(){
-  const PS=0.186, tmi=G('tmi')/100;
+  const PS=PS_BIC, tmi=G('tmi')/100;
 
   // SALAIRE
   const salNetM = salMode==='net' ? G('salN') : G('salB')*0.78;
@@ -699,19 +815,7 @@ function c(){
 
   // TAB 3 — Structures fiscales
   const tmi3=G('tmi2')/100, amort=G('amort');
-  // D3: détecter écart entre amortissement calculé et retenu manuellement
-  const amortEl=$('amort');
-  if(amortEl.dataset.calcVal && Math.abs(amort - +amortEl.dataset.calcVal) > 500){
-    if(!$('amortWarn')) {
-      const w=document.createElement('div');
-      w.id='amortWarn';w.className='box warn';w.style.marginTop='6px';
-      w.textContent='⚠️ Amortissement retenu ('+fe(amort)+'/an) différent de la valeur calculée par composants ('+fe(+amortEl.dataset.calcVal)+'/an). Vérifiez ou recalculez via le calculateur ci-dessus.';
-      amortEl.parentElement.appendChild(w);
-    }
-  } else {
-    const ow=$('amortWarn');if(ow)ow.remove();
-  }
-  const microCap=classt==='nc'?15000:83600, abatt=classt==='nc'?0.30:0.50; // LF2026: seuil classé 83600€
+  const microCap=classt==='nc'?MIC_NC_CAP:MIC_CL_CAP, abatt=classt==='nc'?0.30:0.50;
   const eligible=gross<=microCap;
 
   // LMNP micro-BIC
@@ -722,10 +826,8 @@ function c(){
   // LMNP réel
   const deductFixed=fixIds.reduce((s,id)=>s+(G(id)*M),0)-loanAn+intrAn;
   const reelBase=Math.max(0,gross-opCost-deductFixed-amort);
-  // C1 : au-delà de 23 000 € CA Airbnb, basculement vers cotisations sociales TNS (URSSAF)
-  // Taux TNS BIC services ≈ 37 % sur bénéfice net (vs PS 18,6 % en dessous du seuil)
-  const TNS_RATE=0.37;
-  const isTNS=gross>23000;
+  // C1 : au-delà de TNS_SEUIL (23 000 €) de CA Airbnb, basculement vers cotisations sociales TNS (URSSAF)
+  const isTNS=gross>TNS_SEUIL;
   const reelTax=reelBase*(isTNS?TNS_RATE:tmi3+PS);
   const reelNet=ebitda-fixed-reelTax;
 
@@ -771,7 +873,7 @@ function c(){
     `<div class="row bold total"><span>= Cash-flow net (LMNP réel)</span><span style="color:${cfn>=0?'var(--green)':'var(--red)'}">${fe(cfn)}</span></div>`;
 
   // Note explicative cashflow
-  const amortVal=G('amort'), taxSaving=amortVal*(tmi3+(isTNS?TNS_RATE:0.186));
+  const amortVal=G('amort'), taxSaving=amortVal*(tmi3+(isTNS?TNS_RATE:PS_BIC));
   let cfNote='';
   if(isTNS){
     cfNote='<div class="box warn">'+
@@ -793,13 +895,6 @@ function c(){
       L'amortissement (${fe(amortVal)}/an) est une charge <b>non décaissée</b> : il réduit l'impôt de ${fe(taxSaving)}/an (${fe(taxSaving/12)}/mois) sans sortir d'argent.
     </div>`;
   }
-  // C2: para-hôtellerie — si services additionnels fournis (ménage régulier, linge, réception, ptit-déj)
-  cfNote+='<div class="box warn" style="margin-top:6px">'+
-    '<b>Para-hôtellerie et TVA (art. 261 D, 4° CGI) :</b> si vous fournissez 3 services ou plus parmi : '+
-    'petit-déjeuner, ménage régulier (> 1x/semaine), linge de maison, réception de la clientèle, '+
-    'votre activité bascule en <b>para-hôtellerie</b> → assujettissement TVA 10 % + possible bascule en BIC professionnel. '+
-    'Non géré dans ce simulateur. Vérifiez avec un expert-comptable si vous proposez ces services.'+
-  '</div>';
   $('cashflowNote').innerHTML=cfNote;
 
   // Struct cards
@@ -869,21 +964,26 @@ function c(){
   $('bkLook').innerHTML=[
     [salNetM>0?'✅':'⚠️','Salaire',salNetM>0?'Atout majeur — revenu stable et justifiable':'Aucun salaire — indépendants scrutinés sur 3 ans'],
     [meNet>0?'⚠️':'—','Micro-entreprise (décote 30 %)',meNet>0?`Retenu : ${fe(meNet*.7)}/mois · 3 bilans exigés`:'Non renseigné'],
-    [airNet>0?'⚠️':'—','Airbnb (décote 30 %)',airNet>0?`Retenu : ${fe(airNet*.7)}/mois`:'Non renseigné'],
+    [airNet>0?'⚠️':'—','Airbnb net après impôt (décote bancaire 30 %)',airNet>0?`Retenu : ${fe(airNet*.7)}/mois (base = net fiscal)`:'Non renseigné'],
     [txEnd<=33?'✅':txEnd<=35?'⚠️':'🚫','Endettement',fp(txEnd)+(txEnd<=33?' — Excellent':txEnd<=35?' — Acceptable':' — Trop élevé')],
     ['💰','Reste à vivre',fe(totalRev-mensT-(totalChg-G('loyer')-G('crEx')))+'/mois'],
     ['🏦','Apport / notaire',fe(G('appt'))+' — frais notaire estimés : '+fe(prixMax*.08)],
   ].map(([i,k,v])=>`<div class="row"><span style="display:flex;gap:8px"><span>${i}</span><span style="color:var(--muted)">${k}</span></span><span style="font-size:12px;text-align:right;max-width:55%">${v}</span></div>`).join('');
 
   // Stocker les variables pour l'onglet Conseiller
-  lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,opCost,deductFixed,prixAcq:G('prixAcq')};
+  lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,opCost,deductFixed,prixAcq:G('prixAcq'),micNet,reelTax2:reelTax,bestK};
   calcConseil();
+  calcDeclaration();
+  saveState();
 }
 
 // ── CONSEILLER ────────────────────────────────────────────────────────────────
 function calcConseil(){
   var lc=lastCalc;
-  if(!lc||!lc.prixAcq) return;
+  if(!lc||!lc.prixAcq){
+    var rec=$('recommandation'); if(rec) rec.innerHTML='<div class="box info">Renseignez l\'onglet <b>Airbnb Paris</b> (ADR, occupation, prix d\'acquisition) pour afficher les recommandations.</div>';
+    return;
+  }
 
   // === 1. PROFIL FISCAL ===
   var revSal=G('cRevSal')||0;
@@ -891,6 +991,7 @@ function calcConseil(){
   var parts=parseFloat(document.getElementById('cParts').value)||1;
   var rfr=G('cRFR')||45000;
 
+  // Barème IR 2025 (revenus 2024) — seuils à vérifier lors de la publication du barème 2026
   function tmiFromRev(rev,p){
     var rn=rev/p;
     if(rn<=11497) return 0;
@@ -905,7 +1006,7 @@ function calcConseil(){
   badge.textContent=tmiPct+' %';
   badge.style.background=tmiPct>=30?'var(--acc)':'var(--green)';
   var tmi=tmiCalc>0?tmiCalc:(lc.tmi3||0.30);
-  var PS=0.186;
+  var PS=PS_BIC;
 
   // === 2. DONNEES DU BIEN ===
   var prixAcq=lc.prixAcq||300000;
@@ -928,7 +1029,7 @@ function calcConseil(){
   var ltRevAn=loyerLT*12*(1-vacLT);
   var ltComm=loyerLT*12*gstLT;
   var ltImpot=0; var ltRegime='micro-BIC 50%';
-  if(ltRevAn>83600){
+  if(ltRevAn>MIC_CL_CAP){
     var ltBase=Math.max(0,ltRevAn-ltComm-(fixed-loanAn)-amort);
     ltImpot=ltBase*(tmi+PS); ltRegime='LMNP reel';
   } else {
@@ -942,7 +1043,7 @@ function calcConseil(){
   var airRend=prixAcq>0?reelNet/prixAcq*100:0;
 
   var prixVente=prixAcq*0.95;
-  var venteRevAn=prixVente*0.04*(1-0.30);
+  var venteRevAn=prixVente*0.04*(1-PFU);
   var venteCFm=venteRevAn/12;
   var venteRend=prixAcq>0?venteRevAn/prixAcq*100:0;
 
@@ -962,14 +1063,14 @@ function calcConseil(){
     {id:'lt',  name:'Location longue duree', icon:'Cle',
      cfm:ltCFm,  impotAn:ltImpot,    revBrut:ltRevAn,       rend:ltRend,   regime:ltRegime,
      scores:{cashflow:scoreCF(ltCFm),  fiscalite:scoreFisc(ltImpot,ltRevAn), risque:7, gestion:7, patrimoine:scorePat(ltCFm)},
-     note:'LMNP reel si CA > 77 700 EUR/an (amortissement deductible). Revenus reguliers.'},
+     note:'LMNP reel si CA > '+MIC_CL_CAP.toLocaleString('fr-FR')+' EUR/an (amortissement deductible). Revenus reguliers.'},
     {id:'air', name:'Airbnb LMNP reel', icon:'Avion',
      cfm:airCFm, impotAn:reelTax,    revBrut:gross,         rend:airRend,  regime:'LMNP reel',
      scores:{cashflow:scoreCF(airCFm), fiscalite:scoreFisc(reelTax,gross), risque:4, gestion:3, patrimoine:scorePat(airCFm)},
      note:'Plafond 90 nuits/an en RP (loi Le Meur). Amortissement deductible. Gestion intensive.'},
     {id:'vte', name:'Vente + placement', icon:'Graphique',
-     cfm:venteCFm,impotAn:venteRevAn*0.30,revBrut:venteRevAn,rend:venteRend,regime:'Flat tax 30%',
-     scores:{cashflow:scoreCF(venteCFm),fiscalite:scoreFisc(venteRevAn*0.30,venteRevAn),risque:6,gestion:9,patrimoine:scorePat(venteCFm)},
+     cfm:venteCFm,impotAn:venteRevAn*PFU,revBrut:venteRevAn,rend:venteRend,regime:'Flat tax 31,4%',
+     scores:{cashflow:scoreCF(venteCFm),fiscalite:scoreFisc(venteRevAn*PFU,venteRevAn),risque:6,gestion:9,patrimoine:scorePat(venteCFm)},
      note:'Capital place en SCPI/PEA a ~4% brut. Passif mais perte de l\'effet levier credit.'}
   ];
 
@@ -1046,7 +1147,7 @@ function calcConseil(){
     });
     tbl+='</tr>';
   });
-  $('conseilCmpTbl').innerHTML=tbl;
+  $('cmpTbl').innerHTML=tbl;
 
   // === 7. RECOMMANDATION & ACTIONS ===
   var actions={
@@ -1080,13 +1181,6 @@ function calcConseil(){
   if(amort>0&&ltCFan<0) vigilance.push("Déficit LMNP réel (LT) reportable sur BIC meublés des 10 années suivantes — avantage fiscal différé.");
   if(loanAn>0) vigilance.push("Crédit en cours : "+fe(loanAn/12)+"/mois. Taux d'endettement global à vérifier <= 35% avant nouvel investissement (règle HCSF).");
   if(prixAcq>=1300000) vigilance.push("Patrimoine >= 1,3 M EUR : vérifiez le seuil IFI. Structurer en SCI peut réduire l'assiette taxable.");
-  // B4: option barème + CSG déductible
-  var tmiForBareme=tmiCalc>0?tmiCalc:(lc.tmi3||0.30);
-  if(tmiForBareme<=0.11){
-    vigilance.push("Option barème progressif (case 2OP) : si votre TMI est de 0% ou 11%, l\'option barème peut être plus favorable que le PFU 31,4% sur vos dividendes SCI/SASU. CSG 6,8% déductible du revenu global dans ce cas (art. 154 quinquies CGI). L\'option n\'est plus irrévocable depuis la LF 2026 — à arbitrer chaque année.");
-  } else {
-    vigilance.push("PFU 31,4% (flat tax) appliqué aux dividendes SCI/SASU. Si TMI <= 11%, l\'option barème (case 2OP) avec déduction CSG 6,8% pourrait être avantageuse. Sur revenus BIC meublé (LMNP) : PS non déductible — pas d\'option barème possible.");
-  }
 
   var sorted=[].concat(scenarios).sort(function(a,b){return b.total-a.total;});
   var actList=(actions[best.id]||[]).map(function(a){
@@ -1161,14 +1255,13 @@ function calcProjection(){
     // Scénario LT meublé — D4: seuil micro réévalué chaque année (inflation)
     const ltRev=loyerLT0*g*12*(1-vacLT);
     const ltComm=loyerLT0*g*12*gstLT;
-    // Seuil micro indexé sur inflation (LF2026: 83600€, revu chaque 3 ans mais on approx. avec inflation)
-    const ltSeuilMicro=83600*Math.pow(1+inf,y-1);
+    const ltSeuilMicro=MIC_CL_CAP*Math.pow(1+inf,y-1);
     let ltImp=0;
     if(ltRev>ltSeuilMicro){
       const ltBase=Math.max(0,ltRev-ltComm-(fixed-loanAn)-amort);
-      ltImp=ltBase*(tmi3+0.186);
+      ltImp=ltBase*(tmi3+PS_BIC);
     } else {
-      ltImp=ltRev*0.50*(tmi3+0.186);
+      ltImp=ltRev*0.50*(tmi3+PS_BIC);
     }
     const ltCF12=ltRev-ltComm-ltImp-fixed;
     cumLT+=ltCF12;
@@ -1177,7 +1270,8 @@ function calcProjection(){
     const grossY=gross0*g;
     const opCostY=opCost0*g;
     const airBase=Math.max(0,grossY-opCostY-(fixed-loanAn)-amort);
-    const airTax=airBase*(tmi3+0.186);
+    const isTNSy=grossY>TNS_SEUIL;
+    const airTax=airBase*(isTNSy?TNS_RATE:tmi3+PS_BIC);
     const airCF12=grossY-opCostY-airTax-fixed;
     cumAir+=airCF12;
 
@@ -1215,11 +1309,135 @@ function calcProjection(){
     '<div class="box info" style="margin-top:6px"><b>Note :</b> L\'amortissement LMNP réel s\'épuise par composant (mobilier 7 ans, installations/agencements 15 ans, façade 25 ans, gros oeuvre 50 ans). Au fil des années, la base imposable du scénario Airbnb augmente → l\'avantage fiscal se réduit.</div>';
 }
 
+// ── DÉCLARATION D'IMPÔTS : aide-mémoire personnalisé ────────────────────────────
+function caseRow(box,what,amount,why){
+  const amt=(amount!=null)?' → <span class="amt">'+fe(amount)+'</span>':'';
+  return '<div class="caseline"><span class="casebox">'+box+'</span><div class="casetxt"><span class="what">'+what+'</span>'+amt+'<span class="why">'+why+'</span></div></div>';
+}
+function fiche(ico,title,form,rows,steps){
+  let h='<div class="fiche"><div class="fiche-h"><span class="ico">'+ico+'</span><span class="t">'+title+'</span><span class="f">'+form+'</span></div><div class="fiche-b">'+rows.join('');
+  if(steps&&steps.length) h+='<div style="margin-top:10px;font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.3px">DÉMARCHES À FAIRE</div><ol class="steps">'+steps.map(s=>'<li>'+s+'</li>').join('')+'</ol>';
+  return h+'</div></div>';
+}
+function calcDeclaration(){
+  const el=$('declContent'); if(!el) return;
+  const B=[];
+  // 1 · SALAIRE
+  const salNetM=salMode==='net'?G('salN'):G('salB')*0.78;
+  if(salNetM>0) B.push(fiche('💼','Salaire / traitement','Formulaire 2042',
+    [caseRow('1AJ','Salaire net imposable',Math.round(salNetM*12),'Le plus souvent DÉJÀ pré-rempli par votre employeur — vérifiez simplement le montant. Pour votre conjoint(e) : case 1BJ.')]));
+  // 2 · MICRO-ENTREPRISE
+  const ca=G('meCA');
+  if(ca>0){
+    const caAn=Math.round(ca*12); let rows,steps;
+    if(meIR==='lib'){
+      const m={vte:['5TA','Ventes de marchandises'],svc:['5TB','Prestations de services / BIC'],bnc:['5TE','Activité libérale (BNC)'],cpv:['5TE','Activité libérale (BNC)']}[meType];
+      rows=[caseRow(m[0],m[1]+' — versement libératoire',caAn,'Votre impôt est DÉJÀ payé chaque mois/trimestre. On reporte quand même le chiffre d\'affaires : il sert à calculer le taux d\'imposition du foyer, mais n\'est pas réimposé.')];
+      steps=null;
+    } else {
+      const m={vte:['5KO','Ventes de marchandises (abattement 71 %)'],svc:['5KP','Prestations de services BIC (abattement 50 %)'],bnc:['5HQ','Recettes libérales BNC (abattement 34 %)'],cpv:['5HQ','Recettes libérales BNC (abattement 34 %)']}[meType];
+      rows=[caseRow(m[0],m[1],caAn,'Inscrivez votre chiffre d\'affaires ENCAISSÉ sur l\'année, AVANT abattement. Le fisc applique l\'abattement tout seul.')];
+      steps=['Indiquez aussi votre n° SIRET et le nombre de mois d\'activité dans l\'en-tête de la rubrique.'];
+    }
+    B.push(fiche('🧾','Micro-entreprise (auto-entrepreneur)','Formulaire 2042-C-PRO',rows,steps));
+  }
+  // 3 · LOCATION MEUBLÉE / AIRBNB
+  const grossAir=Math.round(lastCalc.gross||0), airN=G('airN');
+  if(grossAir>0||airN>0){
+    const recettes=grossAir>0?grossAir:Math.round(airN*12), cl=classt==='cl';
+    B.push(fiche('🏠','Airbnb / meublé — option simple (micro-BIC)','Formulaire 2042-C-PRO',
+      [caseRow(cl?'5NG':'5NH','Recettes de location meublée '+(cl?'— meublé de tourisme CLASSÉ (abattement 50 %)':'— meublé de tourisme NON classé, type Airbnb (abattement 30 %)'),recettes,'Total des sommes encaissées sur l\'année (loyers + ménage refacturé), avant abattement. Pour votre conjoint(e) : case '+(cl?'5OG':'5OH')+'. (Réforme « loi Le Meur » : l\'ancienne case 5ND du non classé est remplacée par 5NH à compter des revenus 2025.)')],
+      ['Avant la 1ʳᵉ location : enregistrez le logement en mairie (n° obligatoire à Paris) et créez votre activité sur le guichet unique INPI (formulaire P0i) pour obtenir un n° SIRET.']));
+    const reelNetAn=Math.round(lastCalc.reelNet||0), pos=reelNetAn>=0;
+    B.push(fiche('🏠','... ou option RÉEL (souvent plus avantageuse avec un crédit)','Formulaires 2031 → 2042-C-PRO',
+      [caseRow(pos?'5NA':'5NY',pos?'Bénéfice meublé non professionnel':'Déficit meublé (reportable 10 ans sur vos futurs loyers meublés)',Math.abs(reelNetAn),'Le résultat (recettes − charges − amortissement) se calcule d\'abord sur la déclaration 2031, puis se reporte ici. Demande en général un expert-comptable (~500 €/an, déductible).')],
+      ['Comparez micro-BIC et réel dans l\'onglet « Structure fiscale » : avec un crédit, le réel sort presque toujours gagnant grâce à l\'amortissement.']));
+  }
+  // 4 · DIVIDENDES
+  if(G('divN')>0) B.push(fiche('📈','Dividendes (SCI à l\'IS, SASU…)','Formulaire 2042 / 2042-C',[
+    caseRow('2DC','Montant BRUT des dividendes perçus',null,'Inscrivez le dividende brut (avant prélèvements). Taxé par défaut à la « flat tax » : 30 % sur les dividendes 2025, 31,4 % à partir des versements de 2026.'),
+    caseRow('2CG','Prélèvements sociaux déjà retenus',null,'En général pré-rempli par votre banque ou votre société.'),
+    caseRow('2OP','Case à COCHER pour choisir le barème progressif',null,'À cocher seulement si votre TMI est faible (0 ou 11 %) : le barème devient alors plus intéressant que la flat tax, avec une partie de la CSG déductible.')]));
+  el.innerHTML=B.length?B.join(''):'<div class="box info">Renseignez d\'abord vos revenus dans les onglets <b>Revenus</b> et <b>Airbnb Paris</b> — les cases à remplir s\'afficheront ici automatiquement.</div>';
+}
+
+// ── SAUVEGARDE LOCALE (localStorage) ────────────────────────────────────────────
+const LS_KEY='invest_dashboard_v1';
+var ready=false; // empêche d'écraser les données restaurées pendant l'init
+function saveState(){
+  if(!ready)return;
+  try{
+    const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible}};
+    document.querySelectorAll('input,select').forEach(e=>{if(e.id)d[e.id]=e.value;});
+    localStorage.setItem(LS_KEY,JSON.stringify(d));
+  }catch(e){}
+}
+function applySeg(seg){
+  const grp={salMode:['sModeS',v=>"setMode('"+v+"'"],meType:['sMeType',v=>"setMeType('"+v+"'"],meIR:['sMeIR',v=>"setMeIR('"+v+"'"],freq:['sFreq',v=>"setFreq('"+v+"'"],capN:['sCapN',v=>"setCap("+v],classt:['sClass',v=>"setClass('"+v+"'"],duree:['sDuree',v=>"setDuree("+v],cible:['sCible',v=>"setCible('"+v+"'"]};
+  Object.keys(grp).forEach(k=>{
+    if(seg[k]==null)return;
+    const cont=document.getElementById(grp[k][0]); if(!cont)return;
+    const needle=grp[k][1](seg[k]);
+    const btn=[...cont.querySelectorAll('button')].find(b=>(b.getAttribute('onclick')||'').includes(needle));
+    if(btn)btn.click();
+  });
+}
+function restoreState(){
+  try{
+    const raw=localStorage.getItem(LS_KEY); if(!raw)return;
+    const d=JSON.parse(raw);
+    Object.keys(d).forEach(k=>{if(k==='__seg')return;const e=document.getElementById(k);if(e&&d[k]!=null)e.value=d[k];});
+    if(d.__seg)applySeg(d.__seg);
+    document.querySelectorAll('select').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event('change'));});
+    document.querySelectorAll('input').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event('input'));});
+  }catch(e){}
+}
+function resetAll(){
+  if(confirm('Effacer toutes vos saisies et revenir aux valeurs par défaut ?')){
+    try{localStorage.removeItem(LS_KEY);}catch(e){}
+    location.reload();
+  }
+}
+
+// ── GLOSSAIRE : termes financiers expliqués au survol ───────────────────────────
+function glossate(){
+  const GLOS={
+    'TMI':'Taux Marginal d\'Imposition : le pourcentage d\'impôt qui frappe votre dernier euro de revenu (0, 11, 30, 41 ou 45 %).',
+    'auto-entrepreneur':'Statut simplifié : vous déclarez votre chiffre d\'affaires, l\'État calcule cotisations et impôt avec un abattement forfaitaire.',
+    'Prestations BIC':'Bénéfices Industriels et Commerciaux — revenus de services (artisan, commerce, location meublée).',
+    'Vente BIC':'Bénéfices Industriels et Commerciaux — revenus d\'achat-revente de marchandises.',
+    'Libéral BNC':'Bénéfices Non Commerciaux — revenus d\'une activité libérale (consultant, profession intellectuelle).',
+    'Versement libératoire':'Option pour payer l\'impôt sur le revenu en même temps que les cotisations, à taux fixe, plutôt qu\'au barème annuel.',
+    'Barème progressif':'L\'impôt classique calculé par tranches (de 0 à 45 %) sur l\'ensemble de vos revenus.',
+    'amortissement':'Déduction comptable : on étale le prix du bien et des meubles sur plusieurs années pour réduire l\'impôt, sans dépenser d\'argent réel.',
+    'Saisonnalité':'Variation des revenus selon les mois (haute et basse saison touristique).',
+    'CFE':'Cotisation Foncière des Entreprises : petit impôt local dû par les entreprises et loueurs meublés.',
+    'PNO':'Propriétaire Non Occupant : assurance à souscrire quand vous louez un bien que vous n\'habitez pas.'
+  };
+  const terms=Object.keys(GLOS).sort((a,b)=>b.length-a.length);
+  document.querySelectorAll('.stitle, .seg button, .tab').forEach(elm=>{
+    if(elm.childElementCount>0) return;
+    const txt=elm.textContent;
+    for(const t of terms){
+      const re=new RegExp('(?<![\\wÀ-ÿ-])'+t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![\\wÀ-ÿ-])');
+      const m=txt.match(re);
+      if(m){
+        const def=GLOS[t].replace(/"/g,'&quot;');
+        elm.innerHTML=txt.replace(re,'<span class="gl" tabindex="0">'+m[0]+'<span class="tip">'+def+'</span></span>');
+        break;
+      }
+    }
+  });
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 const sel=$('arrSel');
 Object.keys(ARR).forEach((k,i)=>{const o=document.createElement('option');o.value=k;o.textContent=k;if(i===10)o.selected=true;sel.appendChild(o);});
-setArr();
-calcAmort();
+restoreState();   // restaure les saisies AVANT tout calcul (sinon écrasées par les valeurs par défaut)
+setArr();         // dérive ADR/occupation depuis l'arrondissement
+calcAmort();       // dérive l'amortissement depuis le prix · déclenche c()
+ready=true;        // à partir d'ici, chaque modif est enregistrée
+glossate();        // ajoute les bulles d'aide sur les termes techniques
 // calcProjection() called via calcConseil() which is called from c()
 </script>
 </body>
