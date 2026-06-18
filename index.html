@@ -351,7 +351,20 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 <!-- ══ PANE 1 : L'APPARTEMENT ════════════════════════════════════════════════ -->
 <div class="pane" id="p1" role="tabpanel" aria-labelledby="tab1">
   <div class="box info" style="margin-bottom:14px">
-    <b>Étape 2 — Le bien et son financement.</b> Renseignez le prix, l'amortissement par composants et les conditions de crédit. Les intérêts et l'amortissement calculés ici alimentent les régimes réels (Airbnb, location).
+    <b>Étape 2 — Le bien et son financement.</b> Décrivez ici le logement, déjà acheté ou que vous visez. Le <b>prix</b> et l'<b>amortissement</b> calculés alimentent automatiquement les onglets Airbnb et Location nue (réduction d'impôt au réel, rentabilité).
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Le bien : projet ou déjà acquis ?</div>
+    <div class="field"><label>Nom du bien / projet</label>
+      <input type="text" id="bienNom" placeholder="Ex. Studio Bastille, T2 Montmartre…" oninput="onBienNom()" style="width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px"></div>
+    <div class="field"><label style="margin-bottom:6px">Situation</label>
+      <div class="seg" id="sBienStat">
+        <button class="on" onclick="setBienStat('projet',this)">Projet d'achat</button>
+        <button onclick="setBienStat('acquis',this)">Déjà acquis</button>
+      </div>
+    </div>
+    <div id="bienHelp" class="box info"></div>
   </div>
 
   <div class="sec">
@@ -375,6 +388,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
       <input type="range" id="amort" min="0" max="30000" value="9000" step="500" oninput="sp('amort','lAmt','€');c()"></div>
   </div>
 
+  <div id="projetA">
   <div class="box info" style="margin-bottom:14px">
     <b>Règle HCSF :</b> taux d'endettement max <b>35 %</b> des revenus nets retenus. Revenus non-salariaux décotés de <b>30 %</b> (moyenne 3 ans). Dividendes décotés <b>50 %</b>. Taux marché <b>juin 2026</b> (CAFPI) : 3,20 % sur 15 ans · 3,37 % sur 20 ans · 3,48 % sur 25 ans.
   </div>
@@ -410,8 +424,11 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     </div>
   </div>
 
+  </div><!-- /projetA -->
+
+  <div id="acquisBlock">
   <div class="sec">
-    <div class="stitle">Prêt déjà en cours (optionnel)</div>
+    <div class="stitle">Prêt déjà en cours</div>
     <div class="box info" style="margin-bottom:10px">Partez d'une situation réelle plutôt que d'un projet neuf : renseignez un crédit déjà partiellement amorti. Sa mensualité est ajoutée à vos charges de crédit pour le calcul du taux d'endettement.</div>
     <div class="g3">
       <div class="field"><label>Capital restant dû <strong id="lExCap">0 €</strong></label>
@@ -424,6 +441,9 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="row bold"><span>Mensualité du prêt en cours</span><span id="exMensOut" style="color:var(--orange)">—</span></div>
   </div>
 
+  </div><!-- /acquisBlock -->
+
+  <div id="projetB">
   <div class="g2" style="margin-bottom:14px">
     <div class="kpi" style="border-left-color:var(--acc)"><div class="lbl">Capacité d'emprunt</div><div class="num" id="bkCap" style="color:var(--acc)">—</div><div class="sub2" id="bkMens"></div></div>
     <div class="kpi"><div class="lbl">Budget acquisition max</div><div class="num" id="bkPrix">—</div><div class="sub2" id="bkSub"></div></div>
@@ -459,12 +479,13 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   <div class="src">
     <b>Sources :</b> Taux immobiliers juin 2026 : CAFPI (3,20/3,37/3,48 %) · Pretto · Meilleurtaux · Capifrance. Règle HCSF : taux endettement max 35 %, déc. 2021, maintenu 2026. Décote revenus indépendants : pratique bancaire standard. <i>Ce simulateur est indicatif — consultez un courtier pour une analyse personnalisée.</i>
   </div>
+  </div><!-- /projetB -->
 </div>
 
 <!-- ══ PANE 2 : AIRBNB ══════════════════════════════════════════════════════ -->
 <div class="pane" id="p2" role="tabpanel" aria-labelledby="tab2">
   <div class="box info" style="margin-bottom:14px">
-    <b>Étape 3 — Exploitation Airbnb.</b> Estimez le chiffre d'affaires et le cash-flow d'une location courte durée à Paris.
+    <b>Étape 3 — Exploitation Airbnb<span class="bienNomEcho" style="font-weight:700"></span>.</b> Estimez le chiffre d'affaires et le cash-flow d'une location courte durée à Paris. Le crédit du bien est repris automatiquement depuis l'onglet « L'appartement ».
   </div>
   <div class="sec">
     <div class="stitle">Bien & marché</div>
@@ -504,6 +525,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
       <button class="on" onclick="setFreq('m',this)">Saisie mensuelle</button>
       <button onclick="setFreq('a',this)">Saisie annuelle</button>
     </div>
+    <label style="font-size:11.5px;color:var(--muted);display:flex;gap:6px;align-items:center;margin:0 0 10px"><input type="checkbox" id="loanAuto" checked onchange="c()" style="width:auto;margin:0"> Reporter automatiquement le crédit du bien (mensualité + intérêts) depuis l'onglet « L'appartement »</label>
     <div class="g2">
       <div class="field"><label>Crédit (mensualité totale) <strong id="lLoan">0 €</strong></label><input type="number" id="loan" value="0" step="50" oninput="fv('loan','lLoan');c()"></div>
       <div class="field"><label>Dont intérêts (déductibles réel) <strong id="lIntr">0 €</strong></label><input type="number" id="intr" value="0" step="20" oninput="fv('intr','lIntr');c()"></div>
@@ -550,7 +572,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 <!-- ══ PANE 3 : LOCATION NUE / COLOCATION ════════════════════════════════════ -->
 <div class="pane" id="p3" role="tabpanel" aria-labelledby="tab3">
   <div class="box info" style="margin-bottom:14px">
-    <b>Étape 4 — Location nue ou colocation.</b> Comparez une location classique (vide ou meublée longue durée) à l'Airbnb : loyers plus faibles, mais gestion légère et fiscalité différente.
+    <b>Étape 4 — Location nue ou colocation<span class="bienNomEcho" style="font-weight:700"></span>.</b> Comparez une location classique (vide ou meublée longue durée) à l'Airbnb : loyers plus faibles, mais gestion légère et fiscalité différente.
   </div>
 
   <div class="sec">
@@ -715,7 +737,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 <!-- ══ PANE 5 : BILAN ════════════════════════════════════════════════════════ -->
 <div class="pane" id="p5" role="tabpanel" aria-labelledby="tab5">
   <div class="box info" style="margin-bottom:14px">
-    <b>Étape 6 — Votre bilan.</b> Vue d'ensemble : revenus du foyer, charges courantes, épargne et synthèse de votre projet immobilier.
+    <b>Étape 6 — Votre bilan<span class="bienNomEcho" style="font-weight:700"></span>.</b> Vue d'ensemble : revenus du foyer, charges courantes, épargne et synthèse de votre projet immobilier.
   </div>
 
   <div class="sec o">
@@ -838,6 +860,7 @@ const SEA={Jan:.78,Fév:.80,Mar:.92,Avr:1.05,Mai:1.18,Juin:1.25,Juil:1.20,Aoû:1
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let salMode='net', meType='svc', meIR='bar', freq='m', capN=90, classt='nc', duree=20, cible='rp';
 let lnType='nu', lnRegime='micro', lnFreq='m', salFreq='m', lnResult={net:0,annNet:0,tax:0,rendNet:0};
+let bienStat='projet', lastCapEmp=0;
 let lastCalc={};
 const $=id=>document.getElementById(id);
 const G=id=>+($(id).value||0);
@@ -859,6 +882,17 @@ function sp(id,lbl,u=''){$(lbl).textContent=$(id).value+u}
 function setMode(m,b){salMode=m;document.querySelectorAll('#sModeS button').forEach(x=>x.classList.toggle('on',x===b));$('netF').style.display=m==='net'?'':'none';$('brutF').style.display=m==='brut'?'':'none';c()}
 function applySalFreq(f){salFreq=f;document.querySelectorAll('#sSalFreq button').forEach((x,i)=>x.classList.toggle('on',(f==='m'&&i===0)||(f==='a'&&i===1)));const u=f==='m'?'mensuel':'annuel';if($('salFreqLblN'))$('salFreqLblN').textContent=u;if($('salFreqLblB'))$('salFreqLblB').textContent=u;}
 function setSalFreq(f,b){if(f!==salFreq){const k=f==='a'?12:1/12;$('salN').value=Math.round(G('salN')*k);$('salB').value=Math.round(G('salB')*k);fv('salN','lSN');fv('salB','lSB');}applySalFreq(f);c();}
+function applyBienStat(){
+  const proj=bienStat==='projet';
+  ['projetA','projetB'].forEach(id=>{if($(id))$(id).style.display=proj?'':'none';});
+  if($('acquisBlock'))$('acquisBlock').style.display=proj?'none':'';
+  if($('bienHelp'))$('bienHelp').innerHTML=proj
+    ? '<b>Projet d\'achat.</b> Renseignez le prix visé et les conditions de prêt : l\'outil calcule votre <b>capacité d\'emprunt</b>, l\'échéancier et l\'amortissement. La mensualité et les intérêts sont <b>reportés automatiquement</b> dans l\'onglet Airbnb (et déduits au régime réel).'
+    : '<b>Bien déjà acquis.</b> Renseignez le prix payé (pour l\'amortissement) et votre <b>prêt en cours</b> (capital restant dû). Sa mensualité et ses intérêts sont reportés automatiquement dans Airbnb et dans le calcul d\'endettement.';
+}
+function setBienStat(s,b){bienStat=s;document.querySelectorAll('#sBienStat button').forEach(x=>x.classList.toggle('on',x===b));applyBienStat();c();}
+function refreshBienNom(){const v=($('bienNom')&&$('bienNom').value.trim())||'';document.querySelectorAll('.bienNomEcho').forEach(e=>e.textContent=v?(' — '+v):'');}
+function onBienNom(){refreshBienNom();saveState();}
 function setMeType(t,b){meType=t;document.querySelectorAll('#sMeType button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setMeIR(t,b){meIR=t;document.querySelectorAll('#sMeIR button').forEach(x=>x.classList.toggle('on',x===b));$('tmiF').style.display=t==='bar'?'block':'none';c()}
 function setFreq(f,b){freq=f;document.querySelectorAll('#sFreq button').forEach(x=>x.classList.toggle('on',x===b));c()}
@@ -997,6 +1031,24 @@ function calcLocCompare(rentAn,charges,inter,amort,tmi,prix){
 // ── MAIN CALC ─────────────────────────────────────────────────────────────────
 function c(){
   const PS=PS_BIC, tmi=G('tmi')/100;
+
+  // Report automatique du crédit du bien (onglet Appartement) dans les charges Airbnb
+  if($('loanAuto')){
+    if($('loanAuto').checked){
+      let arCap,arTaux,arDur,arDiff;
+      if(bienStat==='acquis'){arCap=G('exCap');arTaux=G('exTaux');arDur=G('exDur');arDiff=0;}
+      else{arCap=G('montEmp')>0?G('montEmp'):Math.max(0,G('prixAcq')-G('appt'));arTaux=G('tauxM')>0?G('tauxM'):tauxMarche(duree);arDur=duree;arDiff=G('diff');}
+      if(arCap>0&&arDur>0){
+        const schA=loanSchedule(arCap,arTaux,arDur,arDiff);
+        const assMo=bienStat==='acquis'?0:arCap*G('assE')/100/12;
+        const unit=freq==='m'?1:12;
+        $('loan').value=Math.round((schA.pay+assMo)*unit);
+        $('intr').value=Math.round((schA.yearly[0].int/12)*unit);
+      } else {$('loan').value=0;$('intr').value=0;}
+      fv('loan','lLoan');fv('intr','lIntr');
+      $('loan').readOnly=true;$('intr').readOnly=true;
+    } else {$('loan').readOnly=false;$('intr').readOnly=false;}
+  }
 
   // SALAIRE (saisie mensuelle ou annuelle)
   const salDiv = salFreq==='a'?12:1;
@@ -1224,6 +1276,7 @@ function c(){
   const existC=G('crEx')+exMens;
   const mensMax=Math.max(0,revB*.35-existC);
   const capEmp=capB(mensMax,taux,duree);
+  lastCapEmp=capEmp; // mémorisé pour le report auto du crédit au prochain calcul
   const prixMax=capEmp+G('appt');
   const mensC=mens(capEmp,taux,duree);
   const assM=capEmp*G('assE')/100/12;
@@ -1725,13 +1778,13 @@ var ready=false; // empêche d'écraser les données restaurées pendant l'init
 function saveState(){
   if(!ready)return;
   try{
-    const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible,lnType,lnRegime,lnFreq,salFreq}};
+    const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible,lnType,lnRegime,lnFreq,salFreq,bienStat}};
     document.querySelectorAll('input,select').forEach(e=>{if(e.id)d[e.id]=e.type==='checkbox'?e.checked:e.value;});
     localStorage.setItem(LS_KEY,JSON.stringify(d));
   }catch(e){}
 }
 function applySeg(seg){
-  const grp={salMode:['sModeS',v=>"setMode('"+v+"'"],meType:['sMeType',v=>"setMeType('"+v+"'"],meIR:['sMeIR',v=>"setMeIR('"+v+"'"],freq:['sFreq',v=>"setFreq('"+v+"'"],capN:['sCapN',v=>"setCap("+v],classt:['sClass',v=>"setClass('"+v+"'"],duree:['sDuree',v=>"setDuree("+v],cible:['sCible',v=>"setCible('"+v+"'"],lnType:['sLnType',v=>"setLnType('"+v+"'"],lnRegime:['sLnRegime',v=>"setLnRegime('"+v+"'"]};
+  const grp={salMode:['sModeS',v=>"setMode('"+v+"'"],meType:['sMeType',v=>"setMeType('"+v+"'"],meIR:['sMeIR',v=>"setMeIR('"+v+"'"],freq:['sFreq',v=>"setFreq('"+v+"'"],capN:['sCapN',v=>"setCap("+v],classt:['sClass',v=>"setClass('"+v+"'"],duree:['sDuree',v=>"setDuree("+v],cible:['sCible',v=>"setCible('"+v+"'"],lnType:['sLnType',v=>"setLnType('"+v+"'"],lnRegime:['sLnRegime',v=>"setLnRegime('"+v+"'"],bienStat:['sBienStat',v=>"setBienStat('"+v+"'"]};
   Object.keys(grp).forEach(k=>{
     if(seg[k]==null)return;
     const cont=document.getElementById(grp[k][0]); if(!cont)return;
@@ -1794,6 +1847,8 @@ function glossate(){
 const sel=$('arrSel');
 Object.keys(ARR).forEach((k,i)=>{const o=document.createElement('option');o.value=k;o.textContent=k;if(i===10)o.selected=true;sel.appendChild(o);});
 restoreState();   // restaure les saisies AVANT tout calcul (sinon écrasées par les valeurs par défaut)
+applyBienStat();  // affiche les bonnes sections (projet / acquis)
+refreshBienNom(); // affiche le nom du bien dans les onglets
 setArr();         // dérive ADR/occupation depuis l'arrondissement
 calcAmort();       // dérive l'amortissement depuis le prix · déclenche c()
 ready=true;        // à partir d'ici, chaque modif est enregistrée
