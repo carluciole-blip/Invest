@@ -249,6 +249,11 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="box warn" style="margin-top:6px;font-size:11px">⚠️ Barème IR affiché : seuils 2025 (revenus 2024) — à vérifier lors de la parution du barème 2026. Barèmes sociaux mis à jour : juin 2026 (LFSS 2026).</div>
   </div>
 
+  <div class="sec">
+    <div class="stitle">Impact des revenus locatifs sur votre impôt</div>
+    <div id="impactFiscal"></div>
+  </div>
+
   <div class="sec g">
     <div class="stitle">Salaire / activité salariée</div>
     <div class="seg g" id="sModeS">
@@ -814,6 +819,11 @@ const $=id=>document.getElementById(id);
 const G=id=>+($(id).value||0);
 const fe=n=>Math.round(n).toLocaleString('fr-FR')+' €';
 const fp=(n,d=1)=>n.toFixed(d)+' %';
+// Barème IR 2025 (revenus 2024) — par part · à revérifier au barème 2026
+const IR_BR=[[11497,0],[29315,0.11],[83823,0.30],[180294,0.41],[Infinity,0.45]];
+function bareme(r){let t=0,p=0;for(const [c,rate] of IR_BR){if(r>p){t+=(Math.min(r,c)-p)*rate;p=c;}else break;}return t;}
+function impotFoyer(rev,parts){return bareme(rev/parts)*parts;}
+function tmiTranche(rp){return rp<=11497?0:rp<=29315?0.11:rp<=83823?0.30:rp<=180294?0.41:0.45;}
 
 // ── UI HELPERS ────────────────────────────────────────────────────────────────
 function sw(i){
@@ -1199,14 +1209,39 @@ function c(){
   }
 
   // Stocker les variables pour l'onglet Conseiller
-  lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,opCost,deductFixed,prixAcq:G('prixAcq'),micNet,reelTax2:reelTax,bestK};
+  lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,opCost,deductFixed,prixAcq:G('prixAcq'),micNet,reelTax2:reelTax,bestK,micBase,reelBase};
   calcConseil();
   calcDeclaration();
   saveState();
 }
 
 // ── CONSEILLER ────────────────────────────────────────────────────────────────
+// ── IMPACT FISCAL EN TEMPS RÉEL : IR du foyer avant/après revenus locatifs ───────
+function calcImpactFiscal(){
+  if(!$('impactFiscal'))return;
+  const parts=parseFloat(($('cParts')||{}).value)||1;
+  const baseFoyer=(G('cRevSal')||0)+(G('cRevFon')||0);
+  const micB=Math.round((lastCalc&&lastCalc.micBase)||0);
+  const reelB=Math.round((lastCalc&&lastCalc.reelBase)||0);
+  const irAvant=impotFoyer(baseFoyer,parts), tmiAvant=tmiTranche(baseFoyer/parts);
+  function ligne(nom,base){
+    const irApres=impotFoyer(baseFoyer+base,parts), tmiApres=tmiTranche((baseFoyer+base)/parts);
+    const delta=irApres-irAvant, change=tmiApres>tmiAvant;
+    const ps=base*PS_BIC;
+    return '<div class="row"><span>'+nom+'<span class="dim" style="font-size:11px"> · base imposable +'+fe(base)+'</span></span>'+
+      '<span style="text-align:right">IR '+fe(irApres)+' <b style="color:var(--red)">(+'+fe(delta)+')</b>'+
+      (change?'<br><span style="color:var(--red);font-size:11px">⇧ vous changez de tranche : '+Math.round(tmiAvant*100)+' % → '+Math.round(tmiApres*100)+' %</span>':'')+
+      '<br><span class="dim" style="font-size:11px">+ PS 18,6 % BIC : '+fe(ps)+'</span></span></div>';
+  }
+  $('impactFiscal').innerHTML=
+    '<div class="row bold"><span>IR du foyer AVANT location</span><span>'+fe(irAvant)+' · TMI '+Math.round(tmiAvant*100)+' %</span></div>'+
+    ligne('Si Airbnb au micro-BIC',micB)+
+    ligne('Si Airbnb au réel (LMNP)',reelB)+
+    '<div class="box info" style="margin-top:8px">Impôt sur le revenu estimé au barème 2025 ('+parts+' part'+(parts>1?'s':'')+'). « Base » = revenu locatif imposable qui s\'ajoute à votre foyer. En <b>nom propre</b> (micro ou réel) il augmente votre IR ; en <b>SCI/SASU à l\'IS</b>, il n\'impacte pas votre IR personnel. Les revenus locatifs supportent en plus les prélèvements sociaux (18,6 % en BIC meublé).</div>';
+}
+
 function calcConseil(){
+  calcImpactFiscal();
   var lc=lastCalc;
   if(!lc||!lc.prixAcq){
     var rec=$('recommandation'); if(rec) rec.innerHTML='<div class="box info">Renseignez l\'onglet <b>Airbnb Paris</b> (ADR, occupation, prix d\'acquisition) pour afficher les recommandations.</div>';
