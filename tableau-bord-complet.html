@@ -795,8 +795,14 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 
   <div class="sec">
     <div class="stitle">Vue multi-activités (fiscalité consolidée)</div>
+    <div class="field"><label style="margin-bottom:6px">Exploitation du bien comptée dans le total</label>
+      <div class="seg" id="sExpMode">
+        <button class="on" onclick="setExpMode('airbnb',this)">Airbnb</button>
+        <button onclick="setExpMode('location',this)">Location longue durée</button>
+      </div>
+    </div>
     <div style="overflow-x:auto"><table class="ctable" id="multiActivite"></table></div>
-    <div style="font-size:11.5px;color:var(--muted);margin-top:8px">Toutes vos activités regroupées : salaire, formation/auto-entreprise, locations… avec leur régime fiscal et leur net annuel. Utile pour piloter plusieurs sources en parallèle (ex. formation + location).</div>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:8px">Vos activités regroupées (salaire, formation/auto-entreprise, dividendes…) <b>plus une seule exploitation du bien</b> : Airbnb et location longue durée sont deux usages <b>alternatifs</b> du même appartement, donc jamais cumulés. L'autre option est affichée à titre de comparaison.</div>
   </div>
 </div>
 
@@ -877,7 +883,7 @@ const SEA={Jan:.78,Fév:.80,Mar:.92,Avr:1.05,Mai:1.18,Juin:1.25,Juil:1.20,Aoû:1
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let salMode='net', meType='svc', meIR='bar', freq='m', capN=90, classt='nc', duree=20, cible='rp';
 let lnType='nu', lnRegime='micro', lnFreq='m', salFreq='m', lnResult={net:0,annNet:0,tax:0,rendNet:0};
-let bienStat='projet', lastCapEmp=0, lnBest={netM:0,label:'—'};
+let bienStat='projet', expMode='airbnb', lastCapEmp=0, lnBest={netM:0,label:'—'};
 let lastCalc={};
 const $=id=>document.getElementById(id);
 const G=id=>+($(id).value||0);
@@ -908,6 +914,7 @@ function applyBienStat(){
     : '<b>Bien déjà acquis.</b> Renseignez le prix payé (pour l\'amortissement) et votre <b>prêt en cours</b> (capital restant dû). Sa mensualité et ses intérêts sont reportés automatiquement dans Airbnb et dans le calcul d\'endettement.';
 }
 function setBienStat(s,b){bienStat=s;document.querySelectorAll('#sBienStat button').forEach(x=>x.classList.toggle('on',x===b));applyBienStat();c();}
+function setExpMode(m,b){expMode=m;document.querySelectorAll('#sExpMode button').forEach(x=>x.classList.toggle('on',x===b));c();}
 function refreshBienNom(){const v=($('bienNom')&&$('bienNom').value.trim())||'';document.querySelectorAll('.bienNomEcho').forEach(e=>e.textContent=v?(' — '+v):'');}
 function onBienNom(){refreshBienNom();c();}
 function setMeType(t,b){meType=t;document.querySelectorAll('#sMeType button').forEach(x=>x.classList.toggle('on',x===b));c()}
@@ -1373,20 +1380,23 @@ function c(){
       '<div class="box info" style="margin-top:10px">Comparaison indicative du cash-flow mensuel net. Affinez chaque stratégie dans les onglets dédiés et l\'onglet Optimisation.</div>';
   }
 
-  // Point 2 — vue multi-activités (fiscalité consolidée)
+  // Point 2 — vue multi-activités (Airbnb et location = usages ALTERNATIFS du même bien, jamais cumulés)
   if($('multiActivite')){
     const meRegLbl=meIR==='lib'?'Micro · versement libératoire':({svc:'Micro-BIC services',vte:'Micro-BIC vente',bnc:'Micro-BNC',cpv:'Micro-BNC Cipav'}[meType]||'Micro');
+    const airRow={n:'Bien exploité en Airbnb',net:reelNet,reg:'LMNP réel (BIC)'};
+    const locRow={n:'Bien en location longue durée',net:lnResult.annNet,reg:(lnType==='nu'?'Foncier':'BIC meublé')+' · '+(lnRegime==='micro'?'micro':'réel')};
+    const chosen=expMode==='location'?locRow:airRow, alt=expMode==='location'?airRow:locRow;
     const acts=[
       {n:'Salaire',net:salNetM*12,reg:'Traitements & salaires (IR barème)'},
       {n:'France Travail (chômage)',net:ftNet*12,reg:'Chômage (IR barème)'},
       {n:'Micro-entreprise / formation',net:meNet*12,reg:meRegLbl},
-      {n:'Airbnb (LMNP réel)',net:reelNet,reg:'LMNP réel (BIC)'},
-      {n:'Location nue / coloc',net:lnResult.annNet,reg:(lnType==='nu'?'Foncier':'BIC meublé')+' · '+(lnRegime==='micro'?'micro':'réel')},
+      chosen,
       {n:'Dividendes + autres',net:(divNet+autRev)*12,reg:'Capitaux / divers'},
     ].filter(a=>Math.abs(a.net)>0.5);
     let mt='<tr><th>Activité</th><th>Régime fiscal</th><th>Net / an</th><th>Net / mois</th></tr>', tot=0;
     acts.forEach(a=>{tot+=a.net;mt+='<tr><td>'+a.n+'</td><td style="color:var(--muted);font-size:11.5px">'+a.reg+'</td><td>'+fe(a.net)+'</td><td>'+fe(a.net/12)+'</td></tr>';});
-    mt+='<tr class="tot"><td>TOTAL toutes activités</td><td></td><td class="hi">'+fe(tot)+'</td><td class="hi">'+fe(tot/12)+'</td></tr>';
+    mt+='<tr class="tot"><td>TOTAL (exploitation retenue)</td><td></td><td class="hi">'+fe(tot)+'</td><td class="hi">'+fe(tot/12)+'</td></tr>';
+    mt+='<tr><td style="color:var(--muted)">↳ Alternative : '+alt.n+'</td><td style="color:var(--muted);font-size:11.5px">'+alt.reg+' · non cumulée</td><td style="color:var(--muted)">'+fe(alt.net)+'</td><td style="color:var(--muted)">'+fe(alt.net/12)+'</td></tr>';
     $('multiActivite').innerHTML=mt;
   }
 
@@ -1816,13 +1826,13 @@ var ready=false; // empêche d'écraser les données restaurées pendant l'init
 function saveState(){
   if(!ready)return;
   try{
-    const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible,lnType,lnRegime,lnFreq,salFreq,bienStat}};
+    const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible,lnType,lnRegime,lnFreq,salFreq,bienStat,expMode}};
     document.querySelectorAll('input,select').forEach(e=>{if(e.id)d[e.id]=e.type==='checkbox'?e.checked:e.value;});
     localStorage.setItem(LS_KEY,JSON.stringify(d));
   }catch(e){}
 }
 function applySeg(seg){
-  const grp={salMode:['sModeS',v=>"setMode('"+v+"'"],meType:['sMeType',v=>"setMeType('"+v+"'"],meIR:['sMeIR',v=>"setMeIR('"+v+"'"],freq:['sFreq',v=>"setFreq('"+v+"'"],capN:['sCapN',v=>"setCap("+v],classt:['sClass',v=>"setClass('"+v+"'"],duree:['sDuree',v=>"setDuree("+v],cible:['sCible',v=>"setCible('"+v+"'"],lnType:['sLnType',v=>"setLnType('"+v+"'"],lnRegime:['sLnRegime',v=>"setLnRegime('"+v+"'"],bienStat:['sBienStat',v=>"setBienStat('"+v+"'"]};
+  const grp={salMode:['sModeS',v=>"setMode('"+v+"'"],meType:['sMeType',v=>"setMeType('"+v+"'"],meIR:['sMeIR',v=>"setMeIR('"+v+"'"],freq:['sFreq',v=>"setFreq('"+v+"'"],capN:['sCapN',v=>"setCap("+v],classt:['sClass',v=>"setClass('"+v+"'"],duree:['sDuree',v=>"setDuree("+v],cible:['sCible',v=>"setCible('"+v+"'"],lnType:['sLnType',v=>"setLnType('"+v+"'"],lnRegime:['sLnRegime',v=>"setLnRegime('"+v+"'"],bienStat:['sBienStat',v=>"setBienStat('"+v+"'"],expMode:['sExpMode',v=>"setExpMode('"+v+"'"]};
   Object.keys(grp).forEach(k=>{
     if(seg[k]==null)return;
     const cont=document.getElementById(grp[k][0]); if(!cont)return;
