@@ -563,8 +563,14 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
         <button onclick="setLnRegime('reel',this)">Réel (charges réelles)</button>
       </div>
     </div>
+    <div class="field"><label style="margin-bottom:6px">Saisie du loyer</label>
+      <div class="seg" id="sLnFreq">
+        <button class="on" onclick="setLnFreq('m',this)">Mensuel</button>
+        <button onclick="setLnFreq('a',this)">Annuel</button>
+      </div>
+    </div>
     <div class="g2">
-      <div class="field"><label>Loyer mensuel (hors charges) <strong id="lLnLoyer">1 400 €</strong></label>
+      <div class="field"><label>Loyer <span id="lnFreqLbl">mensuel</span> (hors charges) <strong id="lLnLoyer">1 400 €</strong></label>
         <input type="number" id="lnLoyer" value="1400" step="50" oninput="fv('lnLoyer','lLnLoyer');c()"></div>
       <div class="field"><label>Vacance locative <strong id="lLnVac">8 %</strong></label>
         <input type="range" id="lnVac" min="0" max="20" value="8" step="1" oninput="sp('lnVac','lLnVac','%');c()"></div>
@@ -582,6 +588,12 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="stitle">Détail du calcul</div>
     <div id="lnOut"></div>
     <div id="lnNote" style="margin-top:10px"></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Comparaison des 4 régimes (mêmes loyers & charges)</div>
+    <div style="overflow-x:auto"><table class="ctable" id="lnCompare"></table></div>
+    <div style="font-size:11.5px;color:var(--muted);margin-top:8px">★ = régime le plus rentable avec vos paramètres. Le réel meublé déduit aussi l'amortissement saisi dans « L'appartement ».</div>
   </div>
 
   <details class="info">
@@ -684,6 +696,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
       <p style="margin-bottom:8px"><b>LMNP réel simplifié :</b> déduction de toutes les charges réelles + amortissement (80 % du bien sur 25-30 ans, terrain non amortissable). Bénéfice souvent ≈ 0. Déficit reportable 10 ans sur BIC meublés (pas sur salaire). À compter du 15 février 2025 (LF 2025, art. 84) : amortissements déduits réintégrés dans le prix d'acquisition pour le calcul de la plus-value (exception : résidences étudiantes, seniors, Ehpad).</p>
       <p style="margin-bottom:8px"><b>SCI à l'IS :</b> la location meublée (Airbnb) bascule automatiquement une SCI à l'IS si recettes meublées &gt; 10 % des recettes totales. IS 15 % jusqu'à 100 000 € (LF 2026), puis 25 %. Distribution : flat tax 31,4 % (LFSS 2026). Double imposition IS + flat tax.</p>
       <p style="margin-bottom:8px"><b>SASU / SAS à l'IS :</b> même IS 15 %/100 000 € + flat tax 31,4 %. Intéressante si bénéfices réinvestis sans distribution. Inconvénient majeur : plus-value professionnelle à la revente (valeur nette comptable, pas d'abattement durée de détention particuliers).</p>
+      <p style="margin-bottom:8px"><b>EURL à l'IR :</b> société unipersonnelle transparente — le bénéfice (charges et amortissement déduits, comme au réel) est imposé directement à votre IR, mais le gérant associé unique relève du régime <b>TNS</b> : cotisations sociales d'environ 37 % du bénéfice (au lieu des seuls 18,6 % de PS en nom propre). Souvent moins avantageuse que le LMNP réel en nom propre pour une activité de location, sauf besoin de cadre sociétaire. L'EURL peut aussi opter pour l'IS (fiscalité alors proche d'une SASU, avec gérant TNS).</p>
       <div class="wbox">⚠️ Flat tax (PFU) : 31,4 % depuis le 1ᵉʳ janvier 2026 (LFSS 2026, loi n°2025-1403, IR 12,8 % + PS 18,6 %) — hausse CSG 9,2 % → 10,6 % sur dividendes et revenus du capital mobilier. PS 18,6 % s'applique aux BIC de location meublée. Les plus-values immobilières restent à 19 % + 17,2 % PS (CSG 9,2 % non impactée).</div>
       <div class="gbox">✅ Dans la majorité des cas avec un crédit immobilier, le LMNP réel simplifié ressort comme la structure la plus avantageuse grâce à l'amortissement qui neutralise l'impôt sans décaisser de trésorerie. Attention toutefois à l'impact fiscal à la revente depuis la réforme de fév. 2025.</div>
     </div>
@@ -813,7 +826,7 @@ const SEA={Jan:.78,Fév:.80,Mar:.92,Avr:1.05,Mai:1.18,Juin:1.25,Juil:1.20,Aoû:1
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let salMode='net', meType='svc', meIR='bar', freq='m', capN=90, classt='nc', duree=20, cible='rp';
-let lnType='nu', lnRegime='micro', lnResult={net:0,annNet:0,tax:0,rendNet:0};
+let lnType='nu', lnRegime='micro', lnFreq='m', lnResult={net:0,annNet:0,tax:0,rendNet:0};
 let lastCalc={};
 const $=id=>document.getElementById(id);
 const G=id=>+($(id).value||0);
@@ -843,6 +856,8 @@ function setDureeNum(v){duree=+v||1;$('lDuree').textContent=duree+' ans';documen
 function setCible(cl,b){cible=cl;document.querySelectorAll('#sCible button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setLnType(t,b){lnType=t;document.querySelectorAll('#sLnType button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setLnRegime(r,b){lnRegime=r;document.querySelectorAll('#sLnRegime button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function applyLnFreq(f){lnFreq=f;document.querySelectorAll('#sLnFreq button').forEach((x,i)=>x.classList.toggle('on',(f==='m'&&i===0)||(f==='a'&&i===1)));if($('lnFreqLbl'))$('lnFreqLbl').textContent=f==='m'?'mensuel':'annuel';}
+function setLnFreq(f,b){if(f!==lnFreq){const v=G('lnLoyer');$('lnLoyer').value=Math.round(f==='a'?v*12:v/12);fv('lnLoyer','lLnLoyer');}applyLnFreq(f);c();}
 function setArr(){const d=ARR[$('arrSel').value];$('adr').value=Math.round(d.adr*1.2/5)*5;$('occ').value=d.occ;sp('adr','lADR','€');sp('occ','lOcc','%');$('arrI').textContent='Médiane : '+d.adr+' €/nuit · occ. '+d.occ+'% · +20% pour 70m²/6 couchages';c()}
 function syncTMI(){$('tmi').value=$('tmi2').value;$('lTMI').textContent=$('tmi2').value+' %'}
 function syncTMIReverse(){$('tmi2').value=$('tmi').value;$('lTMI2').textContent=$('tmi').value+' %'}
@@ -886,9 +901,9 @@ function loanSchedule(cap,tauxPct,years,diffM){
 // ── LOCATION NUE / COLOCATION (longue durée) ────────────────────────────────────
 function calcLocNue(){
   if(!$('lnLoyer'))return;
-  const loyerM=G('lnLoyer'), vac=G('lnVac')/100, charges=G('lnCharges'), inter=G('lnInter'), amort=G('amort');
+  const vac=G('lnVac')/100, charges=G('lnCharges'), inter=G('lnInter'), amort=G('amort');
   const tmi=G('tmi2')/100, prix=G('prixAcq');
-  const rentAn=loyerM*12*(1-vac);
+  const rentAn=(lnFreq==='m'?G('lnLoyer')*12:G('lnLoyer'))*(1-vac);
   const meuble=(lnType==='meu'||lnType==='colo');
   const PS=meuble?PS_BIC:PS_PV; // 18,6 % meublé BIC ; 17,2 % foncier nu
   if($('lnAmortEcho'))$('lnAmortEcho').textContent=fe(amort)+'/an';
@@ -931,6 +946,39 @@ function calcLocNue(){
   if(meuble) note+='<div class="box info" style="margin-top:6px">Une colocation est le plus souvent meublée → elle relève du LMNP (BIC), même fiscalité que la location meublée longue durée.</div>';
   else note+='<div class="box info" style="margin-top:6px">Location nue = revenus fonciers (PS 17,2 %). Au réel, un déficit foncier s\'impute sur le revenu global jusqu\'à 10 700 €/an.</div>';
   $('lnNote').innerHTML=note;
+  calcLocCompare(rentAn,charges,inter,amort,tmi,prix);
+}
+
+// Tableau unifié : les 4 régimes de la location longue durée comparés côte à côte
+function calcLocCompare(rentAn,charges,inter,amort,tmi,prix){
+  if(!$('lnCompare'))return;
+  function scen(meuble,regime){
+    const PS=meuble?PS_BIC:PS_PV;
+    let base, cases;
+    if(regime==='micro'){base=rentAn*(meuble?0.50:0.30);cases=meuble?'5NI':'4BE';}
+    else{base=Math.max(0,rentAn-charges-inter-(meuble?amort:0));cases=meuble?'5NA/5NY':'4BA';}
+    const tax=base*(tmi+PS);
+    const annNet=rentAn-(regime==='reel'?charges+inter:0)-tax;
+    return {annNet,tax,cases,rend:prix>0?annNet/prix*100:0};
+  }
+  const list=[
+    {n:'Location nue · micro-foncier',s:scen(false,'micro')},
+    {n:'Location nue · réel',s:scen(false,'reel')},
+    {n:'Meublé/coloc · micro-BIC',s:scen(true,'micro')},
+    {n:'Meublé/coloc · réel (LMNP)',s:scen(true,'reel')},
+  ];
+  const bestNet=Math.max(...list.map(x=>x.s.annNet));
+  let t='<tr><th>Régime</th><th>Impôt+PS / an</th><th>Net / an</th><th>Net / mois</th><th>Rent. nette</th><th>Case</th></tr>';
+  list.forEach(x=>{
+    const hi=x.s.annNet===bestNet;
+    t+='<tr'+(hi?' class="tot"':'')+'><td style="color:var(--muted)">'+x.n+(hi?' ★':'')+'</td>'+
+      '<td style="color:var(--red)">'+fe(x.s.tax)+'</td>'+
+      '<td'+(hi?' class="hi"':'')+'>'+fe(x.s.annNet)+'</td>'+
+      '<td>'+fe(x.s.annNet/12)+'</td>'+
+      '<td>'+(prix>0?fp(x.s.rend,2):'—')+'</td>'+
+      '<td>'+x.s.cases+'</td></tr>';
+  });
+  $('lnCompare').innerHTML=t;
 }
 
 // ── MAIN CALC ─────────────────────────────────────────────────────────────────
@@ -1047,9 +1095,15 @@ function c(){
   const sasuFT=(sasuBase-sasuIS)*.314;
   const sasuNet=ebitda-fixed-sasuIS-sasuFT;
 
+  // EURL à l'IR (gérant majoritaire = TNS) : bénéfice BIC (charges + amort. déduits) imposé à l'IR + cotisations TNS
+  const eurlBase=reelBase;
+  const eurlTax=eurlBase*(tmi3+TNS_RATE);
+  const eurlNet=ebitda-fixed-eurlTax;
+
   const structs=[
     {k:'mic',name:'LMNP micro-BIC',net:micNet,tax:micTax,note:eligible?'':'⚠️ CA > plafond '+fe(microCap)+' → Réel obligatoire'},
     {k:'ree',name:'LMNP réel simplifié',net:reelNet,tax:reelTax,note:'Amort. '+fe(amort)+'/an · charges déduites'},
+    {k:'eur',name:'EURL à l\'IR',net:eurlNet,tax:eurlTax,note:'Gérant TNS (cotisations ~37%) · amort. déductible'},
     {k:'sci',name:'SCI à l\'IS',net:sciNet,tax:sciIS+sciFT,note:'IS 15/25% + flat tax 31,4% (double imp.)'},
     {k:'sas',name:'SASU / SAS IS',net:sasuNet,tax:sasuIS+sasuFT,note:'Plus-value pro à la revente (sans abattement)'},
   ];
@@ -1113,17 +1167,17 @@ function c(){
     </div>`;}).join('');
 
   // Compare table
-  const cols=['LMNP micro-BIC','LMNP réel','SCI IS','SASU IS'];
-  const netRow=[micNet,reelNet,sciNet,sasuNet];
-  const taxRow=[micTax,reelTax,sciIS+sciFT,sasuIS+sasuFT];
+  const cols=['LMNP micro-BIC','LMNP réel','EURL à l\'IR','SCI IS','SASU IS'];
+  const netRow=[micNet,reelNet,eurlNet,sciNet,sasuNet];
+  const taxRow=[micTax,reelTax,eurlTax,sciIS+sciFT,sasuIS+sasuFT];
   const rows=[
-    {l:'Structure',v:['Nom propre (SIRET)','Nom propre (SIRET)','Société civile','Soc. commerciale']},
-    {l:'Impôt de base',v:['TMI + 18,6 % PS','TMI + 18,6 % PS','IS 15 %/100k€/25 %','IS 15 %/100k€/25 %']},
-    {l:'Déduction charges',v:[abatt*100+'% abattement','Réelles + amort.','Réelles + amort.','Réelles + amort.']},
-    {l:'Amortissement',v:['Non','Oui ('+fe(amort)+'/an)','Oui','Oui']},
-    {l:'Distribution bénéf.',v:['Revenus directs','Revenus directs','Flat tax 31,4 %','Flat tax 31,4 %']},
-    {l:'Plus-value revente',v:['Particulier + réintég.','Particulier + réintég.','Particulier (SCI IR) / IS','IS — très défavorable']},
-    {l:'Plafond micro',v:[fe(microCap),'—','—','—']},
+    {l:'Structure',v:['Nom propre (SIRET)','Nom propre (SIRET)','Société (1 associé)','Société civile','Soc. commerciale']},
+    {l:'Impôt de base',v:['TMI + 18,6 % PS','TMI + 18,6 % PS','TMI + cotis. TNS','IS 15 %/100k€/25 %','IS 15 %/100k€/25 %']},
+    {l:'Déduction charges',v:[abatt*100+'% abattement','Réelles + amort.','Réelles + amort.','Réelles + amort.','Réelles + amort.']},
+    {l:'Amortissement',v:['Non','Oui ('+fe(amort)+'/an)','Oui','Oui','Oui']},
+    {l:'Distribution bénéf.',v:['Revenus directs','Revenus directs','Revenus directs (TNS)','Flat tax 31,4 %','Flat tax 31,4 %']},
+    {l:'Plus-value revente',v:['Particulier + réintég.','Particulier + réintég.','Pro (si IR : particulier)','Particulier (SCI IR) / IS','IS — très défavorable']},
+    {l:'Plafond micro',v:[fe(microCap),'—','—','—','—']},
     {l:'Impôt total / an',v:taxRow.map(t=>fe(t))},
     {l:'Net dans la poche / an',v:netRow.map(n=>fe(n)),bold:true},
     {l:'Net / mois',v:netRow.map(n=>fe(n/12)),bold:true},
@@ -1634,7 +1688,7 @@ var ready=false; // empêche d'écraser les données restaurées pendant l'init
 function saveState(){
   if(!ready)return;
   try{
-    const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible,lnType,lnRegime}};
+    const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible,lnType,lnRegime,lnFreq}};
     document.querySelectorAll('input,select').forEach(e=>{if(e.id)d[e.id]=e.type==='checkbox'?e.checked:e.value;});
     localStorage.setItem(LS_KEY,JSON.stringify(d));
   }catch(e){}
@@ -1655,6 +1709,7 @@ function restoreState(){
     const d=JSON.parse(raw);
     Object.keys(d).forEach(k=>{if(k==='__seg')return;const e=document.getElementById(k);if(e&&d[k]!=null){if(e.type==='checkbox')e.checked=!!d[k];else e.value=d[k];}});
     if(d.__seg)applySeg(d.__seg);
+    if(d.__seg&&d.__seg.lnFreq)applyLnFreq(d.__seg.lnFreq); // sans conversion : la valeur stockée est déjà dans la bonne unité
     document.querySelectorAll('select').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event('change'));});
     document.querySelectorAll('input').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event(e.type==='checkbox'?'change':'input'));});
   }catch(e){}
