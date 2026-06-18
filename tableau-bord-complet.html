@@ -740,6 +740,8 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <b>Étape 6 — Votre bilan<span class="bienNomEcho" style="font-weight:700"></span>.</b> Vue d'ensemble : revenus du foyer, charges courantes, épargne et synthèse de votre projet immobilier.
   </div>
 
+  <div id="bienVerdict" style="margin-bottom:14px"></div>
+
   <div class="sec o">
     <div class="stitle">Logement</div>
     <div class="g2">
@@ -860,7 +862,7 @@ const SEA={Jan:.78,Fév:.80,Mar:.92,Avr:1.05,Mai:1.18,Juin:1.25,Juil:1.20,Aoû:1
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let salMode='net', meType='svc', meIR='bar', freq='m', capN=90, classt='nc', duree=20, cible='rp';
 let lnType='nu', lnRegime='micro', lnFreq='m', salFreq='m', lnResult={net:0,annNet:0,tax:0,rendNet:0};
-let bienStat='projet', lastCapEmp=0;
+let bienStat='projet', lastCapEmp=0, lnBest={netM:0,label:'—'};
 let lastCalc={};
 const $=id=>document.getElementById(id);
 const G=id=>+($(id).value||0);
@@ -892,7 +894,7 @@ function applyBienStat(){
 }
 function setBienStat(s,b){bienStat=s;document.querySelectorAll('#sBienStat button').forEach(x=>x.classList.toggle('on',x===b));applyBienStat();c();}
 function refreshBienNom(){const v=($('bienNom')&&$('bienNom').value.trim())||'';document.querySelectorAll('.bienNomEcho').forEach(e=>e.textContent=v?(' — '+v):'');}
-function onBienNom(){refreshBienNom();saveState();}
+function onBienNom(){refreshBienNom();c();}
 function setMeType(t,b){meType=t;document.querySelectorAll('#sMeType button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setMeIR(t,b){meIR=t;document.querySelectorAll('#sMeIR button').forEach(x=>x.classList.toggle('on',x===b));$('tmiF').style.display=t==='bar'?'block':'none';c()}
 function setFreq(f,b){freq=f;document.querySelectorAll('#sFreq button').forEach(x=>x.classList.toggle('on',x===b));c()}
@@ -998,7 +1000,6 @@ function calcLocNue(){
 
 // Tableau unifié : les 4 régimes de la location longue durée comparés côte à côte
 function calcLocCompare(rentAn,charges,inter,amort,tmi,prix){
-  if(!$('lnCompare'))return;
   function scen(meuble,regime){
     const PS=meuble?PS_BIC:PS_PV;
     let base, cases;
@@ -1015,6 +1016,9 @@ function calcLocCompare(rentAn,charges,inter,amort,tmi,prix){
     {n:'Meublé/coloc · réel (LMNP)',s:scen(true,'reel')},
   ];
   const bestNet=Math.max(...list.map(x=>x.s.annNet));
+  const bestItem=list.find(x=>x.s.annNet===bestNet);
+  lnBest={netM:bestNet/12,label:bestItem?bestItem.n:'—'}; // meilleur régime LT pour le verdict du Bilan
+  if(!$('lnCompare'))return;
   let t='<tr><th>Régime</th><th>Impôt+PS / an</th><th>Net / an</th><th>Net / mois</th><th>Rent. nette</th><th>Case</th></tr>';
   list.forEach(x=>{
     const hi=x.s.annNet===bestNet;
@@ -1322,6 +1326,25 @@ function c(){
 
   // Location nue / colocation (onglet dédié) + synthèse Bilan
   calcLocNue();
+  // Verdict : Airbnb vs Location longue durée (en haut du Bilan)
+  if($('bienVerdict')){
+    const cfAir=reelNet/12, cfLT=lnBest.netM, prixV=G('prixAcq');
+    const airWins=cfAir>=cfLT, diff=Math.abs(cfAir-cfLT);
+    const nom=($('bienNom')&&$('bienNom').value.trim())?(' — '+$('bienNom').value.trim()):'';
+    const cardA='<div class="kpi" style="border-left-color:var(--acc)'+(airWins?';background:var(--good-bg);border:2px solid var(--green)':'')+'">'+
+      '<div class="lbl">✈️ AIRBNB (LMNP réel)</div><div class="num">'+fe(cfAir)+'<span style="font-size:12px;font-weight:400">/mois</span></div>'+
+      '<div class="sub2">'+(prixV>0?fp(reelNet/prixV*100,2)+' net':'')+(airWins?' · ✅ recommandé':'')+'</div></div>';
+    const cardL='<div class="kpi" style="border-left-color:var(--green)'+(!airWins?';background:var(--good-bg);border:2px solid var(--green)':'')+'">'+
+      '<div class="lbl">🔑 LOCATION LONGUE DURÉE</div><div class="num">'+fe(cfLT)+'<span style="font-size:12px;font-weight:400">/mois</span></div>'+
+      '<div class="sub2">'+lnBest.label+(!airWins?' · ✅ recommandé':'')+'</div></div>';
+    const verdict=airWins
+      ?'<b>✈️ L\'Airbnb est plus rentable</b> de <b>'+fe(diff)+'/mois</b> ('+fe(diff*12)+'/an) que la meilleure location longue durée ('+lnBest.label+'). En contrepartie : gestion intensive, saisonnalité, et plafond de 90 nuits/an en résidence principale (loi Le Meur).'
+      :'<b>🔑 La location longue durée est plus rentable</b> de <b>'+fe(diff)+'/mois</b> ('+fe(diff*12)+'/an) que l\'Airbnb, pour une gestion bien plus légère et des revenus réguliers. Régime conseillé : '+lnBest.label+'.';
+    $('bienVerdict').innerHTML='<div class="sec" style="border:2px solid var(--acc)">'+
+      '<div class="stitle" style="color:var(--acc)">Airbnb ou location longue durée'+nom+' ?</div>'+
+      '<div class="g2">'+cardA+cardL+'</div>'+
+      '<div class="box good" style="margin-top:10px">'+verdict+'</div></div>';
+  }
   if($('bilanSynth')){
     const cfAir=reelNet/12, cfLn=lnResult.net;
     const better=cfAir>=cfLn?'Airbnb (LMNP réel)':('Location '+(lnType==='nu'?'nue':'longue durée'));
