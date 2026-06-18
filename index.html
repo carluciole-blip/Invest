@@ -202,17 +202,52 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 
 <!-- TABS -->
 <div class="tabs" role="tablist">
-  <button class="tab on" role="tab" aria-selected="true"  id="tab0" aria-controls="p0" onclick="sw(0)">Revenus</button>
-  <button class="tab"    role="tab" aria-selected="false" id="tab1" aria-controls="p1" onclick="sw(1)">Charges</button>
-  <button class="tab"    role="tab" aria-selected="false" id="tab2" aria-controls="p2" onclick="sw(2)">Airbnb Paris</button>
-  <button class="tab"    role="tab" aria-selected="false" id="tab3" aria-controls="p3" onclick="sw(3)">Structure fiscale</button>
-  <button class="tab"    role="tab" aria-selected="false" id="tab4" aria-controls="p4" onclick="sw(4)">Banque</button>
-  <button class="tab"    role="tab" aria-selected="false" id="tab5" aria-controls="p5" onclick="sw(5)">Conseiller</button>
+  <button class="tab on" role="tab" aria-selected="true"  id="tab0" aria-controls="p0" onclick="sw(0)">🧾 Situation fiscale</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab1" aria-controls="p1" onclick="sw(1)">🏢 L'appartement</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab2" aria-controls="p2" onclick="sw(2)">✈️ Airbnb</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab3" aria-controls="p3" onclick="sw(3)">🔑 Location nue / coloc</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab4" aria-controls="p4" onclick="sw(4)">💡 Optimisation</button>
+  <button class="tab"    role="tab" aria-selected="false" id="tab5" aria-controls="p5" onclick="sw(5)">📊 Bilan</button>
   <button class="tab"    role="tab" aria-selected="false" id="tab6" aria-controls="p6" onclick="sw(6)">📋 Déclaration</button>
 </div>
 
-<!-- ══ PANE 0 : REVENUS ══════════════════════════════════════════════════════ -->
+<!-- ══ PANE 0 : SITUATION FISCALE ════════════════════════════════════════════ -->
 <div class="pane on" id="p0" role="tabpanel" aria-labelledby="tab0">
+
+  <div class="box info" style="margin-bottom:14px">
+    <b>Étape 1 — Votre situation fiscale.</b> Renseignez vos revenus réels (salaires, France Travail, auto-entreprise…) et votre foyer. Tout le simulateur (impôt, capacité d'emprunt, optimisation) part de ces chiffres.
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Mon foyer fiscal <span style="font-size:12px;font-weight:400;color:var(--muted)">(d'après votre avis d'imposition N-1)</span></div>
+    <div class="g2">
+      <label class="field">Nombre de parts fiscales
+        <select id="cParts" onchange="calcConseil()">
+          <option value="1">1 part</option>
+          <option value="1.5">1,5 parts</option>
+          <option value="2">2 parts</option>
+          <option value="2.5">2,5 parts</option>
+          <option value="3">3 parts</option>
+        </select>
+      </label>
+      <label class="field">Situation familiale
+        <select id="cSit" onchange="calcConseil()">
+          <option>Célibataire</option>
+          <option>Couple</option>
+          <option>Couple + 1 enfant</option>
+          <option>Couple + 2 enfants</option>
+        </select>
+      </label>
+      <label class="field">Revenus salariaux nets N-1 (€)<input type="number" id="cRevSal" value="50000" oninput="calcConseil()"></label>
+      <label class="field">Revenus fonciers / BIC N-1 (€)<input type="number" id="cRevFon" value="0" oninput="calcConseil()"></label>
+      <label class="field">RFR N-2 (€) <span style="font-size:11px;color:var(--muted)">(versement libératoire)</span><input type="number" id="cRFR" value="45000" oninput="calcConseil()"></label>
+      <label class="field">Tranche marginale (TMI) calculée
+        <div style="margin-top:6px"><span id="cTMIbadge" style="display:inline-block;padding:4px 14px;border-radius:20px;color:#fff;font-weight:700;font-size:16px;background:var(--green)">—</span></div>
+      </label>
+    </div>
+    <div class="box info" style="margin-top:8px;font-size:12px">La TMI est le taux qui frappe votre dernier euro de revenu : elle détermine l'impôt sur vos futurs loyers. Ajoutez vos revenus Airbnb/locatifs pour voir si vous changez de tranche dans l'onglet Optimisation.</div>
+    <div class="box warn" style="margin-top:6px;font-size:11px">⚠️ Barème IR affiché : seuils 2025 (revenus 2024) — à vérifier lors de la parution du barème 2026. Barèmes sociaux mis à jour : juin 2026 (LFSS 2026).</div>
+  </div>
 
   <div class="sec g">
     <div class="stitle">Salaire / activité salariée</div>
@@ -279,19 +314,23 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="stitle">Revenus locatifs & autres</div>
     <div class="g2">
       <div class="field"><label>Airbnb net / mois <strong id="lAir">1 200 €</strong></label>
-        <input type="number" id="airN" value="1200" step="50" oninput="fv('airN','lAir');c()"></div>
+        <input type="number" id="airN" value="1200" step="50" oninput="fv('airN','lAir');c()">
+        <label style="font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-top:5px"><input type="checkbox" id="airManual" onchange="c()" style="width:auto;margin:0"> Saisie manuelle (ne pas recalculer auto.)</label></div>
+      <div class="field"><label>France Travail (chômage) net / mois <strong id="lFT">0 €</strong></label>
+        <input type="number" id="ftN" value="0" step="50" oninput="fv('ftN','lFT');c()"></div>
       <div class="field"><label>Dividendes nets / mois <strong id="lDiv">0 €</strong></label>
         <input type="number" id="divN" value="0" step="50" oninput="fv('divN','lDiv');c()"></div>
       <div class="field"><label>Autres revenus nets / mois <strong id="lAut">0 €</strong></label>
         <input type="number" id="autR" value="0" step="50" oninput="fv('autR','lAut');c()"></div>
     </div>
-    <div class="box info">Le net Airbnb est automatiquement mis à jour depuis l'onglet Airbnb Paris → Structure fiscale.</div>
+    <div class="box info">Le net Airbnb est mis à jour automatiquement depuis l'onglet Optimisation. Cochez « Saisie manuelle » pour figer votre propre montant. Les allocations France Travail ne sont en général pas retenues par les banques.</div>
   </div>
 
   <div class="sec">
     <div class="stitle">Récapitulatif revenus nets</div>
     <div class="row"><span>Salaire net</span><span id="rR0">—</span></div>
     <div class="row"><span>Micro-entreprise net</span><span id="rR1">—</span></div>
+    <div class="row"><span>France Travail (chômage)</span><span id="rRFT">—</span></div>
     <div class="row"><span>Airbnb net</span><span id="rR2">—</span></div>
     <div class="row"><span>Dividendes + autres</span><span id="rR3">—</span></div>
     <div class="row bold total"><span>TOTAL NETS / MOIS</span><span id="rRTot" style="color:var(--acc)">—</span></div>
@@ -299,42 +338,124 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   </div>
 </div>
 
-<!-- ══ PANE 1 : CHARGES ══════════════════════════════════════════════════════ -->
+<!-- ══ PANE 1 : L'APPARTEMENT ════════════════════════════════════════════════ -->
 <div class="pane" id="p1" role="tabpanel" aria-labelledby="tab1">
-  <div class="sec o">
-    <div class="stitle">Logement</div>
+  <div class="box info" style="margin-bottom:14px">
+    <b>Étape 2 — Le bien et son financement.</b> Renseignez le prix, l'amortissement par composants et les conditions de crédit. Les intérêts et l'amortissement calculés ici alimentent les régimes réels (Airbnb, location).
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Acquisition & amortissement par composants</div>
     <div class="g2">
-      <div class="field"><label>Loyer ou crédit RP <strong id="lLoy">1 200 €</strong></label>
-        <input type="number" id="loyer" value="1200" step="50" oninput="fv('loyer','lLoy');c()"></div>
-      <div class="field"><label>Crédits existants (hors RP) <strong id="lCrEx">0 €</strong></label>
-        <input type="number" id="crEx" value="0" step="50" oninput="fv('crEx','lCrEx');c()"></div>
+      <div class="field"><label>Prix d'acquisition (FAI) <strong id="lPrix">300 000 €</strong></label>
+        <input type="number" id="prixAcq" value="300000" step="5000" oninput="fv('prixAcq','lPrix');calcAmort()"></div>
+      <div class="field"><label>Quote-part terrain (non amortissable) <strong id="lTerrain">15 %</strong></label>
+        <input type="range" id="terrain" min="5" max="30" value="15" step="1" oninput="sp('terrain','lTerrain','%');calcAmort()"></div>
+    </div>
+    <div id="amortDetail" style="background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;font-size:12px">
+      <div class="row dim"><span>Gros oeuvre (50% · 50 ans)</span><span id="aGO">—</span></div>
+      <div class="row dim"><span>Façade (15% · 25 ans)</span><span id="aFac">—</span></div>
+      <div class="row dim"><span>Agencements cuisine/SdB (20% · 15 ans)</span><span id="aAgen">—</span></div>
+      <div class="row dim"><span>Installations techniques (10% · 15 ans)</span><span id="aInst">—</span></div>
+      <div class="row dim"><span>Mobilier & équipements (5% · 7 ans)</span><span id="aMob">—</span></div>
+      <div class="row bold total"><span>Amortissement total / an</span><span id="aTot" style="color:var(--acc)">—</span></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">Économie fiscale annuelle (TMI + PS) : <span id="aEco" style="color:var(--green);font-weight:600">—</span> — l'amortissement réduit l'impôt sans impact sur le cash.</div>
+    </div>
+    <div class="field"><label>Amortissement annuel retenu <strong id="lAmt">9 000 €</strong></label>
+      <input type="range" id="amort" min="0" max="30000" value="9000" step="500" oninput="sp('amort','lAmt','€');c()"></div>
+  </div>
+
+  <div class="box info" style="margin-bottom:14px">
+    <b>Règle HCSF :</b> taux d'endettement max <b>35 %</b> des revenus nets retenus. Revenus non-salariaux décotés de <b>30 %</b> (moyenne 3 ans). Dividendes décotés <b>50 %</b>. Taux marché <b>juin 2026</b> (CAFPI) : 3,20 % sur 15 ans · 3,37 % sur 20 ans · 3,48 % sur 25 ans.
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Profil de l'emprunt</div>
+    <div class="g2">
+      <div class="field"><label>Apport personnel <strong id="lAppt">50 000 €</strong></label>
+        <input type="number" id="appt" value="50000" step="5000" oninput="fv('appt','lAppt');c()"></div>
+      <div class="field">
+        <label style="margin-bottom:6px">Durée du prêt <strong id="lDuree">20 ans</strong></label>
+        <div class="seg" id="sDuree">
+          <button onclick="setDuree(15,this)">15 ans</button>
+          <button class="on" onclick="setDuree(20,this)">20 ans</button>
+          <button onclick="setDuree(25,this)">25 ans</button>
+        </div>
+        <input type="number" id="dureeNum" value="20" min="1" max="30" step="1" oninput="setDureeNum(this.value)" style="margin-top:6px">
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">Durée libre (années) — ou utilisez les boutons.</div>
+      </div>
+    </div>
+    <div class="field"><label>Taux mannel (0 = marché) <strong id="lTauxM">0 %</strong></label>
+      <input type="range" id="tauxM" min="0" max="6" value="0" step="0.05" oninput="sp('tauxM','lTauxM','%');c()"></div>
+    <div class="field"><label>Assurance emprunteur <strong id="lAssE">0,25 %/an</strong></label>
+      <input type="range" id="assE" min="0" max="0.6" value="0.25" step="0.05" oninput="sp('assE','lAssE','%/an');c()"></div>
+    <div class="field"><label>Différé d'amortissement <strong id="lDiff">0 mois</strong></label>
+      <input type="range" id="diff" min="0" max="36" value="0" step="1" oninput="sp('diff','lDiff',' mois');c()">
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">Pendant le différé, vous ne payez que les intérêts (courant pour le neuf / l'investissement locatif).</div></div>
+    <div class="field"><label style="margin-bottom:6px">Projet financé</label>
+      <div class="seg" id="sCible">
+        <button class="on" onclick="setCible('rp',this)">Résidence principale</button>
+        <button onclick="setCible('loc',this)">Investissement locatif</button>
+      </div>
     </div>
   </div>
-  <div class="sec g">
-    <div class="stitle">Vie courante</div>
-    <div class="g2">
-      <div class="field"><label>Transport <strong id="lTrp">150 €</strong></label><input type="number" id="trp" value="150" step="10" oninput="fv('trp','lTrp');c()"></div>
-      <div class="field"><label>Alimentation <strong id="lAlim">500 €</strong></label><input type="number" id="alim" value="500" step="25" oninput="fv('alim','lAlim');c()"></div>
-      <div class="field"><label>Santé / mutuelle <strong id="lSnte">80 €</strong></label><input type="number" id="snte" value="80" step="10" oninput="fv('snte','lSnte');c()"></div>
-      <div class="field"><label>Abonnements <strong id="lAbo">100 €</strong></label><input type="number" id="abo" value="100" step="10" oninput="fv('abo','lAbo');c()"></div>
-      <div class="field"><label>Loisirs <strong id="lLois">200 €</strong></label><input type="number" id="lois" value="200" step="25" oninput="fv('lois','lLois');c()"></div>
-      <div class="field"><label>Épargne forcée (PEL, PER…) <strong id="lEpF">200 €</strong></label><input type="number" id="epF" value="200" step="50" oninput="fv('epF','lEpF');c()"></div>
+
+  <div class="sec">
+    <div class="stitle">Prêt déjà en cours (optionnel)</div>
+    <div class="box info" style="margin-bottom:10px">Partez d'une situation réelle plutôt que d'un projet neuf : renseignez un crédit déjà partiellement amorti. Sa mensualité est ajoutée à vos charges de crédit pour le calcul du taux d'endettement.</div>
+    <div class="g3">
+      <div class="field"><label>Capital restant dû <strong id="lExCap">0 €</strong></label>
+        <input type="number" id="exCap" value="0" step="5000" oninput="fv('exCap','lExCap');c()"></div>
+      <div class="field"><label>Taux <strong id="lExTaux">3 %</strong></label>
+        <input type="range" id="exTaux" min="0" max="6" value="3" step="0.05" oninput="sp('exTaux','lExTaux','%');c()"></div>
+      <div class="field"><label>Durée restante <strong id="lExDur">15 ans</strong></label>
+        <input type="number" id="exDur" value="15" min="1" max="30" step="1" oninput="document.getElementById('lExDur').textContent=this.value+' ans';c()"></div>
     </div>
-    <div class="field"><label>Autres charges <strong id="lAutC">100 €</strong></label><input type="number" id="autC" value="100" step="25" oninput="fv('autC','lAutC');c()"></div>
+    <div class="row bold"><span>Mensualité du prêt en cours</span><span id="exMensOut" style="color:var(--orange)">—</span></div>
   </div>
-  <div class="sec" id="bilanSec">
-    <div class="stitle">Bilan mensuel</div>
-    <div class="row"><span>Revenus nets</span><span id="bRev" style="color:var(--acc)">—</span></div>
-    <div class="row dim"><span>Logement</span><span id="bLog">—</span></div>
-    <div class="row dim"><span>Vie courante</span><span id="bVie">—</span></div>
-    <div class="row bold total"><span>ÉPARGNE NETTE</span><span id="bEp">—</span></div>
-    <div class="row"><span>Taux d'épargne</span><span id="bTx">—</span></div>
-    <div id="epAlrt"></div>
+
+  <div class="g2" style="margin-bottom:14px">
+    <div class="kpi" style="border-left-color:var(--acc)"><div class="lbl">Capacité d'emprunt</div><div class="num" id="bkCap" style="color:var(--acc)">—</div><div class="sub2" id="bkMens"></div></div>
+    <div class="kpi"><div class="lbl">Budget acquisition max</div><div class="num" id="bkPrix">—</div><div class="sub2" id="bkSub"></div></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Détail du calcul bancaire</div>
+    <div class="row"><span>Revenus retenus par la banque</span><span id="bkRevB">—</span></div>
+    <div class="row dim"><span>35 % max (règle HCSF)</span><span id="bk35">—</span></div>
+    <div class="row dim"><span>Crédits existants à déduire</span><span id="bkExC">—</span></div>
+    <div class="row bold"><span>Mensualité max disponible</span><span id="bkMM">—</span></div>
+    <div class="row dim"><span>Mensualité crédit (hors ass.)</span><span id="bkMC">—</span></div>
+    <div class="row dim"><span>Assurance / mois</span><span id="bkAM">—</span></div>
+    <div class="row bold total"><span>Mensualité TOTALE</span><span id="bkMT" style="color:var(--acc)">—</span></div>
+    <div class="row"><span>Taux d'endettement après projet</span><span id="bkTx">—</span></div>
+    <div id="bkAlrt"></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Tableau d'amortissement du nouveau prêt</div>
+    <div class="field"><label>Montant emprunté <strong id="lMontEmp">capacité calculée</strong></label>
+      <input type="number" id="montEmp" value="0" step="5000" oninput="c()">
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">Laissez 0 pour utiliser la capacité d'emprunt calculée ci-dessus, ou saisissez le montant réel du prêt.</div></div>
+    <div style="overflow-x:auto;margin-top:6px"><table class="ctable" id="amortLoanTbl"></table></div>
+    <div id="amortLoanNote" style="margin-top:8px"></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Ce que le banquier va regarder</div>
+    <div id="bkLook"></div>
+  </div>
+
+  <div class="src">
+    <b>Sources :</b> Taux immobiliers juin 2026 : CAFPI (3,20/3,37/3,48 %) · Pretto · Meilleurtaux · Capifrance. Règle HCSF : taux endettement max 35 %, déc. 2021, maintenu 2026. Décote revenus indépendants : pratique bancaire standard. <i>Ce simulateur est indicatif — consultez un courtier pour une analyse personnalisée.</i>
   </div>
 </div>
 
 <!-- ══ PANE 2 : AIRBNB ══════════════════════════════════════════════════════ -->
 <div class="pane" id="p2" role="tabpanel" aria-labelledby="tab2">
+  <div class="box info" style="margin-bottom:14px">
+    <b>Étape 3 — Exploitation Airbnb.</b> Estimez le chiffre d'affaires et le cash-flow d'une location courte durée à Paris.
+  </div>
   <div class="sec">
     <div class="stitle">Bien & marché</div>
     <div class="field"><label style="margin-bottom:5px">Arrondissement</label>
@@ -396,6 +517,13 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="mk"><div class="l">Nuits · séjours</div><div class="n" id="aNights">—</div></div>
   </div>
 
+  <div class="minikpis">
+    <div class="mk"><div class="l">Rentabilité brute</div><div class="n" id="aRendB">—</div></div>
+    <div class="mk"><div class="l">Rentabilité nette</div><div class="n" id="aRendN">—</div></div>
+    <div class="mk"><div class="l">Cash-flow net réel / mois</div><div class="n" id="aCFm">—</div></div>
+    <div class="mk"><div class="l">Prix d'acquisition</div><div class="n" id="aPrixK">—</div></div>
+  </div>
+
   <div class="sec">
     <div class="stitle">Saisonnalité — CA brut estimé par mois</div>
     <div id="seasBars"></div>
@@ -409,31 +537,65 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   </div>
 </div>
 
-<!-- ══ PANE 3 : STRUCTURE FISCALE ═══════════════════════════════════════════ -->
+<!-- ══ PANE 3 : LOCATION NUE / COLOCATION ════════════════════════════════════ -->
 <div class="pane" id="p3" role="tabpanel" aria-labelledby="tab3">
   <div class="box info" style="margin-bottom:14px">
-    Paramètres communs repris automatiquement depuis les autres onglets (CA Airbnb, charges fixes, TMI). Ajustez l'amortissement et le classement ici.
+    <b>Étape 4 — Location nue ou colocation.</b> Comparez une location classique (vide ou meublée longue durée) à l'Airbnb : loyers plus faibles, mais gestion légère et fiscalité différente.
   </div>
 
   <div class="sec">
-    <div class="stitle">Calculateur d'amortissement par composants</div>
+    <div class="stitle">Paramètres de la location</div>
+    <div class="field"><label style="margin-bottom:6px">Type de location</label>
+      <div class="seg" id="sLnType">
+        <button class="on" onclick="setLnType('nu',this)">Nue (vide)</button>
+        <button onclick="setLnType('meu',this)">Meublée longue durée</button>
+        <button onclick="setLnType('colo',this)">Colocation</button>
+      </div>
+    </div>
+    <div class="field"><label style="margin-bottom:6px">Régime fiscal</label>
+      <div class="seg" id="sLnRegime">
+        <button class="on" onclick="setLnRegime('micro',this)">Micro (abattement)</button>
+        <button onclick="setLnRegime('reel',this)">Réel (charges réelles)</button>
+      </div>
+    </div>
     <div class="g2">
-      <div class="field"><label>Prix d'acquisition (FAI) <strong id="lPrix">300 000 €</strong></label>
-        <input type="number" id="prixAcq" value="300000" step="5000" oninput="fv('prixAcq','lPrix');calcAmort()"></div>
-      <div class="field"><label>Quote-part terrain (non amortissable) <strong id="lTerrain">15 %</strong></label>
-        <input type="range" id="terrain" min="5" max="30" value="15" step="1" oninput="sp('terrain','lTerrain','%');calcAmort()"></div>
+      <div class="field"><label>Loyer mensuel (hors charges) <strong id="lLnLoyer">1 400 €</strong></label>
+        <input type="number" id="lnLoyer" value="1400" step="50" oninput="fv('lnLoyer','lLnLoyer');c()"></div>
+      <div class="field"><label>Vacance locative <strong id="lLnVac">8 %</strong></label>
+        <input type="range" id="lnVac" min="0" max="20" value="8" step="1" oninput="sp('lnVac','lLnVac','%');c()"></div>
+      <div class="field"><label>Charges déductibles / an (réel) <strong id="lLnCharges">3 000 €</strong></label>
+        <input type="number" id="lnCharges" value="3000" step="100" oninput="fv('lnCharges','lLnCharges');c()"></div>
+      <div class="field"><label>Intérêts d'emprunt / an (réel) <strong id="lLnInter">0 €</strong></label>
+        <input type="number" id="lnInter" value="0" step="100" oninput="fv('lnInter','lLnInter');c()"></div>
     </div>
-    <div id="amortDetail" style="background:#ffffff;border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;font-size:12px">
-      <div class="row dim"><span>Gros oeuvre (50% · 50 ans)</span><span id="aGO">—</span></div>
-      <div class="row dim"><span>Façade (15% · 25 ans)</span><span id="aFac">—</span></div>
-      <div class="row dim"><span>Agencements cuisine/SdB (20% · 15 ans)</span><span id="aAgen">—</span></div>
-      <div class="row dim"><span>Installations techniques (10% · 15 ans)</span><span id="aInst">—</span></div>
-      <div class="row dim"><span>Mobilier & équipements (5% · 7 ans)</span><span id="aMob">—</span></div>
-      <div class="row bold total"><span>Amortissement total / an</span><span id="aTot" style="color:var(--acc)">—</span></div>
-      <div style="font-size:11px;color:var(--muted);margin-top:6px">Économie fiscale annuelle (TMI + PS) : <span id="aEco" style="color:var(--green);font-weight:600">—</span> — l'amortissement réduit l'impôt sans impact sur le cash.</div>
+    <div class="box info">Au régime réel meublé, l'amortissement annuel retenu dans l'onglet « L'appartement » (<span id="lnAmortEcho">—</span>) est aussi déduit. L'intérêt d'emprunt de la 1ʳᵉ année est calculé dans le tableau d'amortissement du prêt.</div>
+  </div>
+
+  <div class="minikpis" id="lnKpis"></div>
+
+  <div class="sec">
+    <div class="stitle">Détail du calcul</div>
+    <div id="lnOut"></div>
+    <div id="lnNote" style="margin-top:10px"></div>
+  </div>
+
+  <details class="info">
+    <summary>Comprendre les régimes de la location classique</summary>
+    <div class="dbody">
+      <ul>
+        <li><b>Location nue, micro-foncier :</b> abattement 30 %, accessible si loyers &lt; 15 000 €/an. Imposé à TMI + 17,2 % de prélèvements sociaux. Case <b>4BE</b> (formulaire 2042).</li>
+        <li><b>Location nue, réel :</b> déduction des charges réelles et des intérêts d'emprunt (formulaire 2044), report sur la <b>4BA</b>. Un déficit foncier s'impute sur le revenu global jusqu'à 10 700 €/an.</li>
+        <li><b>Meublé / colocation, micro-BIC :</b> abattement 50 %, plafond 77 700 €. Case <b>5NI</b> (meublé longue durée classique, nouvelle case revenus 2025).</li>
+        <li><b>Meublé / colocation, réel (LMNP) :</b> charges + amortissement déductibles → bénéfice 5NA, déficit 5NY reportable 10 ans sur les loyers meublés.</li>
+      </ul>
     </div>
-    <div class="field"><label>Amortissement annuel retenu <strong id="lAmt">9 000 €</strong></label>
-      <input type="range" id="amort" min="0" max="30000" value="9000" step="500" oninput="sp('amort','lAmt','€');c()"></div>
+  </details>
+</div>
+
+<!-- ══ PANE 4 : OPTIMISATION FISCALE ═════════════════════════════════════════ -->
+<div class="pane" id="p4" role="tabpanel" aria-labelledby="tab4">
+  <div class="box info" style="margin-bottom:14px">
+    <b>Étape 5 — Optimisation fiscale.</b> Comparez les structures (nom propre, SCI, société à l'IS) et les stratégies (RP, location, Airbnb, revente). Les charges et l'amortissement qui se reportent au réel sont pris en compte automatiquement.
   </div>
 
   <div class="sec">
@@ -450,123 +612,6 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     </div>
   </div>
 
-  <div class="scards" id="structCards"></div>
-
-  <div class="sec">
-    <div class="stitle">Comparaison détaillée</div>
-    <div style="overflow-x:auto"><table class="ctable" id="cmpTbl"></table></div>
-  </div>
-
-  <details class="info">
-    <summary>Comprendre chaque structure — règles fiscales 2026</summary>
-    <div class="dbody">
-      <p style="margin-bottom:8px"><b>LMNP micro-BIC :</b> abattement forfaitaire 30 % (non classé) ou 50 % (classé) sur le CA. Base imposable taxée à TMI + 18,6 % PS (LFSS 2026). Plafond : 15 000 € (non classé) / 77 700 € (classé — à confirmer LF 2026). Déclaration ultra-simple.</p>
-      <p style="margin-bottom:8px"><b>LMNP réel simplifié :</b> déduction de toutes les charges réelles + amortissement (80 % du bien sur 25-30 ans, terrain non amortissable). Bénéfice souvent ≈ 0. Déficit reportable 10 ans sur BIC meublés (pas sur salaire). À compter du 15 février 2025 (LF 2025, art. 84) : amortissements déduits réintégrés dans le prix d'acquisition pour le calcul de la plus-value (exception : résidences étudiantes, seniors, Ehpad).</p>
-      <p style="margin-bottom:8px"><b>SCI à l'IS :</b> la location meublée (Airbnb) bascule automatiquement une SCI à l'IS si recettes meublées &gt; 10 % des recettes totales. IS 15 % jusqu'à 100 000 € (LF 2026), puis 25 %. Distribution : flat tax 31,4 % (LFSS 2026). Double imposition IS + flat tax.</p>
-      <p style="margin-bottom:8px"><b>SASU / SAS à l'IS :</b> même IS 15 %/100 000 € + flat tax 31,4 %. Intéressante si bénéfices réinvestis sans distribution. Inconvénient majeur : plus-value professionnelle à la revente (valeur nette comptable, pas d'abattement durée de détention particuliers).</p>
-      <div class="wbox">⚠️ Flat tax (PFU) : 31,4 % depuis le 1ᵉʳ janvier 2026 (LFSS 2026, loi n°2025-1403, IR 12,8 % + PS 18,6 %) — hausse CSG 9,2 % → 10,6 % sur dividendes et revenus du capital mobilier. PS 18,6 % s'applique aux BIC de location meublée. Les plus-values immobilières restent à 19 % + 17,2 % PS (CSG 9,2 % non impactée).</div>
-      <div class="gbox">✅ Dans la majorité des cas avec un crédit immobilier, le LMNP réel simplifié ressort comme la structure la plus avantageuse grâce à l'amortissement qui neutralise l'impôt sans décaisser de trésorerie. Attention toutefois à l'impact fiscal à la revente depuis la réforme de fév. 2025.</div>
-    </div>
-  </details>
-
-  <div class="src">
-    <b>Sources fiscales :</b> Art. 219 CGI (IS 15 %/100 000 € LF 2026 · 25 % au-delà) · LFSS 2026 n°2025-1403 art. 12 (PFU 31,4 % · PS 18,6 % BIC meublé) · Art. 50-0 CGI (micro-BIC abattements 30 %/15 000 € non classé · 50 %/77 700 € classé) · Loi Le Meur n°2024-1039 (90 nuits/an résid. principale) · LF 2025 art. 84 (réintégration amortissements LMNP réel dans plus-value à compter du 15/02/2025 — exception résidences services) · URSSAF 2026 (cotisations micro : BIC svc 21,2 % · vente 12,3 % · BNC 25,6 % · Cipav 23,2 %) · Taux crédit CAFPI juin 2026.
-  </div>
-</div>
-
-<!-- ══ PANE 4 : BANQUE ═══════════════════════════════════════════════════════ -->
-<div class="pane" id="p4" role="tabpanel" aria-labelledby="tab4">
-  <div class="box info" style="margin-bottom:14px">
-    <b>Règle HCSF :</b> taux d'endettement max <b>35 %</b> des revenus nets retenus. Revenus non-salariaux décotés de <b>30 %</b> (moyenne 3 ans). Dividendes décotés <b>50 %</b>. Taux marché <b>juin 2026</b> (CAFPI) : 3,20 % sur 15 ans · 3,37 % sur 20 ans · 3,48 % sur 25 ans.
-  </div>
-
-  <div class="sec">
-    <div class="stitle">Profil de l'emprunt</div>
-    <div class="g2">
-      <div class="field"><label>Apport personnel <strong id="lAppt">50 000 €</strong></label>
-        <input type="number" id="appt" value="50000" step="5000" oninput="fv('appt','lAppt');c()"></div>
-      <div class="field">
-        <label style="margin-bottom:6px">Durée du prêt</label>
-        <div class="seg" id="sDuree">
-          <button onclick="setDuree(15,this)">15 ans</button>
-          <button class="on" onclick="setDuree(20,this)">20 ans</button>
-          <button onclick="setDuree(25,this)">25 ans</button>
-        </div>
-      </div>
-    </div>
-    <div class="field"><label>Taux mannel (0 = marché) <strong id="lTauxM">0 %</strong></label>
-      <input type="range" id="tauxM" min="0" max="6" value="0" step="0.05" oninput="sp('tauxM','lTauxM','%');c()"></div>
-    <div class="field"><label>Assurance emprunteur <strong id="lAssE">0,25 %/an</strong></label>
-      <input type="range" id="assE" min="0" max="0.6" value="0.25" step="0.05" oninput="sp('assE','lAssE','%/an');c()"></div>
-    <div class="field"><label style="margin-bottom:6px">Projet financé</label>
-      <div class="seg" id="sCible">
-        <button class="on" onclick="setCible('rp',this)">Résidence principale</button>
-        <button onclick="setCible('loc',this)">Investissement locatif</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="g2" style="margin-bottom:14px">
-    <div class="kpi" style="border-left-color:var(--acc)"><div class="lbl">Capacité d'emprunt</div><div class="num" id="bkCap" style="color:var(--acc)">—</div><div class="sub2" id="bkMens"></div></div>
-    <div class="kpi"><div class="lbl">Budget acquisition max</div><div class="num" id="bkPrix">—</div><div class="sub2" id="bkSub"></div></div>
-  </div>
-
-  <div class="sec">
-    <div class="stitle">Détail du calcul bancaire</div>
-    <div class="row"><span>Revenus retenus par la banque</span><span id="bkRevB">—</span></div>
-    <div class="row dim"><span>35 % max (règle HCSF)</span><span id="bk35">—</span></div>
-    <div class="row dim"><span>Crédits existants à déduire</span><span id="bkExC">—</span></div>
-    <div class="row bold"><span>Mensualité max disponible</span><span id="bkMM">—</span></div>
-    <div class="row dim"><span>Mensualité crédit (hors ass.)</span><span id="bkMC">—</span></div>
-    <div class="row dim"><span>Assurance / mois</span><span id="bkAM">—</span></div>
-    <div class="row bold total"><span>Mensualité TOTALE</span><span id="bkMT" style="color:var(--acc)">—</span></div>
-    <div class="row"><span>Taux d'endettement après projet</span><span id="bkTx">—</span></div>
-    <div id="bkAlrt"></div>
-  </div>
-
-  <div class="sec">
-    <div class="stitle">Ce que le banquier va regarder</div>
-    <div id="bkLook"></div>
-  </div>
-
-  <div class="src">
-    <b>Sources :</b> Taux immobiliers juin 2026 : CAFPI (3,20/3,37/3,48 %) · Pretto · Meilleurtaux · Capifrance. Règle HCSF : taux endettement max 35 %, déc. 2021, maintenu 2026. Décote revenus indépendants : pratique bancaire standard. <i>Ce simulateur est indicatif — consultez un courtier pour une analyse personnalisée.</i>
-  </div>
-</div>
-
-<!-- ══ PANE 5 : CONSEILLER ════════════════════════════════════════════════════ -->
-<div class="pane" id="p5" role="tabpanel" aria-labelledby="tab5">
-  <div class="sec">
-    <div class="stitle">Mon profil fiscal <span style="font-size:12px;font-weight:400;color:var(--muted)">(avis d'imposition N-1)</span></div>
-    <div class="g2">
-      <label class="field">Revenus salariaux nets N-1 (€)<input type="number" id="cRevSal" value="50000" oninput="calcConseil()"></label>
-      <label class="field">Revenus fonciers / BIC N-1 (€)<input type="number" id="cRevFon" value="0" oninput="calcConseil()"></label>
-      <label class="field">RFR N-2 (€) <span style="font-size:11px;color:var(--muted)">(versement libératoire)</span><input type="number" id="cRFR" value="45000" oninput="calcConseil()"></label>
-      <label class="field">Nombre de parts fiscales
-        <select id="cParts" onchange="calcConseil()">
-          <option value="1">1 part</option>
-          <option value="1.5">1,5 parts</option>
-          <option value="2">2 parts</option>
-          <option value="2.5">2,5 parts</option>
-          <option value="3">3 parts</option>
-        </select>
-      </label>
-      <label class="field">Situation familiale
-        <select id="cSit" onchange="calcConseil()">
-          <option>Célibataire</option>
-          <option>Couple</option>
-          <option>Couple + 1 enfant</option>
-          <option>Couple + 2 enfants</option>
-        </select>
-      </label>
-      <label class="field">TMI calculé
-        <div style="margin-top:6px"><span id="cTMIbadge" style="display:inline-block;padding:4px 14px;border-radius:20px;color:#fff;font-weight:700;font-size:16px;background:var(--green)">—</span></div>
-      </label>
-    </div>
-    <div class="box info" style="margin-top:8px;font-size:12px">Ces données servent à calibrer les recommandations. Non envoyées à un serveur.</div>
-    <div class="box warn" style="margin-top:6px;font-size:11px">⚠️ Barème IR affiché : seuils 2025 (revenus 2024) — à vérifier lors de la parution du barème 2026. Barèmes sociaux mis à jour : juin 2026 (LFSS 2026).</div>
-  </div>
-
   <div class="sec">
     <div class="stitle">Paramètres du bien à optimiser</div>
     <div class="g2">
@@ -581,13 +626,21 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     </div>
   </div>
 
+  <div class="stitle" style="margin-top:4px">Comparaison des structures (Airbnb)</div>
+  <div class="scards" id="structCards"></div>
+
+  <div class="sec">
+    <div class="stitle">Comparaison détaillée des structures</div>
+    <div style="overflow-x:auto"><table class="ctable" id="cmpTbl"></table></div>
+  </div>
+
   <div class="sec">
     <div class="stitle">Notation comparative — 4 stratégies</div>
     <div id="scoreCards"></div>
   </div>
 
   <div class="sec">
-    <div class="stitle">Tableau récapitulatif</div>
+    <div class="stitle">Tableau récapitulatif des stratégies</div>
     <div id="conseilTable" style="overflow-x:auto">
       <table class="ctable" id="conseilCmpTbl"></table>
     </div>
@@ -617,6 +670,65 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     </div>
     <div style="overflow-x:auto;margin-top:8px"><table class="ctable" id="projTable"></table></div>
     <div id="projCumul" style="margin-top:10px"></div>
+  </div>
+
+  <details class="info">
+    <summary>Comprendre chaque structure — règles fiscales 2026</summary>
+    <div class="dbody">
+      <p style="margin-bottom:8px"><b>LMNP micro-BIC :</b> abattement forfaitaire 30 % (non classé) ou 50 % (classé) sur le CA. Base imposable taxée à TMI + 18,6 % PS (LFSS 2026). Plafond : 15 000 € (non classé) / 77 700 € (classé — à confirmer LF 2026). Déclaration ultra-simple.</p>
+      <p style="margin-bottom:8px"><b>LMNP réel simplifié :</b> déduction de toutes les charges réelles + amortissement (80 % du bien sur 25-30 ans, terrain non amortissable). Bénéfice souvent ≈ 0. Déficit reportable 10 ans sur BIC meublés (pas sur salaire). À compter du 15 février 2025 (LF 2025, art. 84) : amortissements déduits réintégrés dans le prix d'acquisition pour le calcul de la plus-value (exception : résidences étudiantes, seniors, Ehpad).</p>
+      <p style="margin-bottom:8px"><b>SCI à l'IS :</b> la location meublée (Airbnb) bascule automatiquement une SCI à l'IS si recettes meublées &gt; 10 % des recettes totales. IS 15 % jusqu'à 100 000 € (LF 2026), puis 25 %. Distribution : flat tax 31,4 % (LFSS 2026). Double imposition IS + flat tax.</p>
+      <p style="margin-bottom:8px"><b>SASU / SAS à l'IS :</b> même IS 15 %/100 000 € + flat tax 31,4 %. Intéressante si bénéfices réinvestis sans distribution. Inconvénient majeur : plus-value professionnelle à la revente (valeur nette comptable, pas d'abattement durée de détention particuliers).</p>
+      <div class="wbox">⚠️ Flat tax (PFU) : 31,4 % depuis le 1ᵉʳ janvier 2026 (LFSS 2026, loi n°2025-1403, IR 12,8 % + PS 18,6 %) — hausse CSG 9,2 % → 10,6 % sur dividendes et revenus du capital mobilier. PS 18,6 % s'applique aux BIC de location meublée. Les plus-values immobilières restent à 19 % + 17,2 % PS (CSG 9,2 % non impactée).</div>
+      <div class="gbox">✅ Dans la majorité des cas avec un crédit immobilier, le LMNP réel simplifié ressort comme la structure la plus avantageuse grâce à l'amortissement qui neutralise l'impôt sans décaisser de trésorerie. Attention toutefois à l'impact fiscal à la revente depuis la réforme de fév. 2025.</div>
+    </div>
+  </details>
+
+  <div class="src">
+    <b>Sources fiscales :</b> Art. 219 CGI (IS 15 %/100 000 € LF 2026 · 25 % au-delà) · LFSS 2026 n°2025-1403 art. 12 (PFU 31,4 % · PS 18,6 % BIC meublé) · Art. 50-0 CGI (micro-BIC abattements 30 %/15 000 € non classé · 50 %/77 700 € classé) · Loi Le Meur n°2024-1039 (90 nuits/an résid. principale) · LF 2025 art. 84 (réintégration amortissements LMNP réel dans plus-value à compter du 15/02/2025 — exception résidences services) · URSSAF 2026 (cotisations micro : BIC svc 21,2 % · vente 12,3 % · BNC 25,6 % · Cipav 23,2 %) · Taux crédit CAFPI juin 2026.
+  </div>
+</div>
+
+<!-- ══ PANE 5 : BILAN ════════════════════════════════════════════════════════ -->
+<div class="pane" id="p5" role="tabpanel" aria-labelledby="tab5">
+  <div class="box info" style="margin-bottom:14px">
+    <b>Étape 6 — Votre bilan.</b> Vue d'ensemble : revenus du foyer, charges courantes, épargne et synthèse de votre projet immobilier.
+  </div>
+
+  <div class="sec o">
+    <div class="stitle">Logement</div>
+    <div class="g2">
+      <div class="field"><label>Loyer ou crédit RP <strong id="lLoy">1 200 €</strong></label>
+        <input type="number" id="loyer" value="1200" step="50" oninput="fv('loyer','lLoy');c()"></div>
+      <div class="field"><label>Crédits existants (hors RP) <strong id="lCrEx">0 €</strong></label>
+        <input type="number" id="crEx" value="0" step="50" oninput="fv('crEx','lCrEx');c()"></div>
+    </div>
+  </div>
+  <div class="sec g">
+    <div class="stitle">Vie courante</div>
+    <div class="g2">
+      <div class="field"><label>Transport <strong id="lTrp">150 €</strong></label><input type="number" id="trp" value="150" step="10" oninput="fv('trp','lTrp');c()"></div>
+      <div class="field"><label>Alimentation <strong id="lAlim">500 €</strong></label><input type="number" id="alim" value="500" step="25" oninput="fv('alim','lAlim');c()"></div>
+      <div class="field"><label>Santé / mutuelle <strong id="lSnte">80 €</strong></label><input type="number" id="snte" value="80" step="10" oninput="fv('snte','lSnte');c()"></div>
+      <div class="field"><label>Abonnements <strong id="lAbo">100 €</strong></label><input type="number" id="abo" value="100" step="10" oninput="fv('abo','lAbo');c()"></div>
+      <div class="field"><label>Loisirs <strong id="lLois">200 €</strong></label><input type="number" id="lois" value="200" step="25" oninput="fv('lois','lLois');c()"></div>
+      <div class="field"><label>Épargne forcée (PEL, PER…) <strong id="lEpF">200 €</strong></label><input type="number" id="epF" value="200" step="50" oninput="fv('epF','lEpF');c()"></div>
+    </div>
+    <div class="field"><label>Autres charges <strong id="lAutC">100 €</strong></label><input type="number" id="autC" value="100" step="25" oninput="fv('autC','lAutC');c()"></div>
+  </div>
+  <div class="sec" id="bilanSec">
+    <div class="stitle">Bilan mensuel</div>
+    <div class="row"><span>Revenus nets</span><span id="bRev" style="color:var(--acc)">—</span></div>
+    <div class="row dim"><span>Logement</span><span id="bLog">—</span></div>
+    <div class="row dim"><span>Vie courante</span><span id="bVie">—</span></div>
+    <div class="row bold total"><span>ÉPARGNE NETTE</span><span id="bEp">—</span></div>
+    <div class="row"><span>Taux d'épargne</span><span id="bTx">—</span></div>
+    <div id="epAlrt"></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Synthèse patrimoniale</div>
+    <div id="bilanSynth"></div>
   </div>
 </div>
 
@@ -696,6 +808,7 @@ const SEA={Jan:.78,Fév:.80,Mar:.92,Avr:1.05,Mai:1.18,Juin:1.25,Juil:1.20,Aoû:1
 
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let salMode='net', meType='svc', meIR='bar', freq='m', capN=90, classt='nc', duree=20, cible='rp';
+let lnType='nu', lnRegime='micro', lnResult={net:0,annNet:0,tax:0,rendNet:0};
 let lastCalc={};
 const $=id=>document.getElementById(id);
 const G=id=>+($(id).value||0);
@@ -715,8 +828,11 @@ function setMeIR(t,b){meIR=t;document.querySelectorAll('#sMeIR button').forEach(
 function setFreq(f,b){freq=f;document.querySelectorAll('#sFreq button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setCap(n,b){capN=n;document.querySelectorAll('#sCapN button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setClass(cl,b){classt=cl;document.querySelectorAll('#sClass button').forEach(x=>x.classList.toggle('on',x===b));c()}
-function setDuree(d,b){duree=d;document.querySelectorAll('#sDuree button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setDuree(d,b){duree=d;$('dureeNum').value=d;$('lDuree').textContent=d+' ans';document.querySelectorAll('#sDuree button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setDureeNum(v){duree=+v||1;$('lDuree').textContent=duree+' ans';document.querySelectorAll('#sDuree button').forEach(x=>x.classList.toggle('on',(parseInt(x.textContent)||0)===duree));c()}
 function setCible(cl,b){cible=cl;document.querySelectorAll('#sCible button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setLnType(t,b){lnType=t;document.querySelectorAll('#sLnType button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setLnRegime(r,b){lnRegime=r;document.querySelectorAll('#sLnRegime button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setArr(){const d=ARR[$('arrSel').value];$('adr').value=Math.round(d.adr*1.2/5)*5;$('occ').value=d.occ;sp('adr','lADR','€');sp('occ','lOcc','%');$('arrI').textContent='Médiane : '+d.adr+' €/nuit · occ. '+d.occ+'% · +20% pour 70m²/6 couchages';c()}
 function syncTMI(){$('tmi').value=$('tmi2').value;$('lTMI').textContent=$('tmi2').value+' %'}
 function syncTMIReverse(){$('tmi2').value=$('tmi').value;$('lTMI2').textContent=$('tmi').value+' %'}
@@ -736,6 +852,76 @@ function calcAmort(){
 // ── MATH ──────────────────────────────────────────────────────────────────────
 function mens(cap,taux,n){const r=taux/12/100,m=n*12;if(!r)return cap/m;return cap*r*Math.pow(1+r,m)/(Math.pow(1+r,m)-1)}
 function capB(mm,taux,n){const r=taux/12/100,m=n*12;if(!r)return mm*m;return mm*(Math.pow(1+r,m)-1)/(r*Math.pow(1+r,m))}
+function tauxMarche(n){return n<=15?3.20:n<=20?3.37:3.48}
+// Échéancier annuel : capital restant dû, intérêts et capital remboursé par an, avec différé éventuel (intérêts seuls)
+function loanSchedule(cap,tauxPct,years,diffM){
+  const r=tauxPct/12/100, totM=Math.round(years*12);
+  diffM=Math.max(0,Math.min(diffM,totM-1));
+  const amM=totM-diffM;
+  const pay=r?cap*r*Math.pow(1+r,amM)/(Math.pow(1+r,amM)-1):cap/amM;
+  let bal=cap, totInt=0; const yearly=[];
+  for(let y=1;y<=years;y++){
+    let intY=0,prinY=0;
+    for(let mo=1;mo<=12;mo++){
+      const gm=(y-1)*12+mo; if(gm>totM)break;
+      const i=bal*r; let p=gm<=diffM?0:pay-i;
+      if(p>bal)p=bal;
+      intY+=i;prinY+=p;bal-=p;totInt+=i;
+    }
+    yearly.push({y,int:intY,prin:prinY,bal:Math.max(0,bal)});
+  }
+  return {pay,yearly,totInt};
+}
+
+// ── LOCATION NUE / COLOCATION (longue durée) ────────────────────────────────────
+function calcLocNue(){
+  if(!$('lnLoyer'))return;
+  const loyerM=G('lnLoyer'), vac=G('lnVac')/100, charges=G('lnCharges'), inter=G('lnInter'), amort=G('amort');
+  const tmi=G('tmi2')/100, prix=G('prixAcq');
+  const rentAn=loyerM*12*(1-vac);
+  const meuble=(lnType==='meu'||lnType==='colo');
+  const PS=meuble?PS_BIC:PS_PV; // 18,6 % meublé BIC ; 17,2 % foncier nu
+  if($('lnAmortEcho'))$('lnAmortEcho').textContent=fe(amort)+'/an';
+  let base, abatt=0, regimeLbl, cases;
+  if(lnRegime==='micro'){
+    abatt=meuble?0.50:0.30;
+    base=rentAn*(1-abatt);
+    regimeLbl=meuble?'Micro-BIC (abattement 50 %)':'Micro-foncier (abattement 30 %)';
+    cases=meuble?'5NI':'4BE';
+  } else {
+    base=Math.max(0,rentAn-charges-inter-(meuble?amort:0));
+    regimeLbl=meuble?'LMNP réel (charges + amortissement)':'Foncier réel (charges + intérêts)';
+    cases=meuble?'5NA / 5NY':'4BA';
+  }
+  const tax=base*(tmi+PS);
+  const cashCharges=lnRegime==='reel'?charges+inter:0; // amort. non décaissé ; micro : on reste sur loyers − impôt
+  const annNet=rentAn-cashCharges-tax;
+  const rendB=prix>0?rentAn/prix*100:0, rendNet=prix>0?annNet/prix*100:0;
+  lnResult={net:annNet/12,annNet,tax,rendNet};
+  $('lnOut').innerHTML=
+    '<div class="row"><span>Loyers encaissés / an</span><span>'+fe(rentAn)+'</span></div>'+
+    '<div class="row dim"><span>Régime</span><span>'+regimeLbl+'</span></div>'+
+    (lnRegime==='micro'
+      ?'<div class="row dim"><span>Abattement forfaitaire</span><span>− '+fe(rentAn*abatt)+'</span></div>'
+      :'<div class="row dim"><span>Charges + intérêts'+(meuble?' + amort.':'')+' déduits</span><span>− '+fe(charges+inter+(meuble?amort:0))+'</span></div>')+
+    '<div class="row"><span>Base imposable</span><span>'+fe(base)+'</span></div>'+
+    '<div class="row dim"><span>Impôt + PS ('+fp(tmi*100,0)+' + '+fp(PS*100,1)+')</span><span style="color:var(--red)">− '+fe(tax)+'</span></div>'+
+    '<div class="row bold total"><span>Revenu net après impôt / an</span><span style="color:'+(annNet>=0?'var(--green)':'var(--red)')+'">'+fe(annNet)+'</span></div>'+
+    '<div class="row"><span>Soit / mois</span><span>'+fe(annNet/12)+'</span></div>';
+  $('lnKpis').innerHTML=
+    '<div class="mk"><div class="l">Rentabilité brute</div><div class="n">'+(prix>0?fp(rendB,2):'—')+'</div></div>'+
+    '<div class="mk"><div class="l">Rentabilité nette</div><div class="n">'+(prix>0?fp(rendNet,2):'—')+'</div></div>'+
+    '<div class="mk"><div class="l">Net / mois</div><div class="n">'+fe(annNet/12)+'</div></div>'+
+    '<div class="mk"><div class="l">Case déclaration</div><div class="n" style="font-size:15px">'+cases+'</div></div>';
+  let note='';
+  if(lnRegime==='micro'){
+    const cap=meuble?MIC_CL_CAP:15000;
+    if(rentAn>cap) note='<div class="box warn">⚠️ Loyers '+fe(rentAn)+' > plafond micro '+fe(cap)+' → le régime réel devient obligatoire.</div>';
+  }
+  if(meuble) note+='<div class="box info" style="margin-top:6px">Une colocation est le plus souvent meublée → elle relève du LMNP (BIC), même fiscalité que la location meublée longue durée.</div>';
+  else note+='<div class="box info" style="margin-top:6px">Location nue = revenus fonciers (PS 17,2 %). Au réel, un déficit foncier s\'impute sur le revenu global jusqu\'à 10 700 €/an.</div>';
+  $('lnNote').innerHTML=note;
+}
 
 // ── MAIN CALC ─────────────────────────────────────────────────────────────────
 function c(){
@@ -757,8 +943,8 @@ function c(){
   $('rMeTx').textContent=fp(caM>0?(cotM+irM)/caM*100:0);
 
   // AUTRES REVENUS
-  const airNet=G('airN'), divNet=G('divN'), autRev=G('autR');
-  const totalRev=salNetM+meNet+airNet+divNet+autRev;
+  const airNet=G('airN'), divNet=G('divN'), autRev=G('autR'), ftNet=G('ftN');
+  const totalRev=salNetM+meNet+airNet+divNet+autRev+ftNet;
 
   // CHARGES PERSO
   const logC=G('loyer')+G('crEx');
@@ -780,6 +966,7 @@ function c(){
   // TAB 0
   $('rSal').textContent=fe(salNetM);
   $('rR0').textContent=fe(salNetM); $('rR1').textContent=fe(meNet);
+  $('rRFT').textContent=fe(ftNet);
   $('rR2').textContent=fe(airNet); $('rR3').textContent=fe(divNet+autRev);
   $('rRTot').textContent=fe(totalRev); $('rRAn').textContent=fe(totalRev*12);
 
@@ -831,6 +1018,13 @@ function c(){
   const reelTax=reelBase*(isTNS?TNS_RATE:tmi3+PS);
   const reelNet=ebitda-fixed-reelTax;
 
+  // Rentabilité (point 7) — affichée dans l'onglet Airbnb
+  const prixAcqV=G('prixAcq');
+  $('aRendB').textContent=prixAcqV>0?fp(gross/prixAcqV*100,2):'—';
+  $('aRendN').textContent=prixAcqV>0?fp(reelNet/prixAcqV*100,2):'—';
+  $('aCFm').textContent=fe(reelNet/12);
+  $('aPrixK').textContent=fe(prixAcqV);
+
   // SCI IS
   const sciBase=Math.max(0,gross-opCost-fixed+loanAn-intrAn-amort);
   const sciIS=Math.min(sciBase,100000)*.15+Math.max(0,sciBase-100000)*.25;
@@ -851,9 +1045,9 @@ function c(){
   ];
   const bestK=structs.reduce((a,b)=>a.net>b.net?a:b).k;
 
-  // Update airbnbNet from best structure
+  // Update airbnbNet from best structure (sauf si l'utilisateur a coché « saisie manuelle »)
   const bestNet=structs.find(s=>s.k===bestK).net;
-  if(bestNet>0){$('airN').value=Math.round(bestNet/12);$('lAir').textContent=fe(bestNet/12)}
+  if(bestNet>0 && !$('airManual').checked){$('airN').value=Math.round(bestNet/12);$('lAir').textContent=fe(bestNet/12)}
 
   // Cascade pour TAB 2
   const lmnpReelTax=reelTax;
@@ -936,10 +1130,14 @@ function c(){
   });
   $('cmpTbl').innerHTML=tbl;
 
+  // Prêt déjà en cours (point 5) → sa mensualité s'ajoute aux charges de crédit
+  const exMens=G('exCap')>0?mens(G('exCap'),G('exTaux'),G('exDur')):0;
+  $('exMensOut').textContent=fe(exMens)+'/mois';
+
   // TAB 4 — Banque
-  const tauxM=G('tauxM'), taux=tauxM>0?tauxM:(TAUX[duree]||3.37);
+  const tauxM=G('tauxM'), taux=tauxM>0?tauxM:tauxMarche(duree);
   const revB=cible==='loc'?salNetM+meNet*.7+airNet*.7+divNet*.5+autRev*.5:salNetM+meNet*.7+airNet*.7+divNet+autRev;
-  const existC=G('crEx');
+  const existC=G('crEx')+exMens;
   const mensMax=Math.max(0,revB*.35-existC);
   const capEmp=capB(mensMax,taux,duree);
   const prixMax=capEmp+G('appt');
@@ -969,6 +1167,36 @@ function c(){
     ['💰','Reste à vivre',fe(totalRev-mensT-(totalChg-G('loyer')-G('crEx')))+'/mois'],
     ['🏦','Apport / notaire',fe(G('appt'))+' — frais notaire estimés : '+fe(prixMax*.08)],
   ].map(([i,k,v])=>`<div class="row"><span style="display:flex;gap:8px"><span>${i}</span><span style="color:var(--muted)">${k}</span></span><span style="font-size:12px;text-align:right;max-width:55%">${v}</span></div>`).join('');
+
+  // Tableau d'amortissement du nouveau prêt (points 3 & 4)
+  const diffM=G('diff'), montSaisi=G('montEmp'), montEmp=montSaisi>0?montSaisi:capEmp;
+  $('lMontEmp').textContent=montSaisi>0?fe(montSaisi):'capacité calculée ('+fe(capEmp)+')';
+  if(montEmp>0 && duree>0){
+    const sch=loanSchedule(montEmp,taux,duree,diffM);
+    let at='<tr><th>Année</th><th>Capital restant dû</th><th>Intérêts payés</th><th>Capital remboursé</th></tr>';
+    sch.yearly.forEach(ry=>{at+='<tr><td style="color:var(--muted)">'+ry.y+'</td><td>'+fe(ry.bal)+'</td><td style="color:var(--red)">'+fe(ry.int)+'</td><td>'+fe(ry.prin)+'</td></tr>';});
+    $('amortLoanTbl').innerHTML=at;
+    const int1=sch.yearly[0]?sch.yearly[0].int:0;
+    $('amortLoanNote').innerHTML='<div class="box info">Mensualité hors assurance : <b>'+fe(sch.pay)+'</b> · Intérêts totaux sur '+duree+' ans : <b>'+fe(sch.totInt)+'</b>'+(diffM>0?' · différé de '+diffM+' mois (intérêts seuls)':'')+'.</div>'+
+      '<div class="box good" style="margin-top:6px">Intérêts de la 1ʳᵉ année : <b>'+fe(int1)+'</b> — c\'est le montant déductible au régime <b>LMNP réel</b>. Si ce prêt finance le bien loué, reportez-le dans « Dont intérêts » de l\'onglet Airbnb Paris.</div>';
+  } else {
+    $('amortLoanTbl').innerHTML='';$('amortLoanNote').innerHTML='';
+  }
+
+  // Location nue / colocation (onglet dédié) + synthèse Bilan
+  calcLocNue();
+  if($('bilanSynth')){
+    const cfAir=reelNet/12, cfLn=lnResult.net;
+    const better=cfAir>=cfLn?'Airbnb (LMNP réel)':('Location '+(lnType==='nu'?'nue':'longue durée'));
+    $('bilanSynth').innerHTML=
+      '<div class="row"><span>Épargne nette du foyer / mois</span><span style="color:'+epc+'">'+fe(epargne)+'</span></div>'+
+      '<div class="row"><span>Cash-flow Airbnb (LMNP réel) / mois</span><span>'+fe(cfAir)+'</span></div>'+
+      '<div class="row"><span>Cash-flow location nue / LT / mois</span><span>'+fe(cfLn)+'</span></div>'+
+      '<div class="row dim"><span>Capacité d\'emprunt estimée</span><span>'+fe(capEmp)+'</span></div>'+
+      '<div class="row dim"><span>Taux d\'endettement après projet</span><span style="color:'+(txEnd<=35?'var(--green)':'var(--red)')+'">'+fp(txEnd)+'</span></div>'+
+      '<div class="row bold total"><span>Stratégie locative la + rentable (mensuel)</span><span style="color:var(--acc)">'+better+'</span></div>'+
+      '<div class="box info" style="margin-top:10px">Comparaison indicative du cash-flow mensuel net. Affinez chaque stratégie dans les onglets dédiés et l\'onglet Optimisation.</div>';
+  }
 
   // Stocker les variables pour l'onglet Conseiller
   lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,opCost,deductFixed,prixAcq:G('prixAcq'),micNet,reelTax2:reelTax,bestK};
@@ -1147,7 +1375,7 @@ function calcConseil(){
     });
     tbl+='</tr>';
   });
-  $('cmpTbl').innerHTML=tbl;
+  $('conseilCmpTbl').innerHTML=tbl;
 
   // === 7. RECOMMANDATION & ACTIONS ===
   var actions={
@@ -1326,6 +1554,10 @@ function calcDeclaration(){
   const salNetM=salMode==='net'?G('salN'):G('salB')*0.78;
   if(salNetM>0) B.push(fiche('💼','Salaire / traitement','Formulaire 2042',
     [caseRow('1AJ','Salaire net imposable',Math.round(salNetM*12),'Le plus souvent DÉJÀ pré-rempli par votre employeur — vérifiez simplement le montant. Pour votre conjoint(e) : case 1BJ.')]));
+  // 1b · FRANCE TRAVAIL (chômage)
+  const ftM=G('ftN');
+  if(ftM>0) B.push(fiche('🏛️','Allocations France Travail (chômage)','Formulaire 2042',
+    [caseRow('1AP','Allocations chômage / ARE imposables',Math.round(ftM*12),'En général DÉJÀ pré-rempli par France Travail. Pour votre conjoint(e) : case 1BP. Les allocations chômage sont imposables comme un salaire au barème progressif.')]));
   // 2 · MICRO-ENTREPRISE
   const ca=G('meCA');
   if(ca>0){
@@ -1367,13 +1599,13 @@ var ready=false; // empêche d'écraser les données restaurées pendant l'init
 function saveState(){
   if(!ready)return;
   try{
-    const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible}};
-    document.querySelectorAll('input,select').forEach(e=>{if(e.id)d[e.id]=e.value;});
+    const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible,lnType,lnRegime}};
+    document.querySelectorAll('input,select').forEach(e=>{if(e.id)d[e.id]=e.type==='checkbox'?e.checked:e.value;});
     localStorage.setItem(LS_KEY,JSON.stringify(d));
   }catch(e){}
 }
 function applySeg(seg){
-  const grp={salMode:['sModeS',v=>"setMode('"+v+"'"],meType:['sMeType',v=>"setMeType('"+v+"'"],meIR:['sMeIR',v=>"setMeIR('"+v+"'"],freq:['sFreq',v=>"setFreq('"+v+"'"],capN:['sCapN',v=>"setCap("+v],classt:['sClass',v=>"setClass('"+v+"'"],duree:['sDuree',v=>"setDuree("+v],cible:['sCible',v=>"setCible('"+v+"'"]};
+  const grp={salMode:['sModeS',v=>"setMode('"+v+"'"],meType:['sMeType',v=>"setMeType('"+v+"'"],meIR:['sMeIR',v=>"setMeIR('"+v+"'"],freq:['sFreq',v=>"setFreq('"+v+"'"],capN:['sCapN',v=>"setCap("+v],classt:['sClass',v=>"setClass('"+v+"'"],duree:['sDuree',v=>"setDuree("+v],cible:['sCible',v=>"setCible('"+v+"'"],lnType:['sLnType',v=>"setLnType('"+v+"'"],lnRegime:['sLnRegime',v=>"setLnRegime('"+v+"'"]};
   Object.keys(grp).forEach(k=>{
     if(seg[k]==null)return;
     const cont=document.getElementById(grp[k][0]); if(!cont)return;
@@ -1386,10 +1618,10 @@ function restoreState(){
   try{
     const raw=localStorage.getItem(LS_KEY); if(!raw)return;
     const d=JSON.parse(raw);
-    Object.keys(d).forEach(k=>{if(k==='__seg')return;const e=document.getElementById(k);if(e&&d[k]!=null)e.value=d[k];});
+    Object.keys(d).forEach(k=>{if(k==='__seg')return;const e=document.getElementById(k);if(e&&d[k]!=null){if(e.type==='checkbox')e.checked=!!d[k];else e.value=d[k];}});
     if(d.__seg)applySeg(d.__seg);
     document.querySelectorAll('select').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event('change'));});
-    document.querySelectorAll('input').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event('input'));});
+    document.querySelectorAll('input').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event(e.type==='checkbox'?'change':'input'));});
   }catch(e){}
 }
 function resetAll(){
