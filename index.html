@@ -279,19 +279,23 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="stitle">Revenus locatifs & autres</div>
     <div class="g2">
       <div class="field"><label>Airbnb net / mois <strong id="lAir">1 200 €</strong></label>
-        <input type="number" id="airN" value="1200" step="50" oninput="fv('airN','lAir');c()"></div>
+        <input type="number" id="airN" value="1200" step="50" oninput="fv('airN','lAir');c()">
+        <label style="font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center;margin-top:5px"><input type="checkbox" id="airManual" onchange="c()" style="width:auto;margin:0"> Saisie manuelle (ne pas recalculer auto.)</label></div>
+      <div class="field"><label>France Travail (chômage) net / mois <strong id="lFT">0 €</strong></label>
+        <input type="number" id="ftN" value="0" step="50" oninput="fv('ftN','lFT');c()"></div>
       <div class="field"><label>Dividendes nets / mois <strong id="lDiv">0 €</strong></label>
         <input type="number" id="divN" value="0" step="50" oninput="fv('divN','lDiv');c()"></div>
       <div class="field"><label>Autres revenus nets / mois <strong id="lAut">0 €</strong></label>
         <input type="number" id="autR" value="0" step="50" oninput="fv('autR','lAut');c()"></div>
     </div>
-    <div class="box info">Le net Airbnb est automatiquement mis à jour depuis l'onglet Airbnb Paris → Structure fiscale.</div>
+    <div class="box info">Le net Airbnb est mis à jour automatiquement depuis l'onglet Structure fiscale. Cochez « Saisie manuelle » pour figer votre propre montant. Les allocations France Travail ne sont en général pas retenues par les banques.</div>
   </div>
 
   <div class="sec">
     <div class="stitle">Récapitulatif revenus nets</div>
     <div class="row"><span>Salaire net</span><span id="rR0">—</span></div>
     <div class="row"><span>Micro-entreprise net</span><span id="rR1">—</span></div>
+    <div class="row"><span>France Travail (chômage)</span><span id="rRFT">—</span></div>
     <div class="row"><span>Airbnb net</span><span id="rR2">—</span></div>
     <div class="row"><span>Dividendes + autres</span><span id="rR3">—</span></div>
     <div class="row bold total"><span>TOTAL NETS / MOIS</span><span id="rRTot" style="color:var(--acc)">—</span></div>
@@ -396,6 +400,13 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="mk"><div class="l">Nuits · séjours</div><div class="n" id="aNights">—</div></div>
   </div>
 
+  <div class="minikpis">
+    <div class="mk"><div class="l">Rentabilité brute</div><div class="n" id="aRendB">—</div></div>
+    <div class="mk"><div class="l">Rentabilité nette</div><div class="n" id="aRendN">—</div></div>
+    <div class="mk"><div class="l">Cash-flow net réel / mois</div><div class="n" id="aCFm">—</div></div>
+    <div class="mk"><div class="l">Prix d'acquisition</div><div class="n" id="aPrixK">—</div></div>
+  </div>
+
   <div class="sec">
     <div class="stitle">Saisonnalité — CA brut estimé par mois</div>
     <div id="seasBars"></div>
@@ -486,24 +497,43 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
       <div class="field"><label>Apport personnel <strong id="lAppt">50 000 €</strong></label>
         <input type="number" id="appt" value="50000" step="5000" oninput="fv('appt','lAppt');c()"></div>
       <div class="field">
-        <label style="margin-bottom:6px">Durée du prêt</label>
+        <label style="margin-bottom:6px">Durée du prêt <strong id="lDuree">20 ans</strong></label>
         <div class="seg" id="sDuree">
           <button onclick="setDuree(15,this)">15 ans</button>
           <button class="on" onclick="setDuree(20,this)">20 ans</button>
           <button onclick="setDuree(25,this)">25 ans</button>
         </div>
+        <input type="number" id="dureeNum" value="20" min="1" max="30" step="1" oninput="setDureeNum(this.value)" style="margin-top:6px">
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">Durée libre (années) — ou utilisez les boutons.</div>
       </div>
     </div>
     <div class="field"><label>Taux mannel (0 = marché) <strong id="lTauxM">0 %</strong></label>
       <input type="range" id="tauxM" min="0" max="6" value="0" step="0.05" oninput="sp('tauxM','lTauxM','%');c()"></div>
     <div class="field"><label>Assurance emprunteur <strong id="lAssE">0,25 %/an</strong></label>
       <input type="range" id="assE" min="0" max="0.6" value="0.25" step="0.05" oninput="sp('assE','lAssE','%/an');c()"></div>
+    <div class="field"><label>Différé d'amortissement <strong id="lDiff">0 mois</strong></label>
+      <input type="range" id="diff" min="0" max="36" value="0" step="1" oninput="sp('diff','lDiff',' mois');c()">
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">Pendant le différé, vous ne payez que les intérêts (courant pour le neuf / l'investissement locatif).</div></div>
     <div class="field"><label style="margin-bottom:6px">Projet financé</label>
       <div class="seg" id="sCible">
         <button class="on" onclick="setCible('rp',this)">Résidence principale</button>
         <button onclick="setCible('loc',this)">Investissement locatif</button>
       </div>
     </div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Prêt déjà en cours (optionnel)</div>
+    <div class="box info" style="margin-bottom:10px">Partez d'une situation réelle plutôt que d'un projet neuf : renseignez un crédit déjà partiellement amorti. Sa mensualité est ajoutée à vos charges de crédit pour le calcul du taux d'endettement.</div>
+    <div class="g3">
+      <div class="field"><label>Capital restant dû <strong id="lExCap">0 €</strong></label>
+        <input type="number" id="exCap" value="0" step="5000" oninput="fv('exCap','lExCap');c()"></div>
+      <div class="field"><label>Taux <strong id="lExTaux">3 %</strong></label>
+        <input type="range" id="exTaux" min="0" max="6" value="3" step="0.05" oninput="sp('exTaux','lExTaux','%');c()"></div>
+      <div class="field"><label>Durée restante <strong id="lExDur">15 ans</strong></label>
+        <input type="number" id="exDur" value="15" min="1" max="30" step="1" oninput="document.getElementById('lExDur').textContent=this.value+' ans';c()"></div>
+    </div>
+    <div class="row bold"><span>Mensualité du prêt en cours</span><span id="exMensOut" style="color:var(--orange)">—</span></div>
   </div>
 
   <div class="g2" style="margin-bottom:14px">
@@ -522,6 +552,15 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="row bold total"><span>Mensualité TOTALE</span><span id="bkMT" style="color:var(--acc)">—</span></div>
     <div class="row"><span>Taux d'endettement après projet</span><span id="bkTx">—</span></div>
     <div id="bkAlrt"></div>
+  </div>
+
+  <div class="sec">
+    <div class="stitle">Tableau d'amortissement du nouveau prêt</div>
+    <div class="field"><label>Montant emprunté <strong id="lMontEmp">capacité calculée</strong></label>
+      <input type="number" id="montEmp" value="0" step="5000" oninput="c()">
+      <div style="font-size:11px;color:var(--muted);margin-top:3px">Laissez 0 pour utiliser la capacité d'emprunt calculée ci-dessus, ou saisissez le montant réel du prêt.</div></div>
+    <div style="overflow-x:auto;margin-top:6px"><table class="ctable" id="amortLoanTbl"></table></div>
+    <div id="amortLoanNote" style="margin-top:8px"></div>
   </div>
 
   <div class="sec">
@@ -715,7 +754,8 @@ function setMeIR(t,b){meIR=t;document.querySelectorAll('#sMeIR button').forEach(
 function setFreq(f,b){freq=f;document.querySelectorAll('#sFreq button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setCap(n,b){capN=n;document.querySelectorAll('#sCapN button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setClass(cl,b){classt=cl;document.querySelectorAll('#sClass button').forEach(x=>x.classList.toggle('on',x===b));c()}
-function setDuree(d,b){duree=d;document.querySelectorAll('#sDuree button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setDuree(d,b){duree=d;$('dureeNum').value=d;$('lDuree').textContent=d+' ans';document.querySelectorAll('#sDuree button').forEach(x=>x.classList.toggle('on',x===b));c()}
+function setDureeNum(v){duree=+v||1;$('lDuree').textContent=duree+' ans';document.querySelectorAll('#sDuree button').forEach(x=>x.classList.toggle('on',(parseInt(x.textContent)||0)===duree));c()}
 function setCible(cl,b){cible=cl;document.querySelectorAll('#sCible button').forEach(x=>x.classList.toggle('on',x===b));c()}
 function setArr(){const d=ARR[$('arrSel').value];$('adr').value=Math.round(d.adr*1.2/5)*5;$('occ').value=d.occ;sp('adr','lADR','€');sp('occ','lOcc','%');$('arrI').textContent='Médiane : '+d.adr+' €/nuit · occ. '+d.occ+'% · +20% pour 70m²/6 couchages';c()}
 function syncTMI(){$('tmi').value=$('tmi2').value;$('lTMI').textContent=$('tmi2').value+' %'}
@@ -736,6 +776,26 @@ function calcAmort(){
 // ── MATH ──────────────────────────────────────────────────────────────────────
 function mens(cap,taux,n){const r=taux/12/100,m=n*12;if(!r)return cap/m;return cap*r*Math.pow(1+r,m)/(Math.pow(1+r,m)-1)}
 function capB(mm,taux,n){const r=taux/12/100,m=n*12;if(!r)return mm*m;return mm*(Math.pow(1+r,m)-1)/(r*Math.pow(1+r,m))}
+function tauxMarche(n){return n<=15?3.20:n<=20?3.37:3.48}
+// Échéancier annuel : capital restant dû, intérêts et capital remboursé par an, avec différé éventuel (intérêts seuls)
+function loanSchedule(cap,tauxPct,years,diffM){
+  const r=tauxPct/12/100, totM=Math.round(years*12);
+  diffM=Math.max(0,Math.min(diffM,totM-1));
+  const amM=totM-diffM;
+  const pay=r?cap*r*Math.pow(1+r,amM)/(Math.pow(1+r,amM)-1):cap/amM;
+  let bal=cap, totInt=0; const yearly=[];
+  for(let y=1;y<=years;y++){
+    let intY=0,prinY=0;
+    for(let mo=1;mo<=12;mo++){
+      const gm=(y-1)*12+mo; if(gm>totM)break;
+      const i=bal*r; let p=gm<=diffM?0:pay-i;
+      if(p>bal)p=bal;
+      intY+=i;prinY+=p;bal-=p;totInt+=i;
+    }
+    yearly.push({y,int:intY,prin:prinY,bal:Math.max(0,bal)});
+  }
+  return {pay,yearly,totInt};
+}
 
 // ── MAIN CALC ─────────────────────────────────────────────────────────────────
 function c(){
@@ -757,8 +817,8 @@ function c(){
   $('rMeTx').textContent=fp(caM>0?(cotM+irM)/caM*100:0);
 
   // AUTRES REVENUS
-  const airNet=G('airN'), divNet=G('divN'), autRev=G('autR');
-  const totalRev=salNetM+meNet+airNet+divNet+autRev;
+  const airNet=G('airN'), divNet=G('divN'), autRev=G('autR'), ftNet=G('ftN');
+  const totalRev=salNetM+meNet+airNet+divNet+autRev+ftNet;
 
   // CHARGES PERSO
   const logC=G('loyer')+G('crEx');
@@ -780,6 +840,7 @@ function c(){
   // TAB 0
   $('rSal').textContent=fe(salNetM);
   $('rR0').textContent=fe(salNetM); $('rR1').textContent=fe(meNet);
+  $('rRFT').textContent=fe(ftNet);
   $('rR2').textContent=fe(airNet); $('rR3').textContent=fe(divNet+autRev);
   $('rRTot').textContent=fe(totalRev); $('rRAn').textContent=fe(totalRev*12);
 
@@ -831,6 +892,13 @@ function c(){
   const reelTax=reelBase*(isTNS?TNS_RATE:tmi3+PS);
   const reelNet=ebitda-fixed-reelTax;
 
+  // Rentabilité (point 7) — affichée dans l'onglet Airbnb
+  const prixAcqV=G('prixAcq');
+  $('aRendB').textContent=prixAcqV>0?fp(gross/prixAcqV*100,2):'—';
+  $('aRendN').textContent=prixAcqV>0?fp(reelNet/prixAcqV*100,2):'—';
+  $('aCFm').textContent=fe(reelNet/12);
+  $('aPrixK').textContent=fe(prixAcqV);
+
   // SCI IS
   const sciBase=Math.max(0,gross-opCost-fixed+loanAn-intrAn-amort);
   const sciIS=Math.min(sciBase,100000)*.15+Math.max(0,sciBase-100000)*.25;
@@ -851,9 +919,9 @@ function c(){
   ];
   const bestK=structs.reduce((a,b)=>a.net>b.net?a:b).k;
 
-  // Update airbnbNet from best structure
+  // Update airbnbNet from best structure (sauf si l'utilisateur a coché « saisie manuelle »)
   const bestNet=structs.find(s=>s.k===bestK).net;
-  if(bestNet>0){$('airN').value=Math.round(bestNet/12);$('lAir').textContent=fe(bestNet/12)}
+  if(bestNet>0 && !$('airManual').checked){$('airN').value=Math.round(bestNet/12);$('lAir').textContent=fe(bestNet/12)}
 
   // Cascade pour TAB 2
   const lmnpReelTax=reelTax;
@@ -936,10 +1004,14 @@ function c(){
   });
   $('cmpTbl').innerHTML=tbl;
 
+  // Prêt déjà en cours (point 5) → sa mensualité s'ajoute aux charges de crédit
+  const exMens=G('exCap')>0?mens(G('exCap'),G('exTaux'),G('exDur')):0;
+  $('exMensOut').textContent=fe(exMens)+'/mois';
+
   // TAB 4 — Banque
-  const tauxM=G('tauxM'), taux=tauxM>0?tauxM:(TAUX[duree]||3.37);
+  const tauxM=G('tauxM'), taux=tauxM>0?tauxM:tauxMarche(duree);
   const revB=cible==='loc'?salNetM+meNet*.7+airNet*.7+divNet*.5+autRev*.5:salNetM+meNet*.7+airNet*.7+divNet+autRev;
-  const existC=G('crEx');
+  const existC=G('crEx')+exMens;
   const mensMax=Math.max(0,revB*.35-existC);
   const capEmp=capB(mensMax,taux,duree);
   const prixMax=capEmp+G('appt');
@@ -969,6 +1041,21 @@ function c(){
     ['💰','Reste à vivre',fe(totalRev-mensT-(totalChg-G('loyer')-G('crEx')))+'/mois'],
     ['🏦','Apport / notaire',fe(G('appt'))+' — frais notaire estimés : '+fe(prixMax*.08)],
   ].map(([i,k,v])=>`<div class="row"><span style="display:flex;gap:8px"><span>${i}</span><span style="color:var(--muted)">${k}</span></span><span style="font-size:12px;text-align:right;max-width:55%">${v}</span></div>`).join('');
+
+  // Tableau d'amortissement du nouveau prêt (points 3 & 4)
+  const diffM=G('diff'), montSaisi=G('montEmp'), montEmp=montSaisi>0?montSaisi:capEmp;
+  $('lMontEmp').textContent=montSaisi>0?fe(montSaisi):'capacité calculée ('+fe(capEmp)+')';
+  if(montEmp>0 && duree>0){
+    const sch=loanSchedule(montEmp,taux,duree,diffM);
+    let at='<tr><th>Année</th><th>Capital restant dû</th><th>Intérêts payés</th><th>Capital remboursé</th></tr>';
+    sch.yearly.forEach(ry=>{at+='<tr><td style="color:var(--muted)">'+ry.y+'</td><td>'+fe(ry.bal)+'</td><td style="color:var(--red)">'+fe(ry.int)+'</td><td>'+fe(ry.prin)+'</td></tr>';});
+    $('amortLoanTbl').innerHTML=at;
+    const int1=sch.yearly[0]?sch.yearly[0].int:0;
+    $('amortLoanNote').innerHTML='<div class="box info">Mensualité hors assurance : <b>'+fe(sch.pay)+'</b> · Intérêts totaux sur '+duree+' ans : <b>'+fe(sch.totInt)+'</b>'+(diffM>0?' · différé de '+diffM+' mois (intérêts seuls)':'')+'.</div>'+
+      '<div class="box good" style="margin-top:6px">Intérêts de la 1ʳᵉ année : <b>'+fe(int1)+'</b> — c\'est le montant déductible au régime <b>LMNP réel</b>. Si ce prêt finance le bien loué, reportez-le dans « Dont intérêts » de l\'onglet Airbnb Paris.</div>';
+  } else {
+    $('amortLoanTbl').innerHTML='';$('amortLoanNote').innerHTML='';
+  }
 
   // Stocker les variables pour l'onglet Conseiller
   lastCalc={gross,reelNet,fixed,loanAn,reelTax,tmi3,amort,opCost,deductFixed,prixAcq:G('prixAcq'),micNet,reelTax2:reelTax,bestK};
@@ -1326,6 +1413,10 @@ function calcDeclaration(){
   const salNetM=salMode==='net'?G('salN'):G('salB')*0.78;
   if(salNetM>0) B.push(fiche('💼','Salaire / traitement','Formulaire 2042',
     [caseRow('1AJ','Salaire net imposable',Math.round(salNetM*12),'Le plus souvent DÉJÀ pré-rempli par votre employeur — vérifiez simplement le montant. Pour votre conjoint(e) : case 1BJ.')]));
+  // 1b · FRANCE TRAVAIL (chômage)
+  const ftM=G('ftN');
+  if(ftM>0) B.push(fiche('🏛️','Allocations France Travail (chômage)','Formulaire 2042',
+    [caseRow('1AP','Allocations chômage / ARE imposables',Math.round(ftM*12),'En général DÉJÀ pré-rempli par France Travail. Pour votre conjoint(e) : case 1BP. Les allocations chômage sont imposables comme un salaire au barème progressif.')]));
   // 2 · MICRO-ENTREPRISE
   const ca=G('meCA');
   if(ca>0){
@@ -1368,7 +1459,7 @@ function saveState(){
   if(!ready)return;
   try{
     const d={__seg:{salMode,meType,meIR,freq,capN,classt,duree,cible}};
-    document.querySelectorAll('input,select').forEach(e=>{if(e.id)d[e.id]=e.value;});
+    document.querySelectorAll('input,select').forEach(e=>{if(e.id)d[e.id]=e.type==='checkbox'?e.checked:e.value;});
     localStorage.setItem(LS_KEY,JSON.stringify(d));
   }catch(e){}
 }
@@ -1386,10 +1477,10 @@ function restoreState(){
   try{
     const raw=localStorage.getItem(LS_KEY); if(!raw)return;
     const d=JSON.parse(raw);
-    Object.keys(d).forEach(k=>{if(k==='__seg')return;const e=document.getElementById(k);if(e&&d[k]!=null)e.value=d[k];});
+    Object.keys(d).forEach(k=>{if(k==='__seg')return;const e=document.getElementById(k);if(e&&d[k]!=null){if(e.type==='checkbox')e.checked=!!d[k];else e.value=d[k];}});
     if(d.__seg)applySeg(d.__seg);
     document.querySelectorAll('select').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event('change'));});
-    document.querySelectorAll('input').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event('input'));});
+    document.querySelectorAll('input').forEach(e=>{if(d[e.id]!=null)e.dispatchEvent(new Event(e.type==='checkbox'?'change':'input'));});
   }catch(e){}
 }
 function resetAll(){
