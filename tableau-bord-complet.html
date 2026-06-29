@@ -587,6 +587,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="mk"><div class="l">Cash-flow net réel / mois</div><div class="n" id="aCFm">—</div></div>
     <div class="mk"><div class="l">Prix d'acquisition</div><div class="n" id="aPrixK">—</div></div>
   </div>
+  <div class="box info" style="font-size:11px;margin-top:8px"><b>Rentabilité nette</b> = rendement du bien, <b>hors crédit</b> (pour juger le bien lui-même) · <b>Cash-flow</b> = ce qui reste réellement en poche, <b>crédit payé</b> (capital + intérêts).</div>
 
   <div class="sec">
     <div class="stitle">Saisonnalité — CA brut estimé par mois</div>
@@ -642,6 +643,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
   </div>
 
   <div class="minikpis" id="lnKpis"></div>
+  <div class="box info" style="font-size:11px;margin-top:8px"><b>Rentabilité nette</b> = rendement du bien, <b>hors crédit</b> · <b>Net en poche / mois</b> = trésorerie réelle (charges et intérêts payés). Cet onglet ne modélise pas la mensualité de crédit : pour le cash-flow après crédit, voir l'onglet Airbnb ou la synthèse du Bilan.</div>
 
   <div class="sec">
     <div class="stitle">Détail du calcul</div>
@@ -759,8 +761,9 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
     <div class="box info">ℹ️ Les revenus <b>fonciers</b> (location nue) restent soumis à <b>17,2 % de PS</b>. Les <b>BIC</b> de location meublée sont à <b>18,6 %</b> depuis la LFSS 2026. Les deux taux coexistent volontairement, ce n'est pas une erreur.</div>
   </div>
 
-  <div class="stitle" style="margin-top:4px">Net en poche par structure (sur l'activité Airbnb)</div>
+  <div class="stitle" style="margin-top:4px">Cash-flow net par structure, après crédit (activité Airbnb)</div>
   <div class="scards" id="structCards"></div>
+  <div class="box info" style="font-size:11px;margin-top:6px">Montants exprimés en <b>cash-flow</b> : ce qui reste en poche une fois le <b>crédit payé</b> (capital + intérêts) et l'impôt déduit.</div>
 
   <div class="sec">
     <div class="stitle">Comparaison détaillée des structures</div>
@@ -1051,7 +1054,10 @@ function calcLocNue(){
   // Seul l'impôt diffère entre micro et réel → comparaison cash cohérente. (amort. non décaissé, exclu)
   const cashCharges=charges+inter;
   const annNet=rentAn-cashCharges-tax;
-  const rendB=prix>0?rentAn/prix*100:0, rendNet=prix>0?annNet/prix*100:0;
+  // Rentabilité nette = rendement du bien HORS financement → on exclut les intérêts d'emprunt
+  // (comme l'onglet Airbnb). Le « Net / mois » ci-dessous reste la trésorerie réelle (intérêts inclus).
+  const exploitNet=rentAn-charges-tax;
+  const rendB=prix>0?rentAn/prix*100:0, rendNet=prix>0?exploitNet/prix*100:0;
   lnResult={net:annNet/12,annNet,tax,rendNet};
   $('lnOut').innerHTML=
     '<div class="row"><span>Loyers encaissés / an</span><span>'+fe(rentAn)+'</span></div>'+
@@ -1066,8 +1072,8 @@ function calcLocNue(){
     '<div class="row"><span>Soit / mois</span><span>'+fe(annNet/12)+'</span></div>';
   $('lnKpis').innerHTML=
     '<div class="mk"><div class="l">Rentabilité brute</div><div class="n">'+(prix>0?fp(rendB,2):'—')+'</div></div>'+
-    '<div class="mk"><div class="l">Rentabilité nette</div><div class="n">'+(prix>0?fp(rendNet,2):'—')+'</div></div>'+
-    '<div class="mk"><div class="l">Net / mois</div><div class="n">'+fe(annNet/12)+'</div></div>'+
+    '<div class="mk"><div class="l">Rentabilité nette (hors crédit)</div><div class="n">'+(prix>0?fp(rendNet,2):'—')+'</div></div>'+
+    '<div class="mk"><div class="l">Net en poche / mois</div><div class="n">'+fe(annNet/12)+'</div></div>'+
     '<div class="mk"><div class="l">Case déclaration</div><div class="n" style="font-size:15px">'+cases+'</div></div>';
   let note='';
   if(lnRegime==='micro'){
@@ -1090,7 +1096,7 @@ function calcLocCompare(rentAn,charges,inter,amort,tmi,prix){
     const tax=base*(tmi+PS);
     // charges + intérêts réels décaissés dans les DEUX régimes ; seul l'impôt diffère
     const annNet=rentAn-charges-inter-tax;
-    return {annNet,tax,cases,rend:prix>0?annNet/prix*100:0};
+    return {annNet,tax,cases,rend:prix>0?(rentAn-charges-tax)/prix*100:0}; // rentabilité nette = hors crédit (intérêts exclus)
   }
   const list=[
     {n:'Location nue · micro-foncier',s:scen(false,'micro')},
@@ -1351,8 +1357,8 @@ function c(){
     {l:'Plus-value revente',v:['Particulier + réintég.','Particulier + réintég.','Pro (si IR : particulier)','Particulier (SCI IR) / IS','IS — très défavorable']},
     {l:'Plafond micro',v:[fe(microCap),'—','—','—','—']},
     {l:'Impôt total / an',v:taxRow.map(t=>fe(t))},
-    {l:'Net dans la poche / an',v:netRow.map(n=>fe(n)),bold:true},
-    {l:'Net / mois',v:netRow.map(n=>fe(n/12)),bold:true},
+    {l:'Cash-flow net / an (après crédit)',v:netRow.map(n=>fe(n)),bold:true},
+    {l:'Cash-flow net / mois (après crédit)',v:netRow.map(n=>fe(n/12)),bold:true},
   ];
   let tbl=`<tr>${['Critère',...cols].map((h,i)=>`<th>${h}${i>0&&structs[i-1].k===bestK?' ★':''}</th>`).join('')}</tr>`;
   rows.forEach(row=>{
