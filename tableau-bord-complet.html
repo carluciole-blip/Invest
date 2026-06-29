@@ -581,7 +581,7 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
 
   <div class="minikpis">
     <div class="mk"><div class="l">Rentabilité brute</div><div class="n" id="aRendB">—</div></div>
-    <div class="mk"><div class="l">Rentabilité nette</div><div class="n" id="aRendN">—</div></div>
+    <div class="mk"><div class="l">Rentabilité nette (hors crédit)</div><div class="n" id="aRendN">—</div></div>
     <div class="mk"><div class="l">Cash-flow net réel / mois</div><div class="n" id="aCFm">—</div></div>
     <div class="mk"><div class="l">Prix d'acquisition</div><div class="n" id="aPrixK">—</div></div>
   </div>
@@ -631,12 +631,12 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
         <input type="number" id="lnLoyer" value="1400" step="50" oninput="fv('lnLoyer','lLnLoyer');c()"></div>
       <div class="field"><label>Vacance locative <strong id="lLnVac">8 %</strong></label>
         <input type="range" id="lnVac" min="0" max="20" value="8" step="1" oninput="sp('lnVac','lLnVac','%');c()"></div>
-      <div class="field"><label>Charges déductibles / an (réel) <strong id="lLnCharges">3 000 €</strong></label>
+      <div class="field"><label>Charges réelles / an (copro, taxe foncière, assurance…) <strong id="lLnCharges">3 000 €</strong></label>
         <input type="number" id="lnCharges" value="3000" step="100" oninput="fv('lnCharges','lLnCharges');c()"></div>
-      <div class="field"><label>Intérêts d'emprunt / an (réel) <strong id="lLnInter">0 €</strong></label>
+      <div class="field"><label>Intérêts d'emprunt / an <strong id="lLnInter">0 €</strong></label>
         <input type="number" id="lnInter" value="0" step="100" oninput="fv('lnInter','lLnInter');c()"></div>
     </div>
-    <div class="box info">Au régime réel meublé, l'amortissement annuel retenu dans l'onglet « L'appartement » (<span id="lnAmortEcho">—</span>) est aussi déduit. L'intérêt d'emprunt de la 1ʳᵉ année est calculé dans le tableau d'amortissement du prêt.</div>
+    <div class="box info">Les charges et intérêts ci-dessus sont des <b>décaissements réels</b> : ils sont retranchés du net dans <b>tous</b> les régimes (la différence entre micro et réel ne porte que sur l'impôt). Au régime réel meublé, ils sont <b>en plus déduits fiscalement</b> avec l'amortissement annuel retenu dans l'onglet « L'appartement » (<span id="lnAmortEcho">—</span>) ; en micro, c'est l'abattement forfaitaire qui en tient lieu fiscalement. L'intérêt d'emprunt de la 1ʳᵉ année est calculé dans le tableau d'amortissement du prêt.</div>
   </div>
 
   <div class="minikpis" id="lnKpis"></div>
@@ -1040,7 +1040,10 @@ function calcLocNue(){
     cases=meuble?'5NA / 5NY':'4BA';
   }
   const tax=base*(tmi+PS);
-  const cashCharges=lnRegime==='reel'?charges+inter:0; // amort. non décaissé ; micro : on reste sur loyers − impôt
+  // Charges et intérêts d'emprunt sont des décaissements réels quel que soit le régime fiscal :
+  // en micro l'abattement les remplace FISCALEMENT, mais ils restent payés en trésorerie.
+  // Seul l'impôt diffère entre micro et réel → comparaison cash cohérente. (amort. non décaissé, exclu)
+  const cashCharges=charges+inter;
   const annNet=rentAn-cashCharges-tax;
   const rendB=prix>0?rentAn/prix*100:0, rendNet=prix>0?annNet/prix*100:0;
   lnResult={net:annNet/12,annNet,tax,rendNet};
@@ -1048,11 +1051,12 @@ function calcLocNue(){
     '<div class="row"><span>Loyers encaissés / an</span><span>'+fe(rentAn)+'</span></div>'+
     '<div class="row dim"><span>Régime</span><span>'+regimeLbl+'</span></div>'+
     (lnRegime==='micro'
-      ?'<div class="row dim"><span>Abattement forfaitaire</span><span>− '+fe(rentAn*abatt)+'</span></div>'
-      :'<div class="row dim"><span>Charges + intérêts'+(meuble?' + amort.':'')+' déduits</span><span>− '+fe(charges+inter+(meuble?amort:0))+'</span></div>')+
-    '<div class="row"><span>Base imposable</span><span>'+fe(base)+'</span></div>'+
+      ?'<div class="row dim"><span>Abattement forfaitaire (fiscal)</span><span>− '+fe(rentAn*abatt)+'</span></div>'
+      :'<div class="row dim"><span>Charges + intérêts'+(meuble?' + amort.':'')+' déduits (fiscal)</span><span>− '+fe(charges+inter+(meuble?amort:0))+'</span></div>')+
+    '<div class="row dim"><span>Base imposable</span><span>'+fe(base)+'</span></div>'+
     '<div class="row dim"><span>Impôt + PS ('+fp(tmi*100,0)+' + '+fp(PS*100,1)+')</span><span style="color:var(--red)">− '+fe(tax)+'</span></div>'+
-    '<div class="row bold total"><span>Revenu net après impôt / an</span><span style="color:'+(annNet>=0?'var(--green)':'var(--red)')+'">'+fe(annNet)+'</span></div>'+
+    '<div class="row dim"><span>Charges + intérêts décaissés (trésorerie)</span><span style="color:var(--red)">− '+fe(cashCharges)+'</span></div>'+
+    '<div class="row bold total"><span>Revenu net (après impôt et charges) / an</span><span style="color:'+(annNet>=0?'var(--green)':'var(--red)')+'">'+fe(annNet)+'</span></div>'+
     '<div class="row"><span>Soit / mois</span><span>'+fe(annNet/12)+'</span></div>';
   $('lnKpis').innerHTML=
     '<div class="mk"><div class="l">Rentabilité brute</div><div class="n">'+(prix>0?fp(rendB,2):'—')+'</div></div>'+
@@ -1075,10 +1079,11 @@ function calcLocCompare(rentAn,charges,inter,amort,tmi,prix){
   function scen(meuble,regime){
     const PS=meuble?PS_BIC:PS_PV;
     let base, cases;
-    if(regime==='micro'){base=rentAn*(meuble?0.50:0.30);cases=meuble?'5NI':'4BE';}
+    if(regime==='micro'){base=rentAn*(1-(meuble?0.50:0.30));cases=meuble?'5NI':'4BE';} // base imposable = loyers × (1 − abattement)
     else{base=Math.max(0,rentAn-charges-inter-(meuble?amort:0));cases=meuble?'5NA/5NY':'4BA';}
     const tax=base*(tmi+PS);
-    const annNet=rentAn-(regime==='reel'?charges+inter:0)-tax;
+    // charges + intérêts réels décaissés dans les DEUX régimes ; seul l'impôt diffère
+    const annNet=rentAn-charges-inter-tax;
     return {annNet,tax,cases,rend:prix>0?annNet/prix*100:0};
   }
   const list=[
@@ -1218,23 +1223,28 @@ function c(){
   const microCap=classt==='nc'?MIC_NC_CAP:capClasse(), abatt=classt==='nc'?FISC.microNcAbat:FISC.microClAbat;
   const eligible=gross<=microCap;
 
+  // C1 : au-delà de TNS_SEUIL (23 000 €) de CA meublé de tourisme, basculement vers les cotisations
+  // sociales TNS/URSSAF — c'est un seuil SOCIAL, indépendant du choix fiscal micro/réel → s'applique aux deux.
+  const isTNS=gross>TNS_SEUIL;
+
   // LMNP micro-BIC
   const micBase=Math.max(0,gross*(1-abatt));
-  const micTax=micBase*(tmi3+PS);
+  const micTax=micBase*(isTNS?TNS_RATE:tmi3+PS);
   const micNet=ebitda-fixed-micTax;
 
   // LMNP réel
   const deductFixed=fixIds.reduce((s,id)=>s+(G(id)*M),0)-loanAn+intrAn;
   const reelBase=Math.max(0,gross-opCost-deductFixed-amort);
-  // C1 : au-delà de TNS_SEUIL (23 000 €) de CA Airbnb, basculement vers cotisations sociales TNS (URSSAF)
-  const isTNS=gross>TNS_SEUIL;
   const reelTax=reelBase*(isTNS?TNS_RATE:tmi3+PS);
   const reelNet=ebitda-fixed-reelTax;
 
   // Rentabilité (point 7) — affichée dans l'onglet Airbnb
   const prixAcqV=G('prixAcq');
+  // Rentabilité nette = exploitation − charges fixes (HORS mensualité de crédit) − impôt, rapportée au prix.
+  // Le remboursement du capital est du financement, pas une charge → exclu (sinon ce serait le cash-flow).
+  const rentNetAirbnb=ebitda-(fixed-loanAn)-reelTax;
   $('aRendB').textContent=prixAcqV>0?fp(gross/prixAcqV*100,2):'—';
-  $('aRendN').textContent=prixAcqV>0?fp(reelNet/prixAcqV*100,2):'—';
+  $('aRendN').textContent=prixAcqV>0?fp(rentNetAirbnb/prixAcqV*100,2):'—';
   $('aCFm').textContent=fe(reelNet/12);
   $('aPrixK').textContent=fe(prixAcqV);
 
@@ -1556,7 +1566,9 @@ function calcConseil(){
   var airRend=prixAcq>0?reelNet/prixAcq*100:0;
 
   var prixVente=prixAcq*0.95;
-  var venteRevAn=prixVente*0.04*(1-PFU);
+  var venteBrutAn=prixVente*0.04;            // rendement brut du capital placé (~4 %)
+  var venteImpotAn=venteBrutAn*PFU;          // flat tax 31,4 % sur le rendement BRUT
+  var venteRevAn=venteBrutAn-venteImpotAn;   // net de flat tax
   var venteCFm=venteRevAn/12;
   var venteRend=prixAcq>0?venteRevAn/prixAcq*100:0;
 
@@ -1582,8 +1594,8 @@ function calcConseil(){
      scores:{cashflow:scoreCF(airCFm), fiscalite:scoreFisc(reelTax,gross), risque:4, gestion:3, patrimoine:scorePat(airCFm)},
      note:'Plafond 90 nuits/an en RP (loi Le Meur). Amortissement deductible. Gestion intensive.'},
     {id:'vte', name:'Vente + placement', icon:'Graphique',
-     cfm:venteCFm,impotAn:venteRevAn*PFU,revBrut:venteRevAn,rend:venteRend,regime:'Flat tax 31,4%',
-     scores:{cashflow:scoreCF(venteCFm),fiscalite:scoreFisc(venteRevAn*PFU,venteRevAn),risque:6,gestion:9,patrimoine:scorePat(venteCFm)},
+     cfm:venteCFm,impotAn:venteImpotAn,revBrut:venteBrutAn,rend:venteRend,regime:'Flat tax 31,4%',
+     scores:{cashflow:scoreCF(venteCFm),fiscalite:scoreFisc(venteImpotAn,venteBrutAn),risque:6,gestion:9,patrimoine:scorePat(venteCFm)},
      note:'Capital place en SCPI/PEA a ~4% brut. Passif mais perte de l\'effet levier credit.'}
   ];
 
@@ -1754,15 +1766,22 @@ function calcProjection(){
     return goAn+(y<=25?facAn:0)+(y<=15?agenAn+instAn:0)+(y<=7?mobAn:0);
   }
 
+  // F : durée du prêt (le crédit cesse d'être décaissé une fois le bien remboursé)
+  const loanYears = bienStat==='acquis' ? (G('exDur')||duree) : duree;
+
   const rows=[];
   let cumRP=0,cumLT=0,cumAir=0;
 
   for(let y=1;y<=n;y++){
     const g=Math.pow(1+inf,y-1);
     const amort=amortY(y);
+    // F : charges hors crédit indexées sur l'inflation ; mensualité de crédit jusqu'à la fin du prêt seulement
+    const fixedHC=(fixed-loanAn)*g;
+    const loanY=(y<=loanYears)?loanAn:0;
+    const fixedY=fixedHC+loanY;
 
-    // Scénario RP : loyer évité croît avec inflation, charges fixes (crédit constant)
-    const rpCF12=(loyerEvite0*g*12)-fixed;
+    // Scénario RP : loyer évité croît avec inflation
+    const rpCF12=(loyerEvite0*g*12)-fixedY;
     cumRP+=rpCF12;
 
     // Scénario LT meublé — D4: seuil micro réévalué chaque année (inflation)
@@ -1771,21 +1790,21 @@ function calcProjection(){
     const ltSeuilMicro=capClasse()*Math.pow(1+inf,y-1);
     let ltImp=0;
     if(ltRev>ltSeuilMicro){
-      const ltBase=Math.max(0,ltRev-ltComm-(fixed-loanAn)-amort);
+      const ltBase=Math.max(0,ltRev-ltComm-fixedHC-amort);
       ltImp=ltBase*(tmi3+PS_BIC);
     } else {
       ltImp=ltRev*0.50*(tmi3+PS_BIC);
     }
-    const ltCF12=ltRev-ltComm-ltImp-fixed;
+    const ltCF12=ltRev-ltComm-ltImp-fixedY;
     cumLT+=ltCF12;
 
     // Scénario Airbnb LMNP réel
     const grossY=gross0*g;
     const opCostY=opCost0*g;
-    const airBase=Math.max(0,grossY-opCostY-(fixed-loanAn)-amort);
+    const airBase=Math.max(0,grossY-opCostY-fixedHC-amort);
     const isTNSy=grossY>TNS_SEUIL;
     const airTax=airBase*(isTNSy?TNS_RATE:tmi3+PS_BIC);
-    const airCF12=grossY-opCostY-airTax-fixed;
+    const airCF12=grossY-opCostY-airTax-fixedY;
     cumAir+=airCF12;
 
     rows.push({y,an:anDebut+y-1,rpM:rpCF12/12,ltM:ltCF12/12,airM:airCF12/12,cumRP,cumLT,cumAir,amort,ltRegP:ltRev>ltSeuilMicro?'LMNP réel':'micro-BIC'});
@@ -1799,6 +1818,7 @@ function calcProjection(){
     if(r.y===8) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">mobilier épuisé</span>';
     else if(r.y===16) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">agen.+inst. épuisés</span>';
     else if(r.y===26) amortNote='<br><span style="font-size:10px;color:var(--warn-txt)">façade épuisée</span>';
+    if(loanYears<n && r.y===loanYears+1) amortNote+='<br><span style="font-size:10px;color:var(--green)">crédit soldé</span>';
     tbl+='<tr>';
     tbl+='<td style="color:var(--muted)">'+r.an+amortNote+'</td>';
     tbl+='<td class="'+(r.rpM===best?'col-hi':'')+'" style="color:'+(r.rpM>=0?'inherit':'var(--red)')+'">'+fe(r.rpM)+'</td>';
