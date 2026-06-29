@@ -414,6 +414,8 @@ details.info[open] summary{border-bottom:1px solid var(--info-brd)}
       <div class="row bold total"><span>Amortissement total / an</span><span id="aTot" style="color:var(--acc)">—</span></div>
       <div style="font-size:11px;color:var(--muted);margin-top:6px">Économie fiscale annuelle (TMI + PS) : <span id="aEco" style="color:var(--green);font-weight:600">—</span> — l'amortissement réduit l'impôt sans impact sur le cash.</div>
     </div>
+    <label style="font-size:11.5px;color:var(--muted);display:flex;gap:6px;align-items:flex-start;margin:0 0 8px"><input type="checkbox" id="amortEligible" checked onchange="calcAmort()" style="width:auto;margin:2px 0 0"> <span>J'ai le <b>droit d'amortir</b> : logement <b>meublé</b>, au <b>régime réel</b>, avec comptabilité (liasse 2031).</span></label>
+    <div class="box warn" style="margin:0 0 10px;font-size:11.5px">⚠️ <b>L'amortissement n'est pas un droit automatique.</b> Il suppose une location <b>meublée</b> (LMNP/LMP) au <b>régime réel</b> tenant une comptabilité. Aucun amortissement en <b>micro-BIC</b> ni en <b>location nue</b>. Le terrain ne s'amortit pas, et l'amortissement <b>ne peut pas créer de déficit</b> (l'excédent est reporté sur les années suivantes). Si vous n'y avez pas droit, <b>décochez la case</b> ci-dessus : l'amortissement passe à 0 € et l'impôt est recalculé en conséquence.</div>
     <div class="field"><label>Amortissement annuel retenu <strong id="lAmt">9 000 €</strong></label>
       <input type="range" id="amort" min="0" max="30000" value="9000" step="500" oninput="sp('amort','lAmt','€');c()"></div>
   </div>
@@ -989,9 +991,13 @@ function calcAmort(){
   const tot=GO+fac+agen+inst+mob;
   $('aGO').textContent=fe(GO);$('aFac').textContent=fe(fac);$('aAgen').textContent=fe(agen);
   $('aInst').textContent=fe(inst);$('aMob').textContent=fe(mob);$('aTot').textContent=fe(tot);
-  const tmiVal=G('tmi2')/100, eco=tot*(tmiVal+PS_BIC);
-  $('aEco').textContent=fe(eco)+'/an ('+fe(eco/12)+'/mois)';
-  $('amort').value=Math.round(tot/500)*500;$('lAmt').textContent=fe(Math.round(tot/500)*500);
+  // Droit à l'amortissement : meublé + réel + comptabilité (case à cocher). Sinon, amortissement retenu = 0.
+  const eligible = !$('amortEligible') || $('amortEligible').checked;
+  const retenu = eligible ? Math.round(tot/500)*500 : 0;
+  const tmiVal=G('tmi2')/100, eco=retenu*(tmiVal+PS_BIC);
+  $('aEco').textContent = eligible ? (fe(eco)+'/an ('+fe(eco/12)+'/mois)') : 'aucune — droit à l\'amortissement décoché';
+  $('amort').value=retenu; $('lAmt').textContent=fe(retenu);
+  $('amort').disabled=!eligible;
   c();
 }
 
